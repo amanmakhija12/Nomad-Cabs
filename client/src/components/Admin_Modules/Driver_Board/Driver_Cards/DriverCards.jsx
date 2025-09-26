@@ -158,8 +158,10 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
     const confirmDelete = new Promise((resolve) => {
       toast.warn(
         ({ closeToast }) => (
-          <div className="text-white text-sm space-y-5">
-            <p className="font-medium text-white/80">Delete this driver?</p>
+          <div className="text-white text-sm space-y-5 text-center">
+            <p className="font-medium text-white/80 text-center">
+              Delete this driver permanently?
+            </p>
             <div className="flex justify-center gap-3">
               <button
                 onClick={() => {
@@ -177,7 +179,7 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
                 }}
                 className="h-9 px-5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-semibold tracking-wide border border-white/15"
               >
-                Cancel
+                Close
               </button>
             </div>
           </div>
@@ -189,6 +191,7 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
           closeOnClick: false,
           draggable: false,
           hideProgressBar: true,
+          closeButton: false,
           transition: Bounce,
         }
       );

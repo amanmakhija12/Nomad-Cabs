@@ -83,7 +83,10 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
       onRefresh && onRefresh();
     } catch (e) {
       console.error(e);
-      toast.error("Error updating rider", { transition: Bounce, theme: "dark" });
+      toast.error("Error updating rider", {
+        transition: Bounce,
+        theme: "dark",
+      });
     }
   };
 
@@ -91,8 +94,8 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
     new Promise((resolve) => {
       toast.warn(
         ({ closeToast }) => (
-          <div className="text-white text-sm space-y-5">
-            <p className="font-medium text-white/80">
+          <div className="text-white text-sm space-y-5 text-center">
+            <p className="font-medium text-white/80 text-center">
               Delete this rider permanently?
             </p>
             <div className="flex justify-center gap-3">
@@ -112,7 +115,7 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
                 }}
                 className="h-9 px-5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-semibold tracking-wide border border-white/15"
               >
-                Cancel
+                Close
               </button>
             </div>
           </div>
@@ -124,6 +127,7 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
           closeOnClick: false,
           draggable: false,
           hideProgressBar: true,
+          closeButton: false,
           transition: Bounce,
         }
       );
@@ -147,7 +151,10 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
       onClose();
     } catch (e) {
       console.error(e);
-      toast.error("Error deleting rider", { transition: Bounce, theme: "dark" });
+      toast.error("Error deleting rider", {
+        transition: Bounce,
+        theme: "dark",
+      });
     } finally {
       setIsDeleting(false);
     }
@@ -201,10 +208,12 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
                 </h2>
                 <div className="mt-2 flex flex-wrap gap-3 text-[11px]">
                   <span className={badgeClass(formData.is_email_verified)}>
-                    Email {formData.is_email_verified ? "Verified" : "Unverified"}
+                    Email{" "}
+                    {formData.is_email_verified ? "Verified" : "Unverified"}
                   </span>
                   <span className={badgeClass(formData.is_phone_verified)}>
-                    Phone {formData.is_phone_verified ? "Verified" : "Unverified"}
+                    Phone{" "}
+                    {formData.is_phone_verified ? "Verified" : "Unverified"}
                   </span>
                   <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold bg-white text-black border border-white">
                     {rider.role}
@@ -258,28 +267,26 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
         {/* Content */}
         <div className="p-8 space-y-10">
           {/* Top status panels */}
-            <div className="grid md:grid-cols-3 gap-6">
-              <StatusPanel
-                label="Status"
-                icon={<Shield className="w-3.5 h-3.5" />}
-                editing={isEditing}
-                value={formData.status}
-                onChange={(v) =>
-                  setFormData((p) => ({ ...p, status: v }))
-                }
-                statusTheme={statusTheme}
-              />
-              <SimplePanel
-                label="Email Verified"
-                icon={<UserCheck className="w-3.5 h-3.5" />}
-                badge={formData.is_email_verified}
-              />
-              <SimplePanel
-                label="Phone Verified"
-                icon={<Phone className="w-3.5 h-3.5" />}
-                badge={formData.is_phone_verified}
-              />
-            </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            <StatusPanel
+              label="Status"
+              icon={<Shield className="w-3.5 h-3.5" />}
+              editing={isEditing}
+              value={formData.status}
+              onChange={(v) => setFormData((p) => ({ ...p, status: v }))}
+              statusTheme={statusTheme}
+            />
+            <SimplePanel
+              label="Email Verified"
+              icon={<UserCheck className="w-3.5 h-3.5" />}
+              badge={formData.is_email_verified}
+            />
+            <SimplePanel
+              label="Phone Verified"
+              icon={<Phone className="w-3.5 h-3.5" />}
+              badge={formData.is_phone_verified}
+            />
+          </div>
 
           {/* Editable / Static sections */}
           <div className="grid md:grid-cols-2 gap-8">
@@ -365,7 +372,14 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
 const panelBase =
   "bg-[#1b1b1b] border border-white/10 rounded-xl p-5 flex flex-col gap-2";
 
-const StatusPanel = ({ label, icon, editing, value, onChange, statusTheme }) => (
+const StatusPanel = ({
+  label,
+  icon,
+  editing,
+  value,
+  onChange,
+  statusTheme,
+}) => (
   <div className={panelBase}>
     <p className="text-[11px] uppercase tracking-wider text-white/40 flex items-center gap-2">
       {icon}

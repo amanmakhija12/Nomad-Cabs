@@ -70,7 +70,7 @@ const ManageDrivers = () => {
   const totalPages = Math.ceil(drivers.length / driversPerPage) || 1;
 
   return (
-    <div className="p-6 flex flex-col h-full min-h-[500px] pb-20 relative  text-white">
+    <div className="p-6 flex flex-col min-h-[500px] pb-10 bg-[#151212] text-white rounded-3xl">
       {/* Header */}
       <div className="mb-10">
         <div className="bg-gradient-to-r from-[#181818] via-[#151515] to-[#121212] rounded-2xl p-8 border border-white/10 shadow-lg">
@@ -139,38 +139,62 @@ const ManageDrivers = () => {
         ))}
       </div>
 
-      {/* Pagination */}
+       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 flex-wrap">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="h-10 px-4 rounded-lg bg-[#1b1b1b] border border-white/10 text-white/70 flex items-center gap-2 text-sm hover:bg-[#232323] disabled:opacity-40"
-          >
-            <ChevronLeft className="h-4 w-4" /> <span className="hidden sm:inline">Prev</span>
-          </button>
-          <div className="flex gap-2">
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentPage(i + 1)}
-                className={`h-10 w-10 rounded-lg text-sm font-semibold border transition ${
-                  currentPage === i + 1
-                    ? "bg-white text-black border-white shadow"
-                    : "bg-[#1b1b1b] text-white/70 border-white/10 hover:bg-[#232323]"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))}
+        <div className="mt-10 flex justify-center">
+          <div className="flex items-center gap-2 bg-[#141414] border border-white/10 rounded-full px-3 py-2 shadow-lg">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="h-9 w-9 flex items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((n) => {
+                if (totalPages <= 7) return true;
+                if (n === 1 || n === totalPages) return true;
+                if (Math.abs(n - currentPage) <= 1) return true;
+                if (currentPage <= 3 && n <= 5) return true;
+                if (currentPage >= totalPages - 2 && n >= totalPages - 4)
+                  return true;
+                return false;
+              })
+              .map((n, idx, arr) => {
+                const prev = arr[idx - 1];
+                const showDots = prev && n - prev > 1;
+                return (
+                  <div key={n} className="flex">
+                    {showDots && (
+                      <span className="h-9 w-9 flex items-center justify-center text-white/30">
+                        …
+                      </span>
+                    )}
+                    <button
+                      onClick={() => setCurrentPage(n)}
+                      className={`h-9 w-9 rounded-full text-sm font-medium transition ${
+                        currentPage === n
+                          ? "bg-white text-black shadow"
+                          : "text-white/60 hover:text-white hover:bg-white/10"
+                      }`}
+                    >
+                      {n}
+                    </button>
+                  </div>
+                );
+              })}
+
+            <button
+              onClick={() =>
+                setCurrentPage((p) => Math.min(totalPages, p + 1))
+              }
+              disabled={currentPage === totalPages}
+              className="h-9 w-9 flex items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="h-10 px-4 rounded-lg bg-[#1b1b1b] border border-white/10 text-white/70 flex items-center gap-2 text-sm hover:bg-[#232323] disabled:opacity-40"
-          >
-            <span className="hidden sm:inline">Next</span> <ChevronRight className="h-4 w-4" />
-          </button>
         </div>
       )}
 

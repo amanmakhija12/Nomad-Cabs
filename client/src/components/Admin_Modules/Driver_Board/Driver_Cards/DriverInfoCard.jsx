@@ -22,7 +22,7 @@ const DriverInfoCard = ({
     }
 
     if (icon && value) {
-      return `${value}`; // icons removed per design
+      return `${value}`; 
     }
 
     return value || "—";

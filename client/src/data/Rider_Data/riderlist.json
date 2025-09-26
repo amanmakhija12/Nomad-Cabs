@@ -73,9 +73,9 @@
       "is_phone_verified": false,
       "role": "rider",
       "role_description": "Occasional rider",
-      "status": "active",
+      "status": "suspended",
       "created_at": "2025-06-10T11:45:00.000000",
-      "updated_at": "2025-06-10T11:45:00.000000",
+      "updated_at": "2025-09-26 12:23:57.912",
       "bookings": []
     },
     {

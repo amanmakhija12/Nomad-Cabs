@@ -87,7 +87,7 @@ const ManageRiders = () => {
   };
 
   return (
-    <div className="p-6 flex flex-col min-h-[500px] pb-24 bg-[#151212] text-white rounded-3xl">
+    <div className="p-6 flex flex-col min-h-[500px] pb-10 bg-[#151212] text-white rounded-3xl">
       {/* Header */}
       <div className="mb-10">
         <h1 className="text-3xl md:text-4xl font-semibold tracking-tight mb-3">
