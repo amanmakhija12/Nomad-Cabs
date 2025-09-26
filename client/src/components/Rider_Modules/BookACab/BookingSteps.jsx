@@ -1,0 +1,272 @@
+import {
+  MapPin,
+  Navigation,
+  Calendar,
+  Clock,
+  DollarSign,
+  Phone,
+  CreditCard,
+  CheckCircle,
+} from "lucide-react";
+import { vehicleTypes, paymentMethods, calculateFare } from "./bookingData";
+
+export const StepsProgress = ({ step }) => (
+  <div className="bg-[#141414] p-6 rounded-2xl border border-white/10 mb-8">
+    <div className="flex items-center justify-between flex-wrap gap-4">
+      {[1, 2, 3].map((n) => (
+        <div key={n} className="flex items-center">
+          <div
+            className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all shadow-sm ${
+              step >= n ? "bg-white text-black" : "bg-[#1d1d1d] text-gray-500"
+            }`}
+          >
+            {n}
+          </div>
+          <span
+            className={`ml-2 text-[11px] font-medium tracking-wide uppercase ${
+              step >= n ? "text-white" : "text-gray-500"
+            }`}
+          >
+            {n === 1 ? "Ride Details" : n === 2 ? "Vehicle" : "Payment"}
+          </span>
+          {n < 3 && (
+            <div
+              className={`w-16 h-[2px] mx-4 rounded ${
+                step > n ? "bg-white" : "bg-[#1d1d1d]"
+              }`}
+            ></div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+export const StepRideDetails = ({ data, onChange, onNext }) => {
+  const disabled = !data.pickupAddress || !data.dropoffAddress;
+  return (
+    <div className="space-y-8">
+      <h2 className="text-2xl font-semibold tracking-tight">Ride Details</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Field label="Pickup Location" icon={MapPin} iconClass="text-green-400">
+          <input
+            value={data.pickupAddress}
+            onChange={(e) => onChange("pickupAddress", e.target.value)}
+            placeholder="Enter pickup"
+            className="input-dark w-full h-12 pl-11 pr-4 rounded-xl bg-[#1d1d1d] border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 placeholder:text-gray-500 text-sm"
+          />
+        </Field>
+        <Field
+          label="Drop-off Location"
+          icon={Navigation}
+          iconClass="text-red-400"
+        >
+          <input
+            value={data.dropoffAddress}
+            onChange={(e) => onChange("dropoffAddress", e.target.value)}
+            placeholder="Enter destination"
+            className="input-dark w-full h-12 pl-11 pr-4 rounded-xl bg-[#1d1d1d] border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 placeholder:text-gray-500 text-sm"
+          />
+        </Field>
+        <Field label="Date" icon={Calendar} iconClass="text-blue-400">
+          <input
+            type="date"
+            min={new Date().toISOString().split("T")[0]}
+            value={data.scheduledDate}
+            onChange={(e) => onChange("scheduledDate", e.target.value)}
+            className="input-dark w-full h-12 pl-11 pr-3 rounded-xl bg-[#1d1d1d] border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 text-sm"
+          />
+        </Field>
+        <Field label="Time" icon={Clock} iconClass="text-purple-400">
+          <input
+            type="time"
+            value={data.scheduledTime}
+            onChange={(e) => onChange("scheduledTime", e.target.value)}
+            className="input-dark w-full h-12 pl-11 pr-3 rounded-xl bg-[#1d1d1d] border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 text-sm"
+          />
+        </Field>
+      </div>
+      <div className="flex justify-end">
+        <button
+          disabled={disabled}
+          onClick={onNext}
+          className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed h-12 px-8 rounded-xl bg-white text-black font-medium text-sm tracking-wide shadow hover:shadow-lg transition"
+        >
+          Next: Vehicle
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export const StepVehicle = ({ data, onChange, onNext, onBack }) => (
+  <div className="space-y-8">
+    <h2 className="text-2xl font-semibold tracking-tight">
+      Select Vehicle Type
+    </h2>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {vehicleTypes.map((v) => (
+        <div
+          key={v.type}
+          onClick={() => onChange("vehicleType", v.type)}
+          className={`group cursor-pointer rounded-2xl p-5 border border-white/10 bg-[#1a1a1a] shadow-sm transition relative overflow-hidden ${
+            data.vehicleType === v.type
+              ? "ring-2 ring-white bg-white/10"
+              : "hover:border-white/20 hover:bg-white/5"
+          }`}
+        >
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition pointer-events-none bg-gradient-to-br from-white/5 to-transparent"></div>
+          <div className="text-center space-y-2 relative">
+            <div className="text-4xl drop-shadow-sm">{v.icon}</div>
+            <h3 className="font-semibold tracking-wide text-sm">{v.name}</h3>
+            <p className="text-[11px] text-gray-400 leading-snug">
+              {v.description}
+            </p>
+            <p className="text-[10px] text-gray-500">Capacity: {v.capacity}</p>
+            <p className="text-xs font-semibold text-white/90">
+              ₹{v.baseFare}+ / {v.perKm}₹ km
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+    <div className="flex justify-between">
+      <button
+        onClick={onBack}
+        className="btn-secondary h-11 px-6 rounded-xl bg-[#1d1d1d] border border-white/10 text-sm font-medium text-white/90 hover:bg-white/5 transition"
+      >
+        Back
+      </button>
+      <button
+        disabled={!data.vehicleType}
+        onClick={onNext}
+        className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed h-11 px-8 rounded-xl bg-white text-black font-medium text-sm tracking-wide shadow hover:shadow-lg transition"
+      >
+        Next: Payment
+      </button>
+    </div>
+  </div>
+);
+
+export const StepPayment = ({ data, onChange, onBack, onSubmit, loading }) => {
+  const fare = data.vehicleType ? calculateFare(5, data.vehicleType) : null; // static 5km demo
+  return (
+    <div className="space-y-8">
+      <h2 className="text-2xl font-semibold tracking-tight">
+        Payment & Confirmation
+      </h2>
+      {fare && (
+        <div className="bg-[#141414] p-6 rounded-2xl border border-white/10">
+          <h3 className="font-semibold mb-4 text-sm tracking-wide uppercase text-white/80">
+            Fare Breakdown (5 km)
+          </h3>
+          <div className="space-y-2 text-sm">
+            <Row label="Base Fare" value={`₹${fare.baseFare}`} />
+            <Row label="Distance Fare" value={`₹${fare.distanceFare}`} />
+            <Row label="Platform Fee" value={`₹${fare.platformFee}`} />
+            <div className="pt-2 mt-2 border-t border-white/10 flex justify-between text-base font-semibold">
+              <span>Total</span>
+              <span>₹{fare.total}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div>
+        <h3 className="font-semibold mb-4 text-sm tracking-wide uppercase text-white/80">
+          Payment Method
+        </h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {paymentMethods.map((m) => (
+            <div
+              key={m.id}
+              onClick={() => onChange("paymentMethod", m.id)}
+              className={`group cursor-pointer rounded-xl p-4 border border-white/10 bg-[#1a1a1a] text-center transition ${
+                data.paymentMethod === m.id
+                  ? "ring-2 ring-white bg-white/10"
+                  : "hover:border-white/20 hover:bg-white/5"
+              }`}
+            >
+              <div className="space-y-1">
+                {m.id === "cash" && <DollarSign className="w-5 h-5 mx-auto" />}
+                {m.id === "upi" && <Phone className="w-5 h-5 mx-auto" />}
+                {m.id === "card" && <CreditCard className="w-5 h-5 mx-auto" />}
+                {m.id === "wallet" && (
+                  <CreditCard className="w-5 h-5 mx-auto" />
+                )}
+                <span className="text-[11px] tracking-wide text-white/80 block">
+                  {m.label}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-[#141414] p-6 rounded-2xl border border-white/10">
+        <h3 className="font-semibold mb-4 text-sm tracking-wide uppercase text-white/80">
+          Booking Summary
+        </h3>
+        <div className="space-y-2 text-xs">
+          <Row label="From" value={data.pickupAddress || "—"} />
+          <Row label="To" value={data.dropoffAddress || "—"} />
+          <Row label="Vehicle" value={data.vehicleType || "—"} />
+          <Row label="Date" value={data.scheduledDate || "—"} />
+          <Row label="Time" value={data.scheduledTime || "—"} />
+          <Row label="Payment" value={data.paymentMethod} />
+        </div>
+      </div>
+
+      <div className="flex justify-between">
+        <button
+          onClick={onBack}
+          className="btn-secondary h-11 px-6 rounded-xl bg-[#1d1d1d] border border-white/10 text-sm font-medium text-white/90 hover:bg-white/5 transition"
+        >
+          Back
+        </button>
+        <button
+          disabled={loading}
+          onClick={onSubmit}
+          className="btn-success disabled:opacity-40 disabled:cursor-not-allowed h-11 px-8 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-medium text-sm tracking-wide shadow flex items-center gap-2 transition"
+        >
+          {loading ? (
+            "Booking…"
+          ) : (
+            <>
+              <CheckCircle className="w-4 h-4" /> Confirm Booking
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// --- Small Reusable Pieces ---
+const Field = ({ label, icon: Icon, iconClass = "", children }) => (
+  <div>
+    <label className="block text-[11px] font-medium mb-2 text-gray-400 tracking-wide uppercase">
+      {label}
+    </label>
+    <div className="relative">
+      {Icon && (
+        <Icon
+          className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 ${iconClass}`}
+        />
+      )}
+      {children}
+    </div>
+  </div>
+);
+
+const Row = ({ label, value }) => (
+  <div className="flex justify-between text-[11px]">
+    <span className="text-gray-500 uppercase tracking-wide">{label}:</span>
+    <span className="text-white/90 truncate max-w-[60%] text-right">
+      {value}
+    </span>
+  </div>
+);
+
+// Utility tailwind component classes guidance (used inline):
+// input-dark, btn-primary, btn-secondary, btn-success, vehicle-card, payment-card are applied in BookCab stylesheet wrapper or global tailwind layers.
