@@ -48,7 +48,6 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
   if (!rider) return null;
 
   const stop = (e) => e.stopPropagation();
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((p) => ({ ...p, [name]: value }));
@@ -60,7 +59,6 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
         asUTC: true,
         withMs: true,
       });
-
       const response = await fetch(`http://localhost:3005/riders/${rider.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -75,7 +73,6 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
           updated_at: updatedAtMySQL,
         }),
       });
-
       if (!response.ok) throw new Error("Update failed");
       toast.success("Rider updated", { transition: Bounce, theme: "dark" });
       setIsEditing(false);
@@ -176,6 +173,65 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
       ? "bg-red-900/40 text-red-300 border-red-700"
       : "bg-gray-800 text-gray-300 border-gray-600";
 
+  const editableFields = [
+    {
+      label: "Phone Number",
+      name: "phone_number",
+      icon: <Phone className="w-4 h-4 text-white/40" />,
+    },
+    {
+      label: "City",
+      name: "city",
+      icon: <MapPin className="w-4 h-4 text-white/40" />,
+    },
+    {
+      label: "State",
+      name: "state",
+      icon: <MapPin className="w-4 h-4 text-white/40" />,
+    },
+    {
+      label: "Role Description",
+      name: "role_description",
+      icon: <Shield className="w-4 h-4 text-white/40" />,
+    },
+  ];
+
+  const staticFields = [
+    {
+      label: "Email",
+      value: rider.email,
+      icon: <Mail className="w-4 h-4 text-white/40" />,
+    },
+    {
+      label: "Role",
+      value: rider.role,
+      icon: <Shield className="w-4 h-4 text-white/40" />,
+      isBadge: true,
+    },
+    {
+      label: "Created At",
+      value: formatDateSafe(formData.created_at, {
+        locale: "en-IN",
+        timeZone: "Asia/Kolkata",
+        variant: "datetime",
+        fallback: "—",
+        assumeUTCForMySQL: true,
+      }),
+      icon: <CalendarClock className="w-4 h-4 text-white/40" />,
+    },
+    {
+      label: "Updated At",
+      value: formatDateSafe(formData.updated_at, {
+        locale: "en-IN",
+        timeZone: "Asia/Kolkata",
+        variant: "datetime",
+        fallback: "—",
+        assumeUTCForMySQL: true,
+      }),
+      icon: <CalendarClock className="w-4 h-4 text-white/40" />,
+    },
+  ];
+
   return (
     <div
       className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
@@ -256,7 +312,7 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
                   disabled={isDeleting}
                   className="h-11 px-6 rounded-xl bg-red-600 text-white text-sm font-medium flex items-center gap-2 shadow hover:bg-red-700 transition disabled:opacity-40"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4" />{" "}
                   {isDeleting ? "Deleting…" : "Delete"}
                 </button>
               )}
@@ -268,97 +324,102 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
         <div className="p-8 space-y-10">
           {/* Top status panels */}
           <div className="grid md:grid-cols-3 gap-6">
-            <StatusPanel
-              label="Status"
-              icon={<Shield className="w-3.5 h-3.5" />}
-              editing={isEditing}
-              value={formData.status}
-              onChange={(v) => setFormData((p) => ({ ...p, status: v }))}
-              statusTheme={statusTheme}
-            />
-            <SimplePanel
-              label="Email Verified"
-              icon={<UserCheck className="w-3.5 h-3.5" />}
-              badge={formData.is_email_verified}
-            />
-            <SimplePanel
-              label="Phone Verified"
-              icon={<Phone className="w-3.5 h-3.5" />}
-              badge={formData.is_phone_verified}
-            />
+            {/* Status panel */}
+            <div className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5 flex flex-col gap-2">
+              <p className="text-[11px] uppercase tracking-wider text-white/40 flex items-center gap-2">
+                <Shield className="w-3.5 h-3.5" /> Status
+              </p>
+              {isEditing ? (
+                <select
+                  value={formData.status}
+                  onChange={(e) =>
+                    setFormData((p) => ({ ...p, status: e.target.value }))
+                  }
+                  className="h-11 w-full rounded-lg bg-[#242424] text-white text-sm px-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/15"
+                >
+                  <option value="active">Active</option>
+                  <option value="suspended">Suspended</option>
+                  <option value="deleted">Deleted</option>
+                </select>
+              ) : (
+                <span
+                  className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border ${statusTheme}`}
+                >
+                  {formData.status.toUpperCase()}
+                </span>
+              )}
+            </div>
+
+            {/* Email verified */}
+            <div className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5 flex flex-col gap-2">
+              <p className="text-[11px] uppercase tracking-wider text-white/40 flex items-center gap-2">
+                <UserCheck className="w-3.5 h-3.5" /> Email Verified
+              </p>
+              <span className={badgeClass(formData.is_email_verified)}>
+                {formData.is_email_verified ? "VERIFIED" : "NOT VERIFIED"}
+              </span>
+            </div>
+
+            {/* Phone verified */}
+            <div className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5 flex flex-col gap-2">
+              <p className="text-[11px] uppercase tracking-wider text-white/40 flex items-center gap-2">
+                <Phone className="w-3.5 h-3.5" /> Phone Verified
+              </p>
+              <span className={badgeClass(formData.is_phone_verified)}>
+                {formData.is_phone_verified ? "VERIFIED" : "NOT VERIFIED"}
+              </span>
+            </div>
           </div>
 
           {/* Editable / Static sections */}
           <div className="grid md:grid-cols-2 gap-8">
             <div className="space-y-6">
-              <FieldBlock
-                label="Phone Number"
-                icon={<Phone className="w-4 h-4 text-white/40" />}
-                name="phone_number"
-                value={formData.phone_number}
-                editing={isEditing}
-                onChange={handleInputChange}
-              />
-              <FieldBlock
-                label="City"
-                icon={<MapPin className="w-4 h-4 text-white/40" />}
-                name="city"
-                value={formData.city}
-                editing={isEditing}
-                onChange={handleInputChange}
-              />
-              <FieldBlock
-                label="State"
-                icon={<MapPin className="w-4 h-4 text-white/40" />}
-                name="state"
-                value={formData.state}
-                editing={isEditing}
-                onChange={handleInputChange}
-              />
-              <FieldBlock
-                label="Role Description"
-                icon={<Shield className="w-4 h-4 text-white/40" />}
-                name="role_description"
-                value={formData.role_description}
-                editing={isEditing}
-                onChange={handleInputChange}
-              />
+              {editableFields.map((f) => (
+                <div
+                  key={f.name}
+                  className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5"
+                >
+                  <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2 flex items-center gap-2">
+                    {f.icon}
+                    {f.label}
+                  </p>
+                  {isEditing ? (
+                    <input
+                      name={f.name}
+                      value={formData[f.name]}
+                      onChange={handleInputChange}
+                      className="h-11 w-full rounded-lg bg-[#242424] text-white text-sm px-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/15"
+                    />
+                  ) : (
+                    <div className="text-white/90 text-sm font-medium break-words">
+                      {formData[f.name] || "—"}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
 
             <div className="space-y-6">
-              <StaticBlock
-                label="Email"
-                icon={<Mail className="w-4 h-4 text-white/40" />}
-                value={rider.email}
-              />
-              <StaticBlock
-                label="Role"
-                icon={<Shield className="w-4 h-4 text-white/40" />}
-                value={rider.role}
-                badge
-              />
-              <StaticBlock
-                label="Created At"
-                icon={<CalendarClock className="w-4 h-4 text-white/40" />}
-                value={formatDateSafe(formData.created_at, {
-                  locale: "en-IN",
-                  timeZone: "Asia/Kolkata",
-                  variant: "datetime",
-                  fallback: "—",
-                  assumeUTCForMySQL: true,
-                })}
-              />
-              <StaticBlock
-                label="Updated At"
-                icon={<CalendarClock className="w-4 h-4 text-white/40" />}
-                value={formatDateSafe(formData.updated_at, {
-                  locale: "en-IN",
-                  timeZone: "Asia/Kolkata",
-                  variant: "datetime",
-                  fallback: "—",
-                  assumeUTCForMySQL: true,
-                })}
-              />
+              {staticFields.map((f, idx) => (
+                <div
+                  key={idx}
+                  className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5"
+                >
+                  <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2 flex items-center gap-2">
+                    {f.icon}
+                    {f.label}
+                  </p>
+                  {f.isBadge ? (
+                    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-white text-black border border-white">
+                      {f.value}
+                    </span>
+                  ) : (
+                    <div className="text-white/90 text-sm font-medium break-words">
+                      {f.value || "—"}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -366,100 +427,5 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
     </div>
   );
 };
-
-/* Sub Components */
-
-const panelBase =
-  "bg-[#1b1b1b] border border-white/10 rounded-xl p-5 flex flex-col gap-2";
-
-const StatusPanel = ({
-  label,
-  icon,
-  editing,
-  value,
-  onChange,
-  statusTheme,
-}) => (
-  <div className={panelBase}>
-    <p className="text-[11px] uppercase tracking-wider text-white/40 flex items-center gap-2">
-      {icon}
-      {label}
-    </p>
-    {editing ? (
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-11 w-full rounded-lg bg-[#242424] text-white text-sm px-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/15"
-      >
-        <option value="active">Active</option>
-        <option value="suspended">Suspended</option>
-        <option value="deleted">Deleted</option>
-      </select>
-    ) : (
-      <span
-        className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border ${statusTheme}`}
-      >
-        {value.toUpperCase()}
-      </span>
-    )}
-  </div>
-);
-
-const SimplePanel = ({ label, icon, badge }) => (
-  <div className={panelBase}>
-    <p className="text-[11px] uppercase tracking-wider text-white/40 flex items-center gap-2">
-      {icon}
-      {label}
-    </p>
-    <span
-      className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border ${
-        badge
-          ? "bg-emerald-900/40 text-emerald-300 border-emerald-700"
-          : "bg-red-900/40 text-red-300 border-red-700"
-      }`}
-    >
-      {badge ? "VERIFIED" : "NOT VERIFIED"}
-    </span>
-  </div>
-);
-
-const FieldBlock = ({ label, icon, editing, name, value, onChange }) => (
-  <div className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5">
-    <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2 flex items-center gap-2">
-      {icon}
-      {label}
-    </p>
-    {editing ? (
-      <input
-        name={name}
-        value={value}
-        onChange={onChange}
-        className="h-11 w-full rounded-lg bg-[#242424] text-white text-sm px-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/15"
-      />
-    ) : (
-      <div className="text-white/90 text-sm font-medium break-words">
-        {value || "—"}
-      </div>
-    )}
-  </div>
-);
-
-const StaticBlock = ({ label, icon, value, badge }) => (
-  <div className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5">
-    <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2 flex items-center gap-2">
-      {icon}
-      {label}
-    </p>
-    {badge ? (
-      <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-white text-black border border-white">
-        {value}
-      </span>
-    ) : (
-      <div className="text-white/90 text-sm font-medium break-words">
-        {value || "—"}
-      </div>
-    )}
-  </div>
-);
 
 export default RiderCards;

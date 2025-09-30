@@ -27,6 +27,7 @@ const Testimonials = () => {
                 flex w-[max-content] gap-8
                 animate-[carousel_30s_linear_infinite]
                 group-hover:[animation-play-state:paused]
+                group-hover:[cursor:pointer]
                 will-change-transform
               "
             >
@@ -37,9 +38,7 @@ const Testimonials = () => {
                       className="
                         Normal font-[500]
                         overflow-y-auto max-h-[150px]
-                        no-scrollbar
-                      "
-                      tabIndex={0}
+                        no-scrollbar"
                     >
                       {item.testimony}
                     </p>

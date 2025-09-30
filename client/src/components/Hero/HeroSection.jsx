@@ -6,9 +6,8 @@ const HeroSection = () => {
   const [source, setSource] = useState("");
   const [destination, setDestination] = useState("");
   
-localStorage.setItem("trip:from", source);
-localStorage.setItem("trip:to", destination);
-
+  localStorage.setItem("trip:from", source);
+  localStorage.setItem("trip:to", destination);
 
   return (
     <>

@@ -12,29 +12,29 @@ const BookingCard = ({ booking, isRider, onBookingClick }) => {
   return (
     <li
       onClick={() => onBookingClick(booking)}
-      className="group relative bg-[#141414] p-6 border border-white/10 rounded-2xl shadow-lg cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden"
+      className="group relative bg-[#141414] p-4 sm:p-6 border border-white/10 rounded-2xl shadow-lg cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden"
     >
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/0 to-white/0 group-hover:from-white/5 group-hover:to-white/0 transition-all" />
 
-      <div className="relative z-10 flex items-center justify-between gap-4">
-        <div className="flex items-start space-x-4 flex-grow">
+      <div className="relative z-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        <div className="flex items-start space-x-3 sm:space-x-4 flex-grow">
           <div className="flex-shrink-0">
-            <div className="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white text-black rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
               {isRider ? (
-                <span className="text-sm font-bold">R</span>
+                <span className="text-xs sm:text-sm font-bold">R</span>
               ) : (
-                <span className="text-sm font-bold">D</span>
+                <span className="text-xs sm:text-sm font-bold">D</span>
               )}
             </div>
           </div>
 
           <div className="flex-grow min-w-0">
-            <h3 className="text-lg font-semibold text-white group-hover:text-white mb-1">
+            <h3 className="text-base sm:text-lg font-semibold text-white group-hover:text-white mb-1 leading-tight break-words">
               {booking.pickup_address} → {booking.dropoff_address}
             </h3>
-            <div className="flex items-center space-x-2 text-sm text-gray-400">
-              <Calendar className="w-4 h-4" />
-              <span>
+            <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-400">
+              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="truncate">
                 {formatDateSafe(booking.created_at, {
                   locale: "en-IN",
                   timeZone: "Asia/Kolkata",
@@ -47,14 +47,14 @@ const BookingCard = ({ booking, isRider, onBookingClick }) => {
           </div>
         </div>
 
-        <div className="flex-shrink-0 flex flex-col items-end space-y-2">
+        <div className="flex-shrink-0 flex flex-row sm:flex-col items-start sm:items-end gap-2 sm:space-y-2">
           {booking.fare_amount && (
-            <span className="inline-flex items-center gap-1 text-green-400 font-semibold">
+            <span className="inline-flex items-center gap-1 text-green-400 font-semibold text-sm">
               <IndianRupee className="w-4 h-4" /> {booking.fare_amount}
             </span>
           )}
           <span
-            className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${
+            className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold border ${
               booking.booking_status === "completed"
                 ? "bg-green-900/40 text-green-300 border-green-700"
                 : booking.booking_status === "cancelled"

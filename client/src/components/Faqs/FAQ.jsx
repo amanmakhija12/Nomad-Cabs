@@ -1,40 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import {useState } from 'react'
 import CarImg from '../../assets/faq/car.png'
 import {faqItems} from '../../data/LandingPage_data/faqs'
 
 const FAQ = () => {
   
-  const [openIndex, setOpenIndex] = useState(1)
+  const [openIndex, setOpenIndex] = useState(0)
 
   const toggle = (index) => {
     setOpenIndex((prev) => (prev === index ? -1 : index))
   }
 
-  const AccordionItem = ({ item, index, isOpen, onToggle }) => {
-    const contentRef = useRef(null)
-    const [height, setHeight] = useState(0)
-
-    useEffect(() => {
-      if (isOpen) {
-        setHeight(contentRef.current ? contentRef.current.scrollHeight : 0)
-      } else {
-        const currentHeight = contentRef.current ? contentRef.current.scrollHeight : 0
-        setHeight(currentHeight)
-        requestAnimationFrame(() => {
-          setHeight(0)
-        })
-      }
-    }, [isOpen])
-
-    useEffect(() => {
-      const onResize = () => {
-        if (isOpen && contentRef.current) {
-          setHeight(contentRef.current.scrollHeight)
-        }
-      }
-      window.addEventListener('resize', onResize)
-      return () => window.removeEventListener('resize', onResize)
-    }, [isOpen])
+ const AccordionItem = ({ item, index, isOpen, onToggle }) => {
 
     return (
       <div className="border-b last:border-b-0 ">
@@ -43,18 +19,22 @@ const FAQ = () => {
           className={`w-full text-left p-5 Normal font-semibold transition-colors ${
             isOpen ? 'bg-[#ff4d31] text-white' : 'bg-surface'
           }`}
-          aria-expanded={isOpen}
         >
           {index + 1}. {item.question}
         </button>
-        <div style={{ height, overflow: 'hidden', transition: 'height 300ms ease' }}>
-          <div ref={contentRef} className="bg-surface p-6">
+        <div
+          className={`
+            overflow-hidden transition-[max-height] duration-300 ease-in-out
+            ${isOpen ? 'max-h-[500px]' : 'max-h-0'} 
+          `}
+        >
+          <div className="bg-surface p-6">
             <p className="Paragraph text-[#8f8e8b]">{item.answer}</p>
           </div>
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <section id="FAQ" className="mb-50 mt-30">

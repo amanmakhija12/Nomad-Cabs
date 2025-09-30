@@ -3,48 +3,37 @@ import SearchFilter from "./SearchFilter";
 import BookingCard from "./BookingCard";
 import Pagination from "../Pagination";
 import BookingCards from "./BookingCards";
+import { useAuthStore } from "../../../store/authStore";
 
 const Bookings = ({ isRider = false }) => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [allBookings, setAllBookings] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [rider, setRider] = useState(null);
   const [filterType, setFilterType] = useState("pickup");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const bookingsPerPage = 10;
 
+  const user = useAuthStore((s) => s.user);
+
   const openBooking = (booking) => setSelectedBooking(booking);
   const closeBooking = () => setSelectedBooking(null);
 
-  // Utility functions
   const normalize = (v) => (v ?? "").toString().trim().toLowerCase();
 
-  const normalizeDateString = (input) => {
+
+  const normalizeDateKey = (input) => {
     if (!input) return "";
     const raw = input.toString().trim();
-
-    const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (isoMatch) return raw;
-
-    const dmy = raw.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})$/);
-    if (dmy) {
-      const [_, d, m, y] = dmy;
-      const year = y.length === 2 ? `20${y}` : y;
-      const mm = String(m).padStart(2, "0");
-      const dd = String(d).padStart(2, "0");
-      return `${year}-${mm}-${dd}`;
+    if (raw.includes("T") && raw.length >= 10) return raw.slice(0, 10);
+    const d = new Date(raw);
+    if (!isNaN(d.getTime())) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
     }
-
-    const parsed = new Date(raw);
-    if (!isNaN(parsed.getTime())) {
-      const year = parsed.getFullYear();
-      const mm = String(parsed.getMonth() + 1).padStart(2, "0");
-      const dd = String(parsed.getDate()).padStart(2, "0");
-      return `${year}-${mm}-${dd}`;
-    }
-
     return raw.toLowerCase();
   };
 
@@ -63,7 +52,6 @@ const Bookings = ({ isRider = false }) => {
     }
   };
 
-  // Fetch bookings
   useEffect(() => {
     const fetchBookings = async () => {
       try {
@@ -73,7 +61,6 @@ const Bookings = ({ isRider = false }) => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        // Support either array or { bookings: [] }
         const list = Array.isArray(data)
           ? data
           : Array.isArray(data.bookings)
@@ -89,52 +76,40 @@ const Bookings = ({ isRider = false }) => {
     fetchBookings();
   }, []);
 
-  // Fetch rider
   useEffect(() => {
-    const fetchRider = async () => {
-      try {
-        const riderRes = await fetch(
-          "http://localhost:3005/riders/a1b2c3d4-e5f6-7890-abcd-1234567890ab"
-        );
-        if (!riderRes.ok) return;
-        const riderData = await riderRes.json();
-        setRider(riderData);
-      } catch (error) {
-        console.error("Error fetching rider:", error);
+    let base = allBookings;
+    if (user) {
+      const role = user.role;
+      if (isRider || role === "rider") {
+        base = base.filter((b) => b.rider_id === user.id);
+      } else if (role === "driver") {
+        base = base.filter((b) => b.driver_id === user.id);
       }
-    };
-    fetchRider();
-  }, []);
+    }
 
-  // Filter bookings
-  useEffect(() => {
+
     if (searchTerm.trim() === "") {
-      setBookings(allBookings);
+      setBookings(base);
       setCurrentPage(1);
       return;
     }
 
     const term = normalize(searchTerm);
-    const filtered = allBookings.filter((b) => {
+    
+    const filtered = base.filter((b) => {
       const value = getFieldValue(b, filterType);
-
       if (filterType === "travel_date") {
-        const valueKey = normalizeDateString(value);
-        const termKey = normalizeDateString(searchTerm);
-        if (valueKey && termKey) {
-          return valueKey.includes(termKey);
-        }
-        return normalize(value).includes(term);
+        const valueKey = normalizeDateKey(value);
+        const termKey = normalizeDateKey(searchTerm);
+        return valueKey.includes(termKey);
       }
-
       return normalize(value).includes(term);
     });
 
     setBookings(filtered);
     setCurrentPage(1);
-  }, [allBookings, filterType, searchTerm]);
+  }, [allBookings, user, isRider, filterType, searchTerm]);
 
-  // Handle body scroll when modal is open
   useEffect(() => {
     if (selectedBooking) {
       const prev = document.body.style.overflow;
@@ -143,7 +118,6 @@ const Bookings = ({ isRider = false }) => {
     }
   }, [selectedBooking]);
 
-  // Pagination calculations
   const indexOfLastBooking = currentPage * bookingsPerPage;
   const indexOfFirstBooking = indexOfLastBooking - bookingsPerPage;
   const currentBookings = bookings.slice(
@@ -152,7 +126,6 @@ const Bookings = ({ isRider = false }) => {
   );
   const totalPages = Math.ceil(bookings.length / bookingsPerPage);
 
-  // Loading and error states
   if (loading) {
     return (
       <div className="flex justify-center items-center py-24">
@@ -167,15 +140,13 @@ const Bookings = ({ isRider = false }) => {
   }
   return (
     <div className="min-h-screen bg-[#151212] text-white">
-      {/* Header with greeting */}
       <div className="mb-8">
         <h1 className="text-4xl font-semibold text-white mb-3">
-          Good Morning!
+          {`Good Morning${user?.first_name ? ", " + user.first_name : ""}!`}
         </h1>
         <p className="text-gray-300">Manage your ride bookings efficiently</p>
       </div>
 
-      {/* Search and Filter */}
       <SearchFilter
         filterType={filterType}
         setFilterType={setFilterType}
@@ -183,7 +154,6 @@ const Bookings = ({ isRider = false }) => {
         setSearchTerm={setSearchTerm}
       />
 
-      {/* Bookings List */}
       <ul className="space-y-4 flex-grow pb-24">
         {currentBookings.length === 0 ? (
           <div className="bg-[#141414] rounded-2xl p-12 text-center border border-white/10">
@@ -201,7 +171,6 @@ const Bookings = ({ isRider = false }) => {
         )}
       </ul>
 
-      {/* Pagination */}
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
@@ -211,11 +180,10 @@ const Bookings = ({ isRider = false }) => {
         variant="dark"
       />
 
-      {/* Modal */}
       {selectedBooking && (
         <BookingCards
           booking={selectedBooking}
-          user={rider}
+          user={user}
           isRider={isRider}
           onClose={closeBooking}
         />

@@ -18,8 +18,6 @@ const AuthPage = () => {
     }
   }, [user, navigate]);
 
-  const handleLogin = async () => {};
-  const handleSignup = () => {};
 
   return (
     <div
@@ -39,7 +37,7 @@ const AuthPage = () => {
         <div className="mb-4 text-lg text-[#ff4d31] font-semibold animate-words">
           "Welcome back! Your journey starts here."
         </div>
-        <LoginForm onLogin={handleLogin} />
+        <LoginForm  />
         <p className="text-white mt-4">
           Don't have an account?
           <span
@@ -64,7 +62,6 @@ const AuthPage = () => {
           "Create your account and ride the future!"
         </div>
         <SignupForm
-          onSignup={handleSignup}
           onSuccess={() => setMode("login")}
         />
         <p className="text-white mt-4">
@@ -95,23 +92,7 @@ const AuthPage = () => {
           />
         </div>
       </div>
-      <style>{`
-        @keyframes fade-in {0% {opacity:0;transform:translateY(20px);}100% {opacity:1;transform:translateY(0);} }
-        .animate-fade-in {animation: fade-in 0.7s;}
-        @keyframes link {0% {color:#fff;}50% {color:#ff4d31;}100% {color:#fff;}}
-        .animate-link {animation: link 1.2s infinite;}
-        @keyframes glow {0% {box-shadow:0 0 10px #ff4d31,0 0 20px #151212;}50% {box-shadow:0 0 20px #ff4d31,0 0 40px #151212;}100% {box-shadow:0 0 10px #ff4d31,0 0 20px #151212;}}
-        .animate-glow {animation: glow 2s infinite alternate;}
-        @keyframes words {0% {opacity:0;transform:translateY(-10px);}50% {opacity:1;transform:translateY(0);}100% {opacity:0;transform:translateY(10px);}}
-        .animate-words {animation: words 3s infinite;}
-        .primary-btn-nav,input,select {transition: box-shadow .3s,border-color .3s;}
-        .primary-btn-nav:hover {box-shadow:0 0 10px #ff4d31;border-color:#ff4d31;}
-        input:hover,select:hover {border-color:#ff4d31;box-shadow:0 0 5px #ff4d31;}
-        @keyframes bg-slide-right {0% {transform:scale(1) translateX(-30px);}100% {transform:scale(1.05) translateX(0);}}
-        .animate-bg-slide-right {animation:bg-slide-right 1s forwards;}
-        @keyframes bg-slide-left {0% {transform:scale(1) translateX(30px);}100% {transform:scale(1.05) translateX(0);}}
-        .animate-bg-slide-left {animation:bg-slide-left 1s forwards;}
-      `}</style>
+      
     </div>
   );
 };

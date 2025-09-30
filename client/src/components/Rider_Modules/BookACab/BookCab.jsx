@@ -12,9 +12,11 @@ import {
   calculateFare,
 } from "./bookingData";
 import { toast } from "react-toastify";
+import { useAuthStore } from "../../../store/authStore";
+
 
 const BookCab = () => {
-  const user = { id: "demo-user-1", role: "rider" };
+  const user =useAuthStore((s)=>s.user);
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -45,6 +47,7 @@ const BookCab = () => {
       vehicle_type: bookingData.vehicleType,
       payment_method: bookingData.paymentMethod,
       rider_id: user.id,
+      driver_id:null,
       fare_amount: fare?.total ?? null,
       trip_distance_km: fare?.distanceKm ?? null,
       trip_duration_minutes: null,
@@ -104,7 +107,6 @@ const BookCab = () => {
           )}
         </div>
 
-        {/* Hidden exports usage (avoid tree-shake warnings) */}
         <div className="hidden">
           {vehicleTypes.length} {paymentMethods.length}
         </div>

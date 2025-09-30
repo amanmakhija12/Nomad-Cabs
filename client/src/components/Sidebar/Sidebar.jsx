@@ -9,6 +9,8 @@ import {
   ShieldCheck,
   HelpCircle,
   LogOut,
+  IndianRupee,
+  CreditCard,
 } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
 
@@ -25,7 +27,6 @@ const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
     navigate("/auth");
   };
 
-  // Hard-coded icon mapping (simple, no smart inference)
   const iconFor = (label = "") => {
     switch (label) {
       case "My Bookings":
@@ -38,6 +39,18 @@ const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
         return MessageSquare;
       case "Manage Account":
         return ShieldCheck;
+      case "Rider Board":
+        return Users;
+      case "Driver Board":
+        return Car;
+      case "Verification":
+        return ShieldCheck;
+      case "Feedback":
+        return MessageSquare;
+      case "Fare Board":
+        return IndianRupee;
+      case "Transactions":
+        return CreditCard;
       default:
         return HelpCircle;
     }
@@ -48,9 +61,8 @@ const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
     <div className="font-sans flex flex-col md:flex-row h-[100vh] bg-[#0f0f0f]">
       {/* Sidebar */}
       <aside
-        className={`flex flex-col h-[100vh] bg-gradient-to-b from-[#0a0a0a] to-[#0c0c0c] shadow-2xl shadow-black/40 fixed md:static inset-y-0 left-0 z-50 transition-all duration-300 ease-in-out rounded-r-3xl ${
-          openSidebar ? "w-64" : "w-20 md:w-64"
-        } ${!openSidebar && "hidden md:flex"}`}
+        className={`flex flex-col h-[100vh] bg-gradient-to-b from-[#0a0a0a] to-[#0c0c0c] shadow-2xl shadow-black/40 fixed md:static inset-y-0 left-0 z-50 transition-all duration-300 ease-in-out rounded-r-3xl 
+           ${!openSidebar && "hidden md:flex"}`}
       >
         {/* Top Section */}
         <div className="p-6 flex items-center justify-between">
@@ -72,7 +84,7 @@ const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
             onClick={() => setOpenSidebar(!openSidebar)}
             className="md:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors duration-200"
           >
-            {openSidebar ? "×" : "☰"}
+            {openSidebar ? "" : "☰"}
           </button>
         </div>
 
@@ -140,7 +152,7 @@ const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
             onClick={() => setOpenSidebar((prev) => !prev)}
             className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors duration-200"
           >
-            {openSidebar ? "←" : "☰"}
+            {openSidebar ? "X" : "☰"}
           </button>
         </div>
         {children}

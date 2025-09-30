@@ -267,6 +267,3 @@ const Row = ({ label, value }) => (
     </span>
   </div>
 );
-
-// Utility tailwind component classes guidance (used inline):
-// input-dark, btn-primary, btn-secondary, btn-success, vehicle-card, payment-card are applied in BookCab stylesheet wrapper or global tailwind layers.

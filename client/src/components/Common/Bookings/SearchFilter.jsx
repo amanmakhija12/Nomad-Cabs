@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+
 
 const filterOptions = [
   { label: "Pickup Address", value: "pickup" },
@@ -78,10 +78,6 @@ const SearchFilter = ({
                 className="w-full px-5 py-3 pl-12 rounded-xl bg-[#1a1a1a] text-white placeholder-gray-400 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/20 transition-all duration-200"
               />
             )}
-
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-              <Search className="w-5 h-5" />
-            </div>
           </div>
         </div>
       </div>

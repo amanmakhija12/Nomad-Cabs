@@ -1,42 +1,47 @@
 import { useState } from "react";
-import AdminSideBar from "../components/Admin_Modules/Sidebar";
 import ManageRiders from "../components/Admin_Modules/Rider_Board/ManageRiders";
 import ManageDrivers from "../components/Admin_Modules/Driver_Board/ManageDrivers";
 import ManageFare from "../components/Admin_Modules/Fare_Board/ManageFare";
 import ManageTransactions from "../components/Admin_Modules/Transaction_Board/ManageTransactions";
 import Navigator from "../components/Admin_Modules/Utils/Navigator";
 import PlaceHolder from "../components/Common/PlaceHolder";
+import Sidebar from "../components/Sidebar/Sidebar";
 
-
+const NAV_ITEMS = [
+  { id: "riderBoard", label: "Rider Board" },
+  { id: "driverBoard", label: "Driver Board"},
+  { id: "verification", label: "Verification" },
+  { id: "feedback", label: "Feedback"},
+  { id: "fare", label: "Fare Board" },
+  { id: "transaction", label: "Transactions"},
+];
 
 const AdminPage = () => {
-  const [selection, setSelection] = useState(null);
+  const [activeSection, setActiveSection] = useState(null);
 
   return (
-    <div className="font-sans min-h-screen h-[100vh] ">
-      <div className="flex flex-col min-[940px]:flex-row h-full ">
-        <AdminSideBar onSelect={setSelection} activeSelection={selection} />
+
+        <Sidebar activeSection={activeSection} navItems={NAV_ITEMS} setActiveSection={setActiveSection}>
         <main className="bg-[#151212] flex-1 p-4 min-[940px]:p-6 overflow-y-auto">
-          {selection === "riderBoard" && <ManageRiders />}
-          {selection === "driverBoard" && <ManageDrivers />}
-          {selection === "fare" && <ManageFare />}
-          {selection === "transaction" && <ManageTransactions />}
-          {selection === "verification" && (
+          {activeSection === "riderBoard" && <ManageRiders />}
+          {activeSection === "driverBoard" && <ManageDrivers />}
+          {activeSection === "fare" && <ManageFare />}
+          {activeSection === "transaction" && <ManageTransactions />}
+          {activeSection === "verification" && (
             <PlaceHolder
               moduleName="Document & Verification"
-              onBack={() => setSelection(null)}
+              onBack={() => setActiveSection(null)}
             />
           )}
-          {selection === "feedback" && (
+          {activeSection === "feedback" && (
             <PlaceHolder
               moduleName="Feedback & Grievance"
-              onBack={() => setSelection(null)}
+              onBack={() => setActiveSection(null)}
             />
           )}
-          {!selection && <Navigator onSelect={setSelection} />}
+          {!activeSection && <Navigator onSelect={setActiveSection} />}
         </main>
-      </div>
-    </div>
+      </Sidebar>
   );
 };
 

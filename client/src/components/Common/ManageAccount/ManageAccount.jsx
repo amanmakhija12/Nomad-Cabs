@@ -269,7 +269,6 @@ const ManageAccount = () => {
   );
 };
 
-// Reusable small components
 const Field = ({ label, icon: Icon, children }) => (
   <div className="space-y-2">
     <label className="flex items-center gap-2 text-[11px] font-medium tracking-wide text-gray-400 uppercase">

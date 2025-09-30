@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import {
   Search,
   Mail,
@@ -8,17 +8,15 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
-  RefreshCcw
 } from "lucide-react";
 import RiderCards from "./RiderCards";
 
 const filterOptions = [
   { label: "Email", value: "email" },
-  { label: "Phone Number", value: "phone_number" }
+  { label: "Phone Number", value: "phone_number" },
 ];
 
 const ManageRiders = () => {
-
   const [selectedRider, setSelectedRider] = useState(null);
   const [allRiders, setAllRiders] = useState([]);
   const [riders, setRiders] = useState([]);
@@ -39,7 +37,8 @@ const ManageRiders = () => {
     }
   }, [selectedRider]);
 
-  const fetchRiders = useCallback(async () => {
+
+  const fetchRiders = async () => {
     try {
       setLoading(true);
       const response = await fetch("http://localhost:3005/riders");
@@ -52,11 +51,11 @@ const ManageRiders = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     fetchRiders();
-  }, [fetchRiders]);
+  }, []);
 
   useEffect(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -98,28 +97,25 @@ const ManageRiders = () => {
         </p>
       </div>
 
-      {/* Filter Panel */}
       <div className="bg-[#141414] border border-white/10 rounded-2xl p-6 mb-8 shadow-lg">
         <div className="flex flex-wrap gap-6">
-          {/* Filter type */}
-            <div className="flex flex-col min-w-[160px]">
-              <label className="text-[11px] font-semibold tracking-wider uppercase text-white/50 mb-2">
-                Filter By
-              </label>
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className="h-12 rounded-xl bg-[#1d1d1d] text-white/90 text-sm px-4 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/15"
-              >
-                {filterOptions.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="flex flex-col min-w-[160px]">
+            <label className="text-[11px] font-semibold tracking-wider uppercase text-white/50 mb-2">
+              Filter By
+            </label>
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="h-12 rounded-xl bg-[#1d1d1d] text-white/90 text-sm px-4 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/15"
+            >
+              {filterOptions.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          {/* Search */}
           <div className="flex flex-col flex-grow min-w-[260px]">
             <label className="text-[11px] font-semibold tracking-wider uppercase text-white/50 mb-2">
               Search
@@ -137,22 +133,9 @@ const ManageRiders = () => {
               />
             </div>
           </div>
-
-          {/* Refresh */}
-          <div className="flex flex-col justify-end">
-            <button
-              onClick={fetchRiders}
-              disabled={loading}
-              className="h-12 px-6 rounded-xl bg-white text-black text-sm font-medium shadow hover:shadow-lg transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              <RefreshCcw className="w-4 h-4" />
-              {loading ? "Refreshing…" : "Refresh"}
-            </button>
-          </div>
         </div>
       </div>
 
-      {/* Counts */}
       <div className="flex items-center justify-between mb-5">
         <div className="text-sm text-white/60">
           {riders.length
@@ -160,7 +143,7 @@ const ManageRiders = () => {
             : "No riders found"}
         </div>
         <div className="text-xs text-white/40 tracking-wider uppercase">
-          Page {currentPage} / {totalPages}
+          Page {currentPage} of {totalPages}
         </div>
       </div>
 
@@ -189,7 +172,6 @@ const ManageRiders = () => {
 
               <div className="relative z-10 flex items-center justify-between gap-4">
                 <div className="flex items-start space-x-4 flex-grow">
-                  {/* Avatar */}
                   <div className="flex-shrink-0">
                     <div className="w-14 h-14 rounded-full bg-gradient-to-b from-white to-white/80 text-black font-bold flex items-center justify-center shadow-md group-hover:shadow-lg transition">
                       {(rider.first_name?.[0] || "").toUpperCase()}
@@ -197,7 +179,6 @@ const ManageRiders = () => {
                     </div>
                   </div>
 
-                  {/* Content */}
                   <div className="flex-grow min-w-0">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg font-semibold text-white tracking-tight truncate group-hover:text-white/90">
@@ -223,7 +204,9 @@ const ManageRiders = () => {
                       </div>
                       <div className="flex items-center gap-2 text-white/60">
                         <Phone className="w-3.5 h-3.5 text-white/40" />
-                        <span className="font-medium">{rider.phone_number}</span>
+                        <span className="font-medium">
+                          {rider.phone_number}
+                        </span>
                       </div>
                       {rider.city && (
                         <div className="flex items-center gap-2 text-white/60">
@@ -301,9 +284,7 @@ const ManageRiders = () => {
               })}
 
             <button
-              onClick={() =>
-                setCurrentPage((p) => Math.min(totalPages, p + 1))
-              }
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
               className="h-9 w-9 flex items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition"
             >

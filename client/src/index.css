@@ -42,13 +42,7 @@
   color: var(--text);
 }
 
-/* Light theme overrides */
-:root[data-theme='light'] {
-  --bg: #fffaf6;
-  --text: #140604;
-  --surface: #ffffff;
-  --input: #f2f2f2;
-}
+
 
 .bgBnr {
   background-image: url('./images/banner/book-banner.png');
@@ -69,22 +63,8 @@
   color: #ff4d31;
 }
 
-/* Sticky theme toggle button */
-.theme-toggle {
-  background-color: #ff4d31;
-  color: #fffaf6;
-  border: 2px solid #ff4d31;
-  border-radius: 50%;
-  padding: 7px 7px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: 0.2s;
-}
 
-.theme-toggle:hover {
-  background-color: #fffaf6;
-  color: #ff4d31;
-}
+
 
 /* Theme-aware surfaces */
 .bg-surface {
@@ -110,15 +90,7 @@
   width: 100%;
 }
 
-/* Inverted surface: white in dark theme, dark in light theme */
-.bg-surface-invert {
-  background-color: #fffaf6;
-  color: #140604;
-}
-:root[data-theme='light'] .bg-surface-invert {
-  background-color: #151212;
-  color: #fffaf6;
-}
+
 
 .theme-logo {
   filter: none;

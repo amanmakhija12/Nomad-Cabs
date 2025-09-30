@@ -1,9 +1,52 @@
-import { getVehicleIcon } from "./VehicleUtils";
-import { formatDateSafe } from "../../../../utils/DateUtil"
+import { formatDateSafe } from "../../../../utils/DateUtil";
+
+const getVehicleIcon = (type) => {
+  switch (type?.toLowerCase()) {
+    case "sedan":
+      return "🚗";
+    case "suv":
+      return "🚙";
+    case "bike":
+      return "🏍️";
+    case "auto":
+      return "🛺";
+    default:
+      return "🚗";
+  }
+};
+
+const asBool = (v) => {
+  if (typeof v === "string") return v === "1" || v.toLowerCase() === "true";
+  if (typeof v === "number") return v === 1;
+  return !!v;
+};
 
 const VehicleCard = ({ vehicle, onClick }) => {
-  const pill = "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold border";
+  const pill =
+    "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold border";
   const verifiedCls = "bg-emerald-900/40 text-emerald-300 border-emerald-700";
+
+  const rcOk = asBool(vehicle?.is_rc_verified);
+  const pucOk = asBool(vehicle?.is_puc_verified);
+  const insOk = asBool(
+    vehicle?.is_insurance_verified ?? vehicle?.is_ins_verified
+  );
+
+  // DRY helpers
+  const verifs = [
+    { abbr: "RC", ok: rcOk, dotTitle: "RC" },
+    { abbr: "PUC", ok: pucOk, dotTitle: "PUC" },
+    { abbr: "INS", ok: insOk, dotTitle: "Insurance" },
+  ];
+
+  const infoRows = [
+    { label: "PUC Expires", value: formatDateSafe(vehicle.puc_expiry) },
+    {
+      label: "Insurance Expires",
+      value: formatDateSafe(vehicle.insurance_expiry),
+    },
+  ];
+
   return (
     <div
       onClick={() => onClick(vehicle)}
@@ -29,42 +72,39 @@ const VehicleCard = ({ vehicle, onClick }) => {
           </div>
         </div>
         <div className="flex flex-col gap-1 items-end">
-          {vehicle.is_rc_verified && (
-            <span className={`${pill} ${verifiedCls}`}>RC VERIFIED</span>
-          )}
-          {vehicle.is_puc_verified && (
-            <span className={`${pill} ${verifiedCls}`}>PUC VERIFIED</span>
-          )}
-          {vehicle.is_insurance_verified && (
-            <span className={`${pill} ${verifiedCls}`}>INS VERIFIED</span>
-          )}
+          {verifs
+            .filter((v) => v.ok)
+            .map((v) => (
+              <span key={v.abbr} className={`${pill} ${verifiedCls}`}>
+                {v.abbr} VERIFIED
+              </span>
+            ))}
         </div>
       </div>
 
       <div className="relative z-10 space-y-4 mb-6 text-sm">
+        {infoRows.map((r) => (
+          <div key={r.label} className="flex items-center justify-between">
+            <span className="text-white/40 uppercase tracking-wide text-[10px]">
+              {r.label}
+            </span>
+            <span className="text-white/80 font-medium">{r.value}</span>
+          </div>
+        ))}
         <div className="flex items-center justify-between">
-          <span className="text-white/40 uppercase tracking-wide text-[10px]">PUC Expires</span>
-          <span className="text-white/80 font-medium">{formatDateSafe(vehicle.puc_expiry)}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-white/40 uppercase tracking-wide text-[10px]">Insurance Expires</span>
-          <span className="text-white/80 font-medium">{formatDateSafe(vehicle.insurance_expiry)}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-white/40 uppercase tracking-wide text-[10px]">Verification</span>
+          <span className="text-white/40 uppercase tracking-wide text-[10px]">
+            Verification
+          </span>
           <div className="flex gap-1.5">
-            <div
-              className={`w-3 h-3 rounded-full ${vehicle.is_rc_verified ? 'bg-emerald-500' : 'bg-red-500'} shadow-sm`}
-              title="RC"
-            />
-            <div
-              className={`w-3 h-3 rounded-full ${vehicle.is_puc_verified ? 'bg-emerald-500' : 'bg-red-500'} shadow-sm`}
-              title="PUC"
-            />
-            <div
-              className={`w-3 h-3 rounded-full ${vehicle.is_insurance_verified ? 'bg-emerald-500' : 'bg-red-500'} shadow-sm`}
-              title="Insurance"
-            />
+            {verifs.map((v) => (
+              <div
+                key={v.abbr}
+                className={`w-3 h-3 rounded-full ${
+                  v.ok ? "bg-emerald-500" : "bg-red-500"
+                } shadow-sm`}
+                title={v.dotTitle}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -72,8 +112,18 @@ const VehicleCard = ({ vehicle, onClick }) => {
       <div className="relative z-10 pt-5 border-t border-white/10">
         <button className="w-full flex items-center justify-center gap-2 text-white/70 hover:text-white text-xs font-medium tracking-wide transition">
           <span>View Full Details</span>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
           </svg>
         </button>
       </div>

@@ -12,6 +12,7 @@ import AdminPage from "./pages/AdminPage"
 import { useAuthStore } from "./store/authStore";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import BookCab from "./components/Rider_Modules/BookACab/BookCab";
 
 const ProtectedRoute = ({ children, roles }) => {
   const user = useAuthStore(s => s.user);
@@ -30,6 +31,7 @@ const App=()=> {
         <Route path="/rider" element={<ProtectedRoute roles={["rider"]}><RiderPage /></ProtectedRoute>} />
         <Route path="/driver" element={<ProtectedRoute roles={["driver"]}><DriverPage /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute roles={["admin"]}><AdminPage /></ProtectedRoute>} />
+        <Route path="/booking" element={<ProtectedRoute roles={["rider"]}><BookCab/></ProtectedRoute>}/>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <ToastContainer
