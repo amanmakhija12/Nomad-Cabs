@@ -4,8 +4,10 @@ import { toast } from "react-toastify";
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const setUser = useAuthStore((s) => s.setUser);
+  const setAuth = useAuthStore((s) => s.setAuth);
   const [loading, setLoading] = useState(false);
+
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:8080/api/v1";
 
   const validate = () => {
     if (!formData.email.trim() || !formData.password.trim()) {
@@ -27,18 +29,49 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
+    
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+    
+      const loginRes = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Login failed");
-      setUser(data.user);
+      
+      const loginData = await loginRes.json();
+      
+      if (!loginRes.ok) {
+        throw new Error(loginData.message || "Login failed");
+      }
+      
+      const token = loginData.token;
+      
+      if (!token) {
+        throw new Error("No token received");
+      }
+      
+
+      const userRes = await fetch(`${BASE_URL}/users/me`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      
+      const userData = await userRes.json();
+      
+      if (!userRes.ok) {
+        throw new Error(userData.message || "Failed to fetch user data");
+      }
+      
+      setAuth(userData, token);
+      
       toast.success("Login successful", { theme: "dark" });
+      
     } catch (err) {
+      console.error("Login error:", err);
       toast.error(err.message, { theme: "dark" });
     } finally {
       setLoading(false);
@@ -81,4 +114,5 @@ const LoginForm = () => {
     </form>
   );
 };
+
 export default LoginForm;

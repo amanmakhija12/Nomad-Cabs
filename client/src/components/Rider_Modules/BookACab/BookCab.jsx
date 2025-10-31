@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   StepsProgress,
   StepRideDetails,
@@ -10,64 +11,93 @@ import {
   paymentMethods,
   createBooking,
   calculateFare,
+  getCoordinatesFromAddress,
 } from "./bookingData";
 import { toast } from "react-toastify";
 import { useAuthStore } from "../../../store/authStore";
 
-
 const BookCab = () => {
-  const user =useAuthStore((s)=>s.user);
+  const user = useAuthStore((s) => s.user);
+  const token = useAuthStore((s) => s.token);
+  const navigate = useNavigate();
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [bookingData, setBookingData] = useState({
-    pickupAddress: "",
-    dropoffAddress: "",
-    scheduledDate: "",
-    scheduledTime: "",
-    vehicleType: "",
-    paymentMethod: "cash",
+    pickup_address: "",
+    dropoff_address: "",
+    scheduled_date: "",
+    scheduled_time: "",
+    vehicle_type: "",
+    payment_method: "cash",
   });
 
   const updateField = (field, value) =>
     setBookingData((prev) => ({ ...prev, [field]: value }));
+  
   const next = () => setStep((s) => Math.min(3, s + 1));
   const back = () => setStep((s) => Math.max(1, s - 1));
 
   const handleSubmit = async () => {
     setLoading(true);
-    const fare = bookingData.vehicleType
-      ? calculateFare(5, bookingData.vehicleType)
-      : null; 
-    const payload = {
-      pickup_address: bookingData.pickupAddress,
-      dropoff_address: bookingData.dropoffAddress,
-      scheduled_date: bookingData.scheduledDate || null,
-      scheduled_time: bookingData.scheduledTime || null,
-      vehicle_type: bookingData.vehicleType,
-      payment_method: bookingData.paymentMethod,
-      rider_id: user.id,
-      driver_id:null,
-      fare_amount: fare?.total ?? null,
-      trip_distance_km: fare?.distanceKm ?? null,
-      trip_duration_minutes: null,
-    };
-    const res = await createBooking(payload);
-    if (res.success) {
-      setStep(1);
-      setBookingData({
-        pickupAddress: "",
-        dropoffAddress: "",
-        scheduledDate: "",
-        scheduledTime: "",
-        vehicleType: "",
-        paymentMethod: "cash",
+    
+    try {
+      // Get coordinates from addresses
+      const pickupCoords = await getCoordinatesFromAddress(bookingData.pickupAddress);
+      const dropoffCoords = await getCoordinatesFromAddress(bookingData.dropoffAddress);
+      
+      // Prepare payload for backend
+      const payload = {
+        pickup_latitude: pickupCoords.lat,
+        pickup_longitude: pickupCoords.lng,
+        pickup_address: bookingData.pickupAddress,
+        dropoff_latitude: dropoffCoords.lat,
+        dropoff_longitude: dropoffCoords.lng,
+        dropoff_address: bookingData.dropoffAddress,
+        vehicle_type: bookingData.vehicleType.toUpperCase(), // Backend expects uppercase
+      };
+      
+      console.log('Creating booking with payload:', payload);
+      
+      // Call backend API
+      const result = await createBooking(payload, token);
+      
+      if (result.success) {
+        toast.success("🎉 Booking created successfully! Finding nearby drivers...", {
+          theme: "dark",
+          autoClose: 3000,
+        });
+        
+        // Reset form
+        setBookingData({
+          pickup_address: "",
+          dropoff_address: "",
+          scheduled_date: "",
+          scheduled_time: "",
+          vehicle_type: "",
+          payment_method: "cash",
+        });
+        setStep(1);
+        
+        // Navigate to bookings page after 2 seconds
+        setTimeout(() => {
+          navigate("/rider/bookings");
+        }, 2000);
+      } else {
+        toast.error(`❌ ${result.error}`, {
+          theme: "dark",
+          autoClose: 5000,
+        });
+      }
+    } catch (error) {
+      console.error('Booking error:', error);
+      toast.error(`❌ ${error.message || 'Failed to create booking'}`, {
+        theme: "dark",
+        autoClose: 5000,
       });
-      toast.success("Booking created");
-    } else {
-      alert(res.error || "Failed");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -105,10 +135,6 @@ const BookCab = () => {
               loading={loading}
             />
           )}
-        </div>
-
-        <div className="hidden">
-          {vehicleTypes.length} {paymentMethods.length}
         </div>
       </div>
     </div>

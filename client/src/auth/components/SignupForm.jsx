@@ -12,6 +12,9 @@ const SignupForm = ({ onSuccess }) => {
   });
   const [loading, setLoading] = useState(false);
 
+  const BASE_URL =
+    import.meta.env.VITE_BASE_URL || "http://localhost:8080/api/v1";
+
   const validate = () => {
     if (!formData.first_name.trim()) {
       toast.error("First name required", { theme: "dark" });
@@ -46,32 +49,31 @@ const SignupForm = ({ onSuccess }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-    try {
-      setLoading(true);
-      const res = await fetch("http://localhost:5000/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          role: formData.role,
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Signup failed");
-      toast.success("Account created", { theme: "dark" });
-      onSuccess?.();
-    } catch (err) {
-      toast.error(err.message, { theme: "dark" });
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  e.preventDefault();
+  if (!validate()) return;
+  try {
+    setLoading(true);
+    const res = await fetch(`${BASE_URL}/auth/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role.toUpperCase(), 
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Signup failed");
+    toast.success("Account created! Please login.", { theme: "dark" });
+    onSuccess?.();
+  } catch (err) {
+    toast.error(err.message, { theme: "dark" });
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <form
       className="flex gap-3 flex-col mt-5 min-w-100"

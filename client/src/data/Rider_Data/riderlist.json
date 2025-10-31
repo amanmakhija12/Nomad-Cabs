@@ -6,7 +6,7 @@
       "phone_number": "+919876543210",
       "password_hash": "hashed_password_1",
       "first_name": "John",
-      "last_name": "Snow",
+      "last_name": "",
       "city": "Coimbatore",
       "state": "Tamil Nadu",
       "is_email_verified": true,
@@ -167,7 +167,7 @@
       "role_description": "Support admin",
       "status": "active",
       "created_at": "2025-01-10T12:00:00.000000",
-      "updated_at": "2025-01-10T12:00:00.000000",
+      "updated_at": "2025-09-30 04:21:33.568",
       "bookings": []
     },
     {

@@ -1,15 +1,8 @@
 import { useEffect, useState } from "react";
-import {
-  Search,
-  Mail,
-  Phone,
-  MapPin,
-  Shield,
-  ArrowRight,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { Search, Mail, Phone, MapPin, Shield, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import RiderCards from "./RiderCards";
+import { riderService, userService } from "../../../services/adminService";
+import { toast, Bounce } from "react-toastify";
 
 const filterOptions = [
   { label: "Email", value: "email" },
@@ -37,16 +30,38 @@ const ManageRiders = () => {
     }
   }, [selectedRider]);
 
-
   const fetchRiders = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:3005/riders");
-      if (!response.ok) throw new Error("Failed to load riders");
-      const data = await response.json();
-      setAllRiders(Array.isArray(data) ? data : []);
+      
+      // Get all users from backend
+      const users = await riderService.getAllRiders();
+      
+      // Filter only riders (users with role RIDER)
+      const ridersOnly = users.filter(u => u.role?.toLowerCase() === 'rider');
+      
+      // Transform backend format to match your frontend format
+      const transformedRiders = ridersOnly.map(user => ({
+        id: user.id,
+        first_name: user.firstName,
+        last_name: user.lastName,
+        email: user.email,
+        phone_number: user.phoneNumber,
+        city: user.city,
+        state: user.state,
+        role: user.role?.toLowerCase(),
+        status: user.status?.toLowerCase(),
+        created_at: user.createdAt,
+        updated_at: user.updatedAt,
+        is_email_verified: user.isEmailVerified,
+        is_phone_verified: false, // Backend doesn't have this
+        role_description: '', // Backend doesn't have this
+      }));
+      
+      setAllRiders(transformedRiders);
     } catch (e) {
-      console.error(e);
+      console.error('Failed to fetch riders:', e);
+      toast.error('Failed to fetch riders', { theme: 'dark', transition: Bounce });
       setAllRiders([]);
     } finally {
       setLoading(false);
@@ -78,10 +93,8 @@ const ManageRiders = () => {
 
   const statusClass = (s = "") => {
     const v = s.toLowerCase();
-    if (v === "active")
-      return "bg-emerald-900/40 text-emerald-300 border-emerald-700";
-    if (v === "suspended")
-      return "bg-amber-900/40 text-amber-300 border-amber-700";
+    if (v === "active") return "bg-emerald-900/40 text-emerald-300 border-emerald-700";
+    if (v === "suspended") return "bg-amber-900/40 text-amber-300 border-amber-700";
     return "bg-gray-800 text-gray-300 border-gray-700";
   };
 
@@ -97,6 +110,7 @@ const ManageRiders = () => {
         </p>
       </div>
 
+      {/* Filters */}
       <div className="bg-[#141414] border border-white/10 rounded-2xl p-6 mb-8 shadow-lg">
         <div className="flex flex-wrap gap-6">
           <div className="flex flex-col min-w-[160px]">
@@ -126,9 +140,7 @@ const ManageRiders = () => {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder={`Search by ${
-                  filterOptions.find((f) => f.value === filterType)?.label
-                }`}
+                placeholder={`Search by ${filterOptions.find((f) => f.value === filterType)?.label}`}
                 className="w-full h-12 pl-11 pr-4 rounded-xl bg-[#1d1d1d] text-white/90 text-sm border border-white/10 placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/15"
               />
             </div>
@@ -138,7 +150,7 @@ const ManageRiders = () => {
 
       <div className="flex items-center justify-between mb-5">
         <div className="text-sm text-white/60">
-          {riders.length
+          {loading ? 'Loading...' : riders.length
             ? `Found ${riders.length} rider${riders.length !== 1 ? "s" : ""}`
             : "No riders found"}
         </div>
@@ -151,7 +163,7 @@ const ManageRiders = () => {
       <ul className="space-y-4 flex-grow">
         {loading && (
           <li className="flex items-center justify-center h-40">
-            <div className="loader-circle border-white/20" />
+            <div className="animate-spin h-12 w-12 rounded-full border-2 border-white/10 border-t-white" />
           </li>
         )}
 
@@ -161,80 +173,68 @@ const ManageRiders = () => {
           </li>
         )}
 
-        {!loading &&
-          currentRiders.map((rider) => (
-            <li
-              key={rider.id}
-              onClick={() => openRider(rider)}
-              className="group relative bg-[#141414] p-6 border border-white/10 rounded-2xl shadow-lg cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden"
-            >
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/0 to-white/0 group-hover:from-white/5 group-hover:to-white/0 transition-all" />
+        {!loading && currentRiders.map((rider) => (
+          <li
+            key={rider.id}
+            onClick={() => openRider(rider)}
+            className="group relative bg-[#141414] p-6 border border-white/10 rounded-2xl shadow-lg cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden"
+          >
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/0 to-white/0 group-hover:from-white/5 group-hover:to-white/0 transition-all" />
 
-              <div className="relative z-10 flex items-center justify-between gap-4">
-                <div className="flex items-start space-x-4 flex-grow">
-                  <div className="flex-shrink-0">
-                    <div className="w-14 h-14 rounded-full bg-gradient-to-b from-white to-white/80 text-black font-bold flex items-center justify-center shadow-md group-hover:shadow-lg transition">
-                      {(rider.first_name?.[0] || "").toUpperCase()}
-                      {(rider.last_name?.[0] || "").toUpperCase()}
-                    </div>
-                  </div>
-
-                  <div className="flex-grow min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-white tracking-tight truncate group-hover:text-white/90">
-                        {rider.first_name} {rider.last_name}
-                      </h3>
-                      {rider.status && (
-                        <span
-                          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-semibold tracking-wide border ${statusClass(
-                            rider.status
-                          )}`}
-                        >
-                          {rider.status.toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                      <div className="flex items-center gap-2 text-white/60">
-                        <Mail className="w-3.5 h-3.5 text-white/40" />
-                        <span className="font-medium truncate">
-                          {rider.email}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-white/60">
-                        <Phone className="w-3.5 h-3.5 text-white/40" />
-                        <span className="font-medium">
-                          {rider.phone_number}
-                        </span>
-                      </div>
-                      {rider.city && (
-                        <div className="flex items-center gap-2 text-white/60">
-                          <MapPin className="w-3.5 h-3.5 text-white/40" />
-                          <span className="font-medium truncate">
-                            {rider.city}
-                            {rider.state ? `, ${rider.state}` : ""}
-                          </span>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-2 text-white/60">
-                        <Shield className="w-3.5 h-3.5 text-white/40" />
-                        <span className="font-medium capitalize">
-                          {rider.role}
-                        </span>
-                      </div>
-                    </div>
+            <div className="relative z-10 flex items-center justify-between gap-4">
+              <div className="flex items-start space-x-4 flex-grow">
+                <div className="flex-shrink-0">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-b from-white to-white/80 text-black font-bold flex items-center justify-center shadow-md group-hover:shadow-lg transition">
+                    {(rider.first_name?.[0] || "").toUpperCase()}
+                    {(rider.last_name?.[0] || "").toUpperCase()}
                   </div>
                 </div>
 
-                <div className="flex-shrink-0 text-white/30 group-hover:text-white/70 transition">
-                  <ArrowRight className="w-5 h-5" />
+                <div className="flex-grow min-w-0">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-lg font-semibold text-white tracking-tight truncate group-hover:text-white/90">
+                      {rider.first_name} {rider.last_name}
+                    </h3>
+                    {rider.status && (
+                      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-semibold tracking-wide border ${statusClass(rider.status)}`}>
+                        {rider.status.toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                    <div className="flex items-center gap-2 text-white/60">
+                      <Mail className="w-3.5 h-3.5 text-white/40" />
+                      <span className="font-medium truncate">{rider.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/60">
+                      <Phone className="w-3.5 h-3.5 text-white/40" />
+                      <span className="font-medium">{rider.phone_number || 'N/A'}</span>
+                    </div>
+                    {rider.city && (
+                      <div className="flex items-center gap-2 text-white/60">
+                        <MapPin className="w-3.5 h-3.5 text-white/40" />
+                        <span className="font-medium truncate">
+                          {rider.city}{rider.state ? `, ${rider.state}` : ""}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 text-white/60">
+                      <Shield className="w-3.5 h-3.5 text-white/40" />
+                      <span className="font-medium capitalize">{rider.role}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="absolute bottom-0 left-0 w-0 h-1 bg-white/50 group-hover:w-full transition-all duration-300 rounded-b-2xl" />
-            </li>
-          ))}
+              <div className="flex-shrink-0 text-white/30 group-hover:text-white/70 transition">
+                <ArrowRight className="w-5 h-5" />
+              </div>
+            </div>
+
+            <div className="absolute bottom-0 left-0 w-0 h-1 bg-white/50 group-hover:w-full transition-all duration-300 rounded-b-2xl" />
+          </li>
+        ))}
       </ul>
 
       {/* Pagination */}
@@ -255,8 +255,7 @@ const ManageRiders = () => {
                 if (n === 1 || n === totalPages) return true;
                 if (Math.abs(n - currentPage) <= 1) return true;
                 if (currentPage <= 3 && n <= 5) return true;
-                if (currentPage >= totalPages - 2 && n >= totalPages - 4)
-                  return true;
+                if (currentPage >= totalPages - 2 && n >= totalPages - 4) return true;
                 return false;
               })
               .map((n, idx, arr) => {
@@ -265,9 +264,7 @@ const ManageRiders = () => {
                 return (
                   <div key={n} className="flex">
                     {showDots && (
-                      <span className="h-9 w-9 flex items-center justify-center text-white/30">
-                        …
-                      </span>
+                      <span className="h-9 w-9 flex items-center justify-center text-white/30">…</span>
                     )}
                     <button
                       onClick={() => setCurrentPage(n)}
@@ -295,11 +292,7 @@ const ManageRiders = () => {
       )}
 
       {selectedRider && (
-        <RiderCards
-          rider={selectedRider}
-          onClose={closeRider}
-          onRefresh={fetchRiders}
-        />
+        <RiderCards rider={selectedRider} onClose={closeRider} onRefresh={fetchRiders} />
       )}
     </div>
   );

@@ -2,21 +2,24 @@ import { useEffect, useState } from "react";
 import DriverCards from "./Driver_Cards/DriverCards";
 import ManageCard from "./Manage_Driver_Card/ManageCard";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { driverService, userService } from "../../../services/adminService";
+import { toast, Bounce } from "react-toastify";
 
 const filterOptions = [
-  { label: "PAN", value: "pan_card" },
-  { label: "Aadhaar", value: "aadhar_card" },
-  { label: "Driver License", value: "driver_license" },
+  { label: "Aadhaar", value: "aadhaarNumber" },
+  { label: "DL Number", value: "dlNumber" },
 ];
 
 const ManageDrivers = () => {
   const [selectedDriver, setSelectedDriver] = useState(null);
   const openDriver = (driver) => setSelectedDriver(driver);
-  const closeDriver = () => setSelectedDriver("");
+  const closeDriver = () => setSelectedDriver(null);
   const [drivers, setDrivers] = useState([]);
+  const [allDrivers, setAllDrivers] = useState([]);
   const [filterType, setFilterType] = useState(filterOptions[0].value);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const driversPerPage = 9;
 
   useEffect(() => {
@@ -28,41 +31,88 @@ const ManageDrivers = () => {
   }, [selectedDriver]);
 
   const fetchData = async () => {
-    const driversRes = await fetch("http://localhost:3006/drivers");
-    const driversData = await driversRes.json();
+    try {
+      setLoading(true);
 
-    const enrichedDrivers = await Promise.all(
-      driversData.map(async (driver) => {
-        const userRes = await fetch(
-          `http://localhost:3006/users/${driver.user_id}`
-        );
-        const userData = await userRes.json();
+      // Get all drivers from backend
+      const driversData = await driverService.getAllDrivers();
 
-        return {
-          ...driver,
-          full_name: `${userData.first_name}  ${
-            userData.last_name
-          }`.trim(),
-          email: userData.email,
-          phone_number: userData.phone_number || "",
-        };
-      })
-    );
+      // Enrich with user data
+      const enrichedDrivers = await Promise.all(
+        driversData.map(async (driver) => {
+          try {
+            const userData = await userService.getUserById(driver.userId);
 
-    const filteredDrivers =
-      searchTerm.trim() === ""
-        ? enrichedDrivers
-        : enrichedDrivers.filter((driver) =>
-            driver[filterType]?.toLowerCase().includes(searchTerm.toLowerCase())
-          );
+            return {
+              id: driver.id,
+              user_id: driver.userId,
+              full_name: `${userData.firstName} ${userData.lastName}`.trim(),
+              email: userData.email,
+              phone_number: userData.phoneNumber || "",
+              aadhaarNumber: driver.aadhaarNumber,
+              dlNumber: driver.dlNumber,
+              driver_license: driver.dlNumber,
+              driver_license_expiry: driver.dlExpiryDate,
+              pan_card: "", // Backend doesn't have PAN
+              aadhar_card: driver.aadhaarNumber,
+              is_aadhaar_verified: driver.verificationStatus === "APPROVED",
+              is_pan_verified: false,
+              is_driver_license_verified: driver.verificationStatus === "APPROVED",
+              verification_status: driver.verificationStatus,
+            };
+          } catch (err) {
+            console.error("Error fetching user for driver:", driver.id, err);
+            return {
+              id: driver.id,
+              user_id: driver.userId,
+              full_name: "Unknown Driver",
+              email: "N/A",
+              phone_number: "",
+              aadhaarNumber: driver.aadhaarNumber,
+              dlNumber: driver.dlNumber,
+              driver_license: driver.dlNumber,
+              driver_license_expiry: driver.dlExpiryDate,
+              pan_card: "",
+              aadhar_card: driver.aadhaarNumber,
+              is_aadhaar_verified: false,
+              is_pan_verified: false,
+              is_driver_license_verified: false,
+              verification_status: driver.verificationStatus,
+            };
+          }
+        })
+      );
 
-    setDrivers(filteredDrivers);
-    setCurrentPage(1);
+      setAllDrivers(enrichedDrivers);
+      setDrivers(enrichedDrivers);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error("Error fetching drivers:", error);
+      toast.error("Failed to fetch drivers", {
+        theme: "dark",
+        transition: Bounce,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchData();
-  }, [searchTerm, filterType]);
+  }, []);
+
+  useEffect(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) {
+      setDrivers(allDrivers);
+    } else {
+      const filtered = allDrivers.filter((driver) =>
+        (driver[filterType] || "").toLowerCase().includes(term)
+      );
+      setDrivers(filtered);
+    }
+    setCurrentPage(1);
+  }, [searchTerm, filterType, allDrivers]);
 
   const indexOfLastDriver = currentPage * driversPerPage;
   const indexOfFirstDriver = indexOfLastDriver - driversPerPage;
@@ -83,7 +133,7 @@ const ManageDrivers = () => {
 
       {/* Filters */}
       <div className="bg-gradient-to-r from-[#181818] via-[#151515] to-[#121212] rounded-2xl p-8 border border-white/10 shadow-lg">
-        <div className=" grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3">
           <div className="flex flex-col gap-2">
             <label className="text-[11px] font-medium tracking-wide uppercase text-white/40">
               Filter By
@@ -127,7 +177,9 @@ const ManageDrivers = () => {
 
       <div className="mt-6 mb-4 flex items-center justify-between text-sm text-white">
         <span>
-          {drivers.length > 0
+          {loading
+            ? "Loading..."
+            : drivers.length > 0
             ? `Found ${drivers.length} driver${drivers.length !== 1 ? "s" : ""}`
             : "No drivers found"}
         </span>
@@ -137,11 +189,17 @@ const ManageDrivers = () => {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-        {currentDrivers.map((driver) => (
-          <ManageCard key={driver.id} driver={driver} onClick={openDriver} />
-        ))}
-      </div>
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-spin h-12 w-12 rounded-full border-2 border-white/10 border-t-white" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          {currentDrivers.map((driver) => (
+            <ManageCard key={driver.id} driver={driver} onClick={openDriver} />
+          ))}
+        </div>
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (

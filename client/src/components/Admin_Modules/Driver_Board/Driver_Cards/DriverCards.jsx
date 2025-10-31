@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { toast, Bounce } from "react-toastify";
-import { toMySQLFromDate } from "../../../../utils/DateUtil";
 import DriverDetailsView from "./DriverDetailsView";
 import VehicleView from "./VehicleView";
+import { userService, driverService } from "../../../../services/adminService";
 
 const DriverCards = ({ Driver, onClose, onRefresh }) => {
   const [user, setUser] = useState(null);
@@ -24,26 +24,25 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
   useEffect(() => {
     if (!Driver?.user_id) return;
     setLoading(true);
-    fetch(`http://localhost:3006/users/${Driver.user_id}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch user");
-        return res.json();
-      })
+    
+    userService
+      .getUserById(Driver.user_id)
       .then((u) => {
         setUser(u);
         setFormData({
-          phone_number: u.phone_number || "",
+          phone_number: u.phoneNumber || "",
           city: u.city || "",
           state: u.state || "",
-          role_description: u.role_description || "",
-          status: u.status || "active",
-          created_at: u.created_at || "",
-          updated_at: u.updated_at || "",
+          role_description: u.roleDescription || "",
+          status: u.status?.toLowerCase() || "active",
+          created_at: u.createdAt || "",
+          updated_at: u.updatedAt || "",
         });
       })
-      .catch(() =>
-        toast.error("Error loading user", { theme: "dark", transition: Bounce })
-      )
+      .catch((err) => {
+        console.error("Error loading user:", err);
+        toast.error("Error loading user", { theme: "dark", transition: Bounce });
+      })
       .finally(() => setLoading(false));
   }, [Driver?.user_id]);
 
@@ -55,20 +54,24 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
   const handleUpdate = async () => {
     if (!user || !Driver?.user_id) return;
     try {
-      const updatedAtMySQL = toMySQLFromDate(new Date(), {
-        asUTC: true,
-        withMs: false,
-      });
-      const payload = { ...user, ...formData, updated_at: updatedAtMySQL };
-      const res = await fetch(`http://localhost:3006/users/${Driver.user_id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error("Failed to update user");
-      const updatedUser = await res.json();
-      setUser(updatedUser);
-      setFormData((p) => ({ ...p, updated_at: updatedAtMySQL }));
+      // Transform to backend format
+      const payload = {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phoneNumber: formData.phone_number,
+        city: formData.city,
+        state: formData.state,
+        role: user.role,
+      };
+
+      await userService.updateUser(Driver.user_id, payload);
+      
+      // Update status if changed
+      if (formData.status !== user.status?.toLowerCase()) {
+        await userService.updateUserStatus(Driver.user_id, formData.status.toUpperCase());
+      }
+
       setIsEditing(false);
       toast.success("Driver updated", { theme: "dark", transition: Bounce });
       onRefresh && onRefresh();
@@ -130,11 +133,10 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
     const ok = await confirmDelete();
     setIsDeleting(false);
     if (!ok) return;
+    
     try {
-      const res = await fetch(`http://localhost:3006/drivers/${Driver.id}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) throw new Error("Failed to delete driver");
+      // Delete user (which will cascade delete driver)
+      await userService.deleteUser(Driver.user_id);
       toast.success("Driver deleted", { theme: "dark", transition: Bounce });
       onRefresh && onRefresh();
       onClose();
@@ -149,6 +151,16 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
 
   if (!Driver) return null;
 
+  // Transform user data to match frontend format
+  const transformedUser = user ? {
+    first_name: user.firstName,
+    last_name: user.lastName,
+    email: user.email,
+    role: user.role?.toLowerCase(),
+    is_email_verified: user.isEmailVerified,
+    is_phone_verified: false, // Backend doesn't have this
+  } : null;
+
   return (
     <div
       className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
@@ -160,7 +172,7 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
       >
         {!showVehicles ? (
           <DriverDetailsView
-            user={user}
+            user={transformedUser}
             Driver={Driver}
             formData={formData}
             isEditing={isEditing}

@@ -2,26 +2,42 @@ import { useEffect, useState } from "react";
 import { toast, Bounce } from "react-toastify";
 import { formatDateSafe } from "../../../../utils/DateUtil";
 import VehicleCard from "./VehicleCard";
+import { vehicleService } from "../../../../services/adminService";
 
 const VehicleCards = ({ ownerId }) => {
-  // State
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
 
-  // Fetch vehicles (simple for beginners)
   useEffect(() => {
     if (!ownerId) return;
 
     const fetchVehicles = async () => {
       setLoading(true);
       try {
-        const response = await fetch(
-          `http://localhost:3007/vehicles?owner_id=${ownerId}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch vehicles");
-        const data = await response.json();
-        setVehicles(Array.isArray(data) ? data : []);
+        const data = await vehicleService.getVehiclesByDriver(ownerId);
+        
+        // Transform backend format to frontend format
+        const transformedVehicles = data.map(v => ({
+          id: v.id,
+          owner_id: v.driverId,
+          vehicle_type: v.vehicleType?.toLowerCase(),
+          rc_number: v.registrationNumber,
+          puc_number: v.pucNumber,
+          puc_expiry: v.pucExpiryDate,
+          insurance_expiry: v.insuranceExpiryDate,
+          is_rc_verified: v.verificationStatus === "APPROVED",
+          is_puc_verified: v.verificationStatus === "APPROVED",
+          is_insurance_verified: v.verificationStatus === "APPROVED",
+          is_ins_verified: v.verificationStatus === "APPROVED",
+          verification_status: v.verificationStatus,
+          manufacturer: v.manufacturer,
+          model: v.model,
+          year: v.year,
+          color: v.color,
+        }));
+        
+        setVehicles(transformedVehicles);
       } catch (error) {
         console.error("Error fetching vehicles:", error);
         toast.error("Failed to fetch vehicles", {
@@ -36,7 +52,6 @@ const VehicleCards = ({ ownerId }) => {
     fetchVehicles();
   }, [ownerId]);
 
-  // Inline UI pieces to avoid extra files
   const Header = () => (
     <div className="flex justify-between items-start md:items-center mb-10 flex-col md:flex-row gap-6">
       <div className="flex items-center gap-4">
@@ -236,6 +251,16 @@ const VehicleCards = ({ ownerId }) => {
               {formatDateSafe(vehicle?.insurance_expiry)}
             </p>
           </div>
+          {vehicle?.manufacturer && (
+            <div className="bg-[#1b1b1b] p-4 rounded-xl border border-white/10">
+              <p className="text-[10px] font-semibold text-white/40 uppercase mb-2">
+                Manufacturer
+              </p>
+              <p className="text-sm text-white/85 font-medium">
+                {vehicle.manufacturer}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -243,7 +268,7 @@ const VehicleCards = ({ ownerId }) => {
 
   return (
     <>
-      <div className=" p-8">
+      <div className="p-8">
         <Header />
 
         {loading ? (

@@ -1,5 +1,3 @@
-
-
 const filterOptions = [
   { label: "Pickup Address", value: "pickup" },
   { label: "Dropoff Address", value: "dropoff" },
@@ -47,17 +45,21 @@ const SearchFilter = ({
           <div className="relative">
             {filterType === "status" ? (
               <select
+                value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-5 py-3 pl-12 rounded-xl bg-[#1a1a1a] text-white border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/20 transition-all duration-200"
+                className="w-full px-5 py-3 rounded-xl bg-[#1a1a1a] text-white border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/20 transition-all duration-200"
               >
                 <option value="" className="bg-[#0f0f0f]">
                   All statuses
                 </option>
-                <option value="requested" className="bg-[#0f0f0f]">
-                  Requested
+                <option value="pending" className="bg-[#0f0f0f]">
+                  Pending
                 </option>
-                <option value="in_progress" className="bg-[#0f0f0f]">
-                  In Progress
+                <option value="accepted" className="bg-[#0f0f0f]">
+                  Accepted
+                </option>
+                <option value="started" className="bg-[#0f0f0f]">
+                  Started
                 </option>
                 <option value="completed" className="bg-[#0f0f0f]">
                   Completed
@@ -75,7 +77,7 @@ const SearchFilter = ({
                 }`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-5 py-3 pl-12 rounded-xl bg-[#1a1a1a] text-white placeholder-gray-400 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/20 transition-all duration-200"
+                className="w-full px-5 py-3 rounded-xl bg-[#1a1a1a] text-white placeholder-gray-400 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/20 transition-all duration-200"
               />
             )}
           </div>

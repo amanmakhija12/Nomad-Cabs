@@ -3,19 +3,23 @@ import Sidebar from "../components/Sidebar/Sidebar";
 import Bookings from "../components/Common/Bookings/Bookings";
 import ManageAccount from "../components/Common/ManageAccount/ManageAccount";
 import VehicleCards from "../components/Driver_Modules/Vehicles/VehicleCards";
+import Live from "../components/Driver_Modules/LiveBooking/Live";
+import Verification from "../components/Driver_Modules/Verification/Verification";
 import PlaceHolder from "../components/Common/PlaceHolder";
+import { useAuthStore } from "../store/authStore";
 
 const driverNavItems = [
+  { id: "liveBookings", label: "Live Bookings" },
   { id: "bookings", label: "My Bookings" },
   { id: "vehicles", label: "Manage Vehicles" },
-  { id: "liveBookings", label: "Live Bookings" },
-  { id: "feedback", label: "Grievances" },
   { id: "verification", label: "Verification" },
+  { id: "feedback", label: "Grievances" },
   { id: "account", label: "Manage Account" },
 ];
 
 const DriverPage = () => {
-  const [activeSection, setActiveSection] = useState("bookings");
+  const [activeSection, setActiveSection] = useState("liveBookings");
+  const user = useAuthStore((s) => s.user);
 
   return (
     <Sidebar
@@ -23,19 +27,14 @@ const DriverPage = () => {
       setActiveSection={setActiveSection}
       navItems={driverNavItems}
     >
-      {activeSection === "bookings" && <Bookings />}
-      {activeSection === "vehicles" && (
-        <VehicleCards ownerId={"32c100bf-a90a-491f-97c4-3f5f87253822"} />
-      )}
-      {activeSection === "liveBookings" && (
-        <PlaceHolder moduleName="Live Booking" />
-      )}
+      {activeSection === "liveBookings" && <Live />}
+      {activeSection === "bookings" && <Bookings userRole="driver" />}
+      {activeSection === "vehicles" && <VehicleCards ownerId={user?.id} />}
+      {activeSection === "verification" && <Verification />}
       {activeSection === "feedback" && <PlaceHolder moduleName="Grievances" />}
-      {activeSection === "verification" && (
-        <PlaceHolder moduleName="Verification" />
-      )}
       {activeSection === "account" && <ManageAccount />}
     </Sidebar>
   );
 };
+
 export default DriverPage;

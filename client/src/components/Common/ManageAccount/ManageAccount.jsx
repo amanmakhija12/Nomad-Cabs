@@ -12,6 +12,7 @@ import {
   Check,
 } from "lucide-react";
 import { useAuthStore } from "../../../store/authStore";
+import { toast } from "react-toastify";
 
 const ManageAccount = () => {
   const [userDetails, setUserDetails] = useState({
@@ -23,7 +24,6 @@ const ManageAccount = () => {
     city: "",
     state: "",
     is_email_verified: false,
-    is_phone_verified: false,
     role: "",
     status: "",
     created_at: "",
@@ -31,43 +31,86 @@ const ManageAccount = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const user = useAuthStore(s => s.user);
+  
+  const { token, setUser } = useAuthStore();
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:8080/api/v1";
 
+  // Fetch user details on mount
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const response = await fetch("http://localhost:3005/riders");
-        if (!response.ok) throw new Error("Failed to load user");
+        const response = await fetch(`${BASE_URL}/users/me`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to load user details");
+        }
+
         const data = await response.json();
-        if (Array.isArray(data) && data.length) setUserDetails(data[0]);
+        setUserDetails(data);
+        
+        // Update store if needed
+        setUser(data);
+        
       } catch (error) {
         console.error("Error fetching user details:", error);
+        toast.error("Failed to load account details", { theme: "dark" });
       } finally {
         setLoading(false);
       }
     };
-    fetchUserDetails();
-  }, []);
 
+    if (token) {
+      fetchUserDetails();
+    } else {
+      setLoading(false);
+    }
+  }, [token, BASE_URL, setUser]);
+
+  // Handle profile update
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     try {
       setSaving(true);
-      const updated = { ...userDetails, status: "Pending Verification" };
-      const res = await fetch(
-        `http://localhost:3005/riders/${userDetails.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updated),
-        }
-      );
-      if (!res.ok) throw new Error("Update failed");
-      const saved = await res.json();
-      setUserDetails(saved);
+      
+      // Only send editable fields
+      const updatePayload = {
+        first_name: userDetails.first_name,
+        last_name: userDetails.last_name,
+        city: userDetails.city,
+        state: userDetails.state,
+      };
+
+      const response = await fetch(`${BASE_URL}/users/me`, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatePayload),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Update failed");
+      }
+
+      const updatedUser = await response.json();
+      setUserDetails(updatedUser);
+      setUser(updatedUser);
       setIsEditing(false);
+      
+      toast.success("Profile updated successfully", { theme: "dark" });
+      
     } catch (error) {
       console.error("Error updating profile:", error);
+      toast.error(error.message || "Failed to update profile", { theme: "dark" });
     } finally {
       setSaving(false);
     }
@@ -113,9 +156,15 @@ const ManageAccount = () => {
                   {fullName || "Unnamed User"}
                 </h2>
                 <div className="mt-2 flex flex-wrap gap-3 text-xs">
-                  <Badge active={userDetails.is_email_verified} label="Email" />
-                  <Badge active={userDetails.is_phone_verified} label="Phone" />
-                  <RoleBadge role={user.role} />
+                  <Badge 
+                    active={userDetails.is_email_verified} 
+                    label="Email" 
+                  />
+                  <Badge 
+                    active={userDetails.status === "ACTIVE"} 
+                    label="Active" 
+                  />
+                  <RoleBadge role={userDetails.role} />
                 </div>
               </div>
             </div>
@@ -139,50 +188,50 @@ const ManageAccount = () => {
             {/* Personal */}
             <Section title="Personal Information" icon={User}>
               <div className="grid md:grid-cols-2 gap-6">
-                <Field label="Full Name" icon={User}>
+                <Field label="First Name" icon={User}>
                   <input
                     type="text"
-                    value={fullName}
-                    onChange={(e) => {
-                      const parts = e.target.value.split(" ");
+                    value={userDetails.first_name || ""}
+                    onChange={(e) =>
                       setUserDetails({
                         ...userDetails,
-                        first_name: parts[0] || "",
-                        last_name: parts.slice(1).join(" ") || "",
-                      });
-                    }}
+                        first_name: e.target.value,
+                      })
+                    }
                     disabled={!isEditing}
                     className={inputClass(isEditing)}
+                    placeholder="Enter first name"
+                  />
+                </Field>
+                <Field label="Last Name" icon={User}>
+                  <input
+                    type="text"
+                    value={userDetails.last_name || ""}
+                    onChange={(e) =>
+                      setUserDetails({
+                        ...userDetails,
+                        last_name: e.target.value,
+                      })
+                    }
+                    disabled={!isEditing}
+                    className={inputClass(isEditing)}
+                    placeholder="Enter last name"
                   />
                 </Field>
                 <Field label="Email" icon={Mail}>
                   <input
                     type="email"
-                    value={userDetails.email}
+                    value={userDetails.email || ""}
                     disabled
                     className={inputClass(false)}
                   />
                 </Field>
-              </div>
-            </Section>
-
-            {/* Contact & Role */}
-            <Section title="Contact & Role" icon={Shield}>
-              <div className="grid md:grid-cols-2 gap-6">
                 <Field label="Phone Number" icon={Phone}>
                   <input
                     type="tel"
-                    value={userDetails.phone_number}
+                    value={userDetails.phone_number || "Not provided"}
                     disabled
                     className={inputClass(false)}
-                  />
-                </Field>
-                <Field label="Role" icon={Shield}>
-                  <input
-                    type="text"
-                    value={user.role}
-                    disabled
-                    className={`${inputClass(false)} capitalize`}
                   />
                 </Field>
               </div>
@@ -194,44 +243,39 @@ const ManageAccount = () => {
                 <Field label="City" icon={MapPin}>
                   <input
                     type="text"
-                    value={userDetails.city}
+                    value={userDetails.city || ""}
                     onChange={(e) =>
                       setUserDetails({ ...userDetails, city: e.target.value })
                     }
                     disabled={!isEditing}
                     className={inputClass(isEditing)}
+                    placeholder="Enter city"
                   />
                 </Field>
                 <Field label="State" icon={MapPin}>
                   <input
                     type="text"
-                    value={userDetails.state}
+                    value={userDetails.state || ""}
                     onChange={(e) =>
                       setUserDetails({ ...userDetails, state: e.target.value })
                     }
                     disabled={!isEditing}
                     className={inputClass(isEditing)}
+                    placeholder="Enter state"
                   />
                 </Field>
               </div>
             </Section>
 
             {/* Metadata */}
-            <Section title="Membership" icon={Calendar}>
+            <Section title="Account Information" icon={Shield}>
               <div className="grid md:grid-cols-2 gap-6">
-                <Field label="Member Since" icon={Calendar}>
+                <Field label="Role" icon={Shield}>
                   <input
                     type="text"
-                    value={
-                      userDetails.created_at
-                        ? new Date(userDetails.created_at).toLocaleDateString(
-                            "en-US",
-                            { year: "numeric", month: "long", day: "numeric" }
-                          )
-                        : ""
-                    }
+                    value={userDetails.role || ""}
                     disabled
-                    className={inputClass(false)}
+                    className={`${inputClass(false)} capitalize`}
                   />
                 </Field>
                 <Field label="Status" icon={Shield}>
@@ -242,11 +286,48 @@ const ManageAccount = () => {
                     className={inputClass(false)}
                   />
                 </Field>
+                <Field label="Member Since" icon={Calendar}>
+                  <input
+                    type="text"
+                    value={
+                      userDetails.created_at
+                        ? new Date(userDetails.created_at).toLocaleDateString(
+                            "en-US",
+                            { year: "numeric", month: "long", day: "numeric" }
+                          )
+                        : "—"
+                    }
+                    disabled
+                    className={inputClass(false)}
+                  />
+                </Field>
+                <Field label="Last Updated" icon={Calendar}>
+                  <input
+                    type="text"
+                    value={
+                      userDetails.updated_at
+                        ? new Date(userDetails.updated_at).toLocaleDateString(
+                            "en-US",
+                            { year: "numeric", month: "long", day: "numeric" }
+                          )
+                        : "—"
+                    }
+                    disabled
+                    className={inputClass(false)}
+                  />
+                </Field>
               </div>
             </Section>
 
             {isEditing && (
-              <div className="pt-4 flex justify-end border-t border-white/5">
+              <div className="pt-4 flex justify-end gap-4 border-t border-white/5">
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(false)}
+                  className="h-12 px-6 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-medium flex items-center gap-2 transition"
+                >
+                  <X className="w-4 h-4" /> Cancel
+                </button>
                 <button
                   type="submit"
                   disabled={saving}
@@ -269,6 +350,7 @@ const ManageAccount = () => {
   );
 };
 
+// Helper Components
 const Field = ({ label, icon: Icon, children }) => (
   <div className="space-y-2">
     <label className="flex items-center gap-2 text-[11px] font-medium tracking-wide text-gray-400 uppercase">
@@ -305,7 +387,7 @@ const Badge = ({ active, label }) => (
 );
 
 const RoleBadge = ({ role }) => (
-  <span className="flex items-center gap-1 px-3 py-1 rounded-full text-[10px] tracking-wide border bg-white/5 text-gray-300 border-white/10 capitalize">
+  <span className="flex items-center gap-1 px-3 py-1 rounded-full text-[10px] tracking-wide border bg-blue-500/20 text-blue-300 border-blue-400/30 capitalize">
     {role || "role"}
   </span>
 );

@@ -1,18 +1,8 @@
 import { useState, useEffect } from "react";
-import { formatDateSafe, toMySQLFromDate } from "../../../utils/DateUtil";
+import { formatDateSafe } from "../../../utils/DateUtil";
 import { toast, Bounce } from "react-toastify";
-import {
-  X,
-  Mail,
-  Phone,
-  MapPin,
-  Shield,
-  Pencil,
-  Save,
-  Trash2,
-  CalendarClock,
-  UserCheck,
-} from "lucide-react";
+import { riderService, userService } from "../../../services/adminService";
+import { X, Mail, Phone, MapPin, Shield, Pencil, Save, Trash2, CalendarClock, UserCheck } from "lucide-react";
 
 const RiderCards = ({ rider, onClose, onRefresh }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -21,12 +11,10 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
     phone_number: "",
     city: "",
     state: "",
-    role_description: "",
     status: "active",
     created_at: "",
     updated_at: "",
     is_email_verified: false,
-    is_phone_verified: false,
   });
 
   useEffect(() => {
@@ -35,12 +23,10 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
         phone_number: rider.phone_number || "",
         city: rider.city || "",
         state: rider.state || "",
-        role_description: rider.role_description || "",
         status: rider.status || "active",
         created_at: rider.created_at || "",
         updated_at: rider.updated_at || "",
         is_email_verified: rider.is_email_verified || false,
-        is_phone_verified: rider.is_phone_verified || false,
       });
     }
   }, [rider]);
@@ -48,6 +34,7 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
   if (!rider) return null;
 
   const stop = (e) => e.stopPropagation();
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((p) => ({ ...p, [name]: value }));
@@ -55,35 +42,30 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
 
   const handleUpdate = async () => {
     try {
-      const updatedAtMySQL = toMySQLFromDate(new Date(), {
-        asUTC: true,
-        withMs: true,
-      });
-      const response = await fetch(`http://localhost:3005/riders/${rider.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...rider,
-          phone_number: formData.phone_number,
-          city: formData.city,
-          state: formData.state,
-          role_description: formData.role_description,
-          status: formData.status,
-          created_at: formData.created_at,
-          updated_at: updatedAtMySQL,
-        }),
-      });
-      if (!response.ok) throw new Error("Update failed");
-      toast.success("Rider updated", { transition: Bounce, theme: "dark" });
+      // Transform to backend format
+      const payload = {
+        firstName: rider.first_name,
+        lastName: rider.last_name,
+        email: rider.email,
+        phoneNumber: formData.phone_number,
+        city: formData.city,
+        state: formData.state,
+        role: rider.role.toUpperCase(),
+      };
+
+      await riderService.updateRider(rider.id, payload);
+      
+      // Update status separately if changed
+      if (formData.status !== rider.status) {
+        await userService.updateUserStatus(rider.id, formData.status.toUpperCase());
+      }
+
+      toast.success("Rider updated successfully", { transition: Bounce, theme: "dark" });
       setIsEditing(false);
-      setFormData((p) => ({ ...p, updated_at: updatedAtMySQL }));
       onRefresh && onRefresh();
     } catch (e) {
       console.error(e);
-      toast.error("Error updating rider", {
-        transition: Bounce,
-        theme: "dark",
-      });
+      toast.error("Error updating rider", { transition: Bounce, theme: "dark" });
     }
   };
 
@@ -139,19 +121,13 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
       return;
     }
     try {
-      const res = await fetch(`http://localhost:3005/riders/${rider.id}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) throw new Error("Delete failed");
-      toast.success("Rider deleted", { transition: Bounce, theme: "dark" });
+      await riderService.deleteRider(rider.id);
+      toast.success("Rider deleted successfully", { transition: Bounce, theme: "dark" });
       onRefresh && onRefresh();
       onClose();
     } catch (e) {
       console.error(e);
-      toast.error("Error deleting rider", {
-        transition: Bounce,
-        theme: "dark",
-      });
+      toast.error("Error deleting rider", { transition: Bounce, theme: "dark" });
     } finally {
       setIsDeleting(false);
     }
@@ -169,9 +145,7 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
       ? "bg-emerald-900/40 text-emerald-300 border-emerald-700"
       : formData.status === "suspended"
       ? "bg-amber-900/40 text-amber-300 border-amber-700"
-      : formData.status === "deleted"
-      ? "bg-red-900/40 text-red-300 border-red-700"
-      : "bg-gray-800 text-gray-300 border-gray-600";
+      : "bg-red-900/40 text-red-300 border-red-700";
 
   const editableFields = [
     {
@@ -188,11 +162,6 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
       label: "State",
       name: "state",
       icon: <MapPin className="w-4 h-4 text-white/40" />,
-    },
-    {
-      label: "Role Description",
-      name: "role_description",
-      icon: <Shield className="w-4 h-4 text-white/40" />,
     },
   ];
 
@@ -215,7 +184,6 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
         timeZone: "Asia/Kolkata",
         variant: "datetime",
         fallback: "—",
-        assumeUTCForMySQL: true,
       }),
       icon: <CalendarClock className="w-4 h-4 text-white/40" />,
     },
@@ -226,7 +194,6 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
         timeZone: "Asia/Kolkata",
         variant: "datetime",
         fallback: "—",
-        assumeUTCForMySQL: true,
       }),
       icon: <CalendarClock className="w-4 h-4 text-white/40" />,
     },
@@ -264,12 +231,7 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
                 </h2>
                 <div className="mt-2 flex flex-wrap gap-3 text-[11px]">
                   <span className={badgeClass(formData.is_email_verified)}>
-                    Email{" "}
-                    {formData.is_email_verified ? "Verified" : "Unverified"}
-                  </span>
-                  <span className={badgeClass(formData.is_phone_verified)}>
-                    Phone{" "}
-                    {formData.is_phone_verified ? "Verified" : "Unverified"}
+                    Email {formData.is_email_verified ? "Verified" : "Unverified"}
                   </span>
                   <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold bg-white text-black border border-white">
                     {rider.role}
@@ -312,8 +274,7 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
                   disabled={isDeleting}
                   className="h-11 px-6 rounded-xl bg-red-600 text-white text-sm font-medium flex items-center gap-2 shadow hover:bg-red-700 transition disabled:opacity-40"
                 >
-                  <Trash2 className="w-4 h-4" />{" "}
-                  {isDeleting ? "Deleting…" : "Delete"}
+                  <Trash2 className="w-4 h-4" /> {isDeleting ? "Deleting…" : "Delete"}
                 </button>
               )}
             </div>
@@ -322,9 +283,8 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
 
         {/* Content */}
         <div className="p-8 space-y-10">
-          {/* Top status panels */}
+          {/* Status panel */}
           <div className="grid md:grid-cols-3 gap-6">
-            {/* Status panel */}
             <div className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5 flex flex-col gap-2">
               <p className="text-[11px] uppercase tracking-wider text-white/40 flex items-center gap-2">
                 <Shield className="w-3.5 h-3.5" /> Status
@@ -332,9 +292,7 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
               {isEditing ? (
                 <select
                   value={formData.status}
-                  onChange={(e) =>
-                    setFormData((p) => ({ ...p, status: e.target.value }))
-                  }
+                  onChange={(e) => setFormData((p) => ({ ...p, status: e.target.value }))}
                   className="h-11 w-full rounded-lg bg-[#242424] text-white text-sm px-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/15"
                 >
                   <option value="active">Active</option>
@@ -342,15 +300,12 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
                   <option value="deleted">Deleted</option>
                 </select>
               ) : (
-                <span
-                  className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border ${statusTheme}`}
-                >
+                <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border ${statusTheme}`}>
                   {formData.status.toUpperCase()}
                 </span>
               )}
             </div>
 
-            {/* Email verified */}
             <div className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5 flex flex-col gap-2">
               <p className="text-[11px] uppercase tracking-wider text-white/40 flex items-center gap-2">
                 <UserCheck className="w-3.5 h-3.5" /> Email Verified
@@ -359,26 +314,13 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
                 {formData.is_email_verified ? "VERIFIED" : "NOT VERIFIED"}
               </span>
             </div>
-
-            {/* Phone verified */}
-            <div className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5 flex flex-col gap-2">
-              <p className="text-[11px] uppercase tracking-wider text-white/40 flex items-center gap-2">
-                <Phone className="w-3.5 h-3.5" /> Phone Verified
-              </p>
-              <span className={badgeClass(formData.is_phone_verified)}>
-                {formData.is_phone_verified ? "VERIFIED" : "NOT VERIFIED"}
-              </span>
-            </div>
           </div>
 
           {/* Editable / Static sections */}
           <div className="grid md:grid-cols-2 gap-8">
             <div className="space-y-6">
               {editableFields.map((f) => (
-                <div
-                  key={f.name}
-                  className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5"
-                >
+                <div key={f.name} className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5">
                   <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2 flex items-center gap-2">
                     {f.icon}
                     {f.label}
@@ -401,10 +343,7 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
 
             <div className="space-y-6">
               {staticFields.map((f, idx) => (
-                <div
-                  key={idx}
-                  className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5"
-                >
+                <div key={idx} className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5">
                   <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2 flex items-center gap-2">
                     {f.icon}
                     {f.label}

@@ -7,6 +7,7 @@ import {
   Phone,
   CreditCard,
   CheckCircle,
+  AlertCircle,
 } from "lucide-react";
 import { vehicleTypes, paymentMethods, calculateFare } from "./bookingData";
 
@@ -27,7 +28,7 @@ export const StepsProgress = ({ step }) => (
               step >= n ? "text-white" : "text-gray-500"
             }`}
           >
-            {n === 1 ? "Ride Details" : n === 2 ? "Vehicle" : "Payment"}
+            {n === 1 ? "Ride Details" : n === 2 ? "Vehicle" : "Review"}
           </span>
           {n < 3 && (
             <div
@@ -44,55 +45,70 @@ export const StepsProgress = ({ step }) => (
 
 export const StepRideDetails = ({ data, onChange, onNext }) => {
   const disabled = !data.pickupAddress || !data.dropoffAddress;
+  
   return (
     <div className="space-y-8">
       <h2 className="text-2xl font-semibold tracking-tight">Ride Details</h2>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Field label="Pickup Location" icon={MapPin} iconClass="text-green-400">
           <input
             value={data.pickupAddress}
             onChange={(e) => onChange("pickupAddress", e.target.value)}
-            placeholder="Enter pickup"
+            placeholder="e.g., Marine Drive, Mumbai"
             className="input-dark w-full h-12 pl-11 pr-4 rounded-xl bg-[#1d1d1d] border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 placeholder:text-gray-500 text-sm"
           />
         </Field>
-        <Field
-          label="Drop-off Location"
-          icon={Navigation}
-          iconClass="text-red-400"
-        >
+        
+        <Field label="Drop-off Location" icon={Navigation} iconClass="text-red-400">
           <input
             value={data.dropoffAddress}
             onChange={(e) => onChange("dropoffAddress", e.target.value)}
-            placeholder="Enter destination"
+            placeholder="e.g., Gateway of India, Mumbai"
             className="input-dark w-full h-12 pl-11 pr-4 rounded-xl bg-[#1d1d1d] border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 placeholder:text-gray-500 text-sm"
           />
         </Field>
-        <Field label="Date" icon={Calendar} iconClass="text-blue-400">
-          <input
-            type="date"
-            min={new Date().toISOString().split("T")[0]}
-            value={data.scheduledDate}
-            onChange={(e) => onChange("scheduledDate", e.target.value)}
-            className="input-dark w-full h-12 pl-11 pr-3 rounded-xl bg-[#1d1d1d] border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 text-sm"
-          />
-        </Field>
-        <Field label="Time" icon={Clock} iconClass="text-purple-400">
-          <input
-            type="time"
-            value={data.scheduledTime}
-            onChange={(e) => onChange("scheduledTime", e.target.value)}
-            className="input-dark w-full h-12 pl-11 pr-3 rounded-xl bg-[#1d1d1d] border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 text-sm"
-          />
-        </Field>
       </div>
+      
+      {/* Optional: Schedule for later */}
+      <div className="bg-[#1a1a1a] p-4 rounded-xl border border-white/10">
+        <div className="flex items-start gap-3 mb-4">
+          <AlertCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <h3 className="text-sm font-medium text-white/90 mb-1">Schedule for Later (Optional)</h3>
+            <p className="text-xs text-gray-400">Leave empty for immediate booking</p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Field label="Date" icon={Calendar} iconClass="text-blue-400">
+            <input
+              type="date"
+              min={new Date().toISOString().split("T")[0]}
+              value={data.scheduledDate}
+              onChange={(e) => onChange("scheduledDate", e.target.value)}
+              className="input-dark w-full h-12 pl-11 pr-3 rounded-xl bg-[#1d1d1d] border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 text-sm"
+            />
+          </Field>
+          
+          <Field label="Time" icon={Clock} iconClass="text-purple-400">
+            <input
+              type="time"
+              value={data.scheduledTime}
+              onChange={(e) => onChange("scheduledTime", e.target.value)}
+              className="input-dark w-full h-12 pl-11 pr-3 rounded-xl bg-[#1d1d1d] border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 text-sm"
+            />
+          </Field>
+        </div>
+      </div>
+      
       <div className="flex justify-end">
         <button
           disabled={disabled}
           onClick={onNext}
           className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed h-12 px-8 rounded-xl bg-white text-black font-medium text-sm tracking-wide shadow hover:shadow-lg transition"
         >
-          Next: Vehicle
+          Next: Select Vehicle
         </button>
       </div>
     </div>
@@ -104,7 +120,8 @@ export const StepVehicle = ({ data, onChange, onNext, onBack }) => (
     <h2 className="text-2xl font-semibold tracking-tight">
       Select Vehicle Type
     </h2>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
       {vehicleTypes.map((v) => (
         <div
           key={v.type}
@@ -116,6 +133,7 @@ export const StepVehicle = ({ data, onChange, onNext, onBack }) => (
           }`}
         >
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition pointer-events-none bg-gradient-to-br from-white/5 to-transparent"></div>
+          
           <div className="text-center space-y-2 relative">
             <div className="text-4xl drop-shadow-sm">{v.icon}</div>
             <h3 className="font-semibold tracking-wide text-sm">{v.name}</h3>
@@ -124,12 +142,13 @@ export const StepVehicle = ({ data, onChange, onNext, onBack }) => (
             </p>
             <p className="text-[10px] text-gray-500">Capacity: {v.capacity}</p>
             <p className="text-xs font-semibold text-white/90">
-              ₹{v.baseFare}+ / {v.perKm}₹ km
+              ₹{v.baseFare} base + ₹{v.perKm}/km
             </p>
           </div>
         </div>
       ))}
     </div>
+    
     <div className="flex justify-between">
       <button
         onClick={onBack}
@@ -142,85 +161,101 @@ export const StepVehicle = ({ data, onChange, onNext, onBack }) => (
         onClick={onNext}
         className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed h-11 px-8 rounded-xl bg-white text-black font-medium text-sm tracking-wide shadow hover:shadow-lg transition"
       >
-        Next: Payment
+        Next: Review & Confirm
       </button>
     </div>
   </div>
 );
 
 export const StepPayment = ({ data, onChange, onBack, onSubmit, loading }) => {
-  const fare = data.vehicleType ? calculateFare(5, data.vehicleType) : null; // static 5km demo
+  // Frontend estimation (backend will recalculate based on actual coordinates)
+  const estimatedFare = data.vehicleType ? calculateFare(5, data.vehicleType) : null;
+  
   return (
     <div className="space-y-8">
       <h2 className="text-2xl font-semibold tracking-tight">
-        Payment & Confirmation
+        Review & Confirm Booking
       </h2>
-      {fare && (
+      
+      {/* Estimated Fare */}
+      {estimatedFare && (
         <div className="bg-[#141414] p-6 rounded-2xl border border-white/10">
-          <h3 className="font-semibold mb-4 text-sm tracking-wide uppercase text-white/80">
-            Fare Breakdown (5 km)
-          </h3>
+          <div className="flex items-start gap-3 mb-4">
+            <DollarSign className="w-5 h-5 text-green-400" />
+            <div className="flex-grow">
+              <h3 className="font-semibold mb-1 text-sm tracking-wide uppercase text-white/80">
+                Estimated Fare
+              </h3>
+              <p className="text-xs text-gray-400">
+                Final fare will be calculated based on actual distance
+              </p>
+            </div>
+          </div>
+          
           <div className="space-y-2 text-sm">
-            <Row label="Base Fare" value={`₹${fare.baseFare}`} />
-            <Row label="Distance Fare" value={`₹${fare.distanceFare}`} />
-            <Row label="Platform Fee" value={`₹${fare.platformFee}`} />
-            <div className="pt-2 mt-2 border-t border-white/10 flex justify-between text-base font-semibold">
-              <span>Total</span>
-              <span>₹{fare.total}</span>
+            <Row label="Base Fare" value={`₹${estimatedFare.baseFare}`} />
+            <Row label="Distance Fare" value={`₹${estimatedFare.distanceFare} (${estimatedFare.distanceKm} km)`} />
+            <Row label="Platform Fee" value={`₹${estimatedFare.platformFee}`} />
+            <div className="pt-2 mt-2 border-t border-white/10 flex justify-between text-lg font-semibold">
+              <span>Estimated Total</span>
+              <span className="text-green-400">₹{estimatedFare.total}</span>
             </div>
           </div>
         </div>
       )}
 
-      <div>
-        <h3 className="font-semibold mb-4 text-sm tracking-wide uppercase text-white/80">
-          Payment Method
-        </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {paymentMethods.map((m) => (
-            <div
-              key={m.id}
-              onClick={() => onChange("paymentMethod", m.id)}
-              className={`group cursor-pointer rounded-xl p-4 border border-white/10 bg-[#1a1a1a] text-center transition ${
-                data.paymentMethod === m.id
-                  ? "ring-2 ring-white bg-white/10"
-                  : "hover:border-white/20 hover:bg-white/5"
-              }`}
-            >
-              <div className="space-y-1">
-                {m.id === "cash" && <DollarSign className="w-5 h-5 mx-auto" />}
-                {m.id === "upi" && <Phone className="w-5 h-5 mx-auto" />}
-                {m.id === "card" && <CreditCard className="w-5 h-5 mx-auto" />}
-                {m.id === "wallet" && (
-                  <CreditCard className="w-5 h-5 mx-auto" />
-                )}
-                <span className="text-[11px] tracking-wide text-white/80 block">
-                  {m.label}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
+      {/* Booking Summary */}
       <div className="bg-[#141414] p-6 rounded-2xl border border-white/10">
-        <h3 className="font-semibold mb-4 text-sm tracking-wide uppercase text-white/80">
+        <h3 className="font-semibold mb-4 text-sm tracking-wide uppercase text-white/80 flex items-center gap-2">
+          <CheckCircle className="w-4 h-4" />
           Booking Summary
         </h3>
-        <div className="space-y-2 text-xs">
-          <Row label="From" value={data.pickupAddress || "—"} />
-          <Row label="To" value={data.dropoffAddress || "—"} />
-          <Row label="Vehicle" value={data.vehicleType || "—"} />
-          <Row label="Date" value={data.scheduledDate || "—"} />
-          <Row label="Time" value={data.scheduledTime || "—"} />
-          <Row label="Payment" value={data.paymentMethod} />
+        <div className="space-y-3 text-sm">
+          <Row 
+            label="From" 
+            value={data.pickupAddress || "—"} 
+            icon={<MapPin className="w-4 h-4 text-green-400" />}
+          />
+          <Row 
+            label="To" 
+            value={data.dropoffAddress || "—"} 
+            icon={<Navigation className="w-4 h-4 text-red-400" />}
+          />
+          <Row 
+            label="Vehicle" 
+            value={vehicleTypes.find(v => v.type === data.vehicleType)?.name || "—"} 
+          />
+          {data.scheduledDate && (
+            <Row 
+              label="Scheduled" 
+              value={`${data.scheduledDate} ${data.scheduledTime || ''}`} 
+              icon={<Calendar className="w-4 h-4 text-blue-400" />}
+            />
+          )}
         </div>
       </div>
 
+      {/* Important Notes */}
+      <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-xl">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <h4 className="text-sm font-medium text-amber-300 mb-1">Important Notes</h4>
+            <ul className="text-xs text-amber-200/80 space-y-1">
+              <li>• Final fare will be calculated based on actual distance traveled</li>
+              <li>• You can cancel free of charge before driver accepts</li>
+              <li>• Driver will be assigned automatically</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
       <div className="flex justify-between">
         <button
           onClick={onBack}
-          className="btn-secondary h-11 px-6 rounded-xl bg-[#1d1d1d] border border-white/10 text-sm font-medium text-white/90 hover:bg-white/5 transition"
+          disabled={loading}
+          className="btn-secondary h-11 px-6 rounded-xl bg-[#1d1d1d] border border-white/10 text-sm font-medium text-white/90 hover:bg-white/5 transition disabled:opacity-40"
         >
           Back
         </button>
@@ -230,7 +265,10 @@ export const StepPayment = ({ data, onChange, onBack, onSubmit, loading }) => {
           className="btn-success disabled:opacity-40 disabled:cursor-not-allowed h-11 px-8 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-medium text-sm tracking-wide shadow flex items-center gap-2 transition"
         >
           {loading ? (
-            "Booking…"
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent" />
+              Creating Booking...
+            </>
           ) : (
             <>
               <CheckCircle className="w-4 h-4" /> Confirm Booking
@@ -259,10 +297,13 @@ const Field = ({ label, icon: Icon, iconClass = "", children }) => (
   </div>
 );
 
-const Row = ({ label, value }) => (
-  <div className="flex justify-between text-[11px]">
-    <span className="text-gray-500 uppercase tracking-wide">{label}:</span>
-    <span className="text-white/90 truncate max-w-[60%] text-right">
+const Row = ({ label, value, icon }) => (
+  <div className="flex justify-between items-start text-sm gap-4">
+    <span className="text-gray-400 text-xs uppercase tracking-wide flex items-center gap-2">
+      {icon}
+      {label}:
+    </span>
+    <span className="text-white/90 text-right font-medium flex-1">
       {value}
     </span>
   </div>

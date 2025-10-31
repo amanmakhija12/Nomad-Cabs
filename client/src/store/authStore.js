@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 const STORAGE_KEY = "nomad_auth_user";
+const TOKEN_KEY = "nomad_auth_token";
 
 const getStoredUser = () => {
   try {
@@ -11,16 +12,49 @@ const getStoredUser = () => {
   }
 };
 
+const getStoredToken = () => {
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+};
+
 export const useAuthStore = create((set, get) => ({
   user: getStoredUser(),
+  token: getStoredToken(),
+
+  setAuth: (user, token) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+    localStorage.setItem(TOKEN_KEY, token);
+    set({ user, token });
+  },
+
   setUser: (user) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
     set({ user });
   },
+
+  setToken: (token) => {
+    localStorage.setItem(TOKEN_KEY, token);
+    set({ token });
+  },
+ 
   clearUser: () => {
     localStorage.removeItem(STORAGE_KEY);
-    set({ user: null });
+    localStorage.removeItem(TOKEN_KEY);
+    set({ user: null, token: null });
   },
-  isAuthenticated: () => !!get().user,
-  hasRole: (role) => get().user?.role === role,
+  
+  isAuthenticated: () => {
+    const state = get();
+    return !!(state.user && state.token);
+  },
+  
+  hasRole: (role) => {
+    const user = get().user;
+    return user?.role?.toUpperCase() === role?.toUpperCase();
+  },
+  
+  getToken: () => get().token,
 }));

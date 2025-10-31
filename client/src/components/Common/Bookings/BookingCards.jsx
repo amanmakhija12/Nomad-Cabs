@@ -61,7 +61,7 @@ const BookingCards = ({ booking, user, isRider, onClose }) => {
                 {isRider ? "Driver Name" : "Rider Name"}
               </label>
               <div className="text-white/90 font-medium">
-                {user?.first_name} {user?.last_name}
+                {isRider ? booking?.driver_name : booking?.rider_name}
               </div>
             </div>
             <div className="bg-[#1a1a1a] p-4 rounded-xl border border-white/10">

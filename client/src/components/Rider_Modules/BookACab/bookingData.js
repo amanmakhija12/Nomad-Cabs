@@ -1,4 +1,3 @@
-
 export const vehicleTypes = [
   {
     type: "bike",
@@ -6,7 +5,7 @@ export const vehicleTypes = [
     description: "Quick & economical",
     capacity: "1",
     icon: "🏍️",
-    baseFare: 40,
+    baseFare: 20,
     perKm: 8,
   },
   {
@@ -15,16 +14,7 @@ export const vehicleTypes = [
     description: "Affordable short trips",
     capacity: "3",
     icon: "🛺",
-    baseFare: 55,
-    perKm: 10,
-  },
-  {
-    type: "hatchback",
-    name: "Hatchback",
-    description: "Comfort everyday",
-    capacity: "4",
-    icon: "🚗",
-    baseFare: 70,
+    baseFare: 30,
     perKm: 12,
   },
   {
@@ -33,8 +23,8 @@ export const vehicleTypes = [
     description: "Premium comfort",
     capacity: "4",
     icon: "🚙",
-    baseFare: 90,
-    perKm: 14,
+    baseFare: 50,
+    perKm: 15,
   },
   {
     type: "suv",
@@ -42,11 +32,10 @@ export const vehicleTypes = [
     description: "Spacious family ride",
     capacity: "6-7",
     icon: "🚐",
-    baseFare: 120,
-    perKm: 18,
+    baseFare: 70,
+    perKm: 20,
   },
 ];
-
 
 export const paymentMethods = [
   { id: "cash", label: "Cash" },
@@ -55,13 +44,16 @@ export const paymentMethods = [
   { id: "wallet", label: "Wallet" },
 ];
 
+
 export const calculateFare = (distanceKm, vehicleType) => {
   const v = vehicleTypes.find((v) => v.type === vehicleType);
   if (!v) return null;
+  
   const base = v.baseFare;
   const distanceFare = distanceKm * v.perKm;
   const platformFee = Math.round((base + distanceFare) * 0.05);
   const total = base + distanceFare + platformFee;
+  
   return {
     distanceKm,
     baseFare: base,
@@ -71,26 +63,48 @@ export const calculateFare = (distanceKm, vehicleType) => {
   };
 };
 
-export const createBooking = async (booking) => {
+/**
+ * Create booking via backend API
+ */
+export const createBooking = async (bookingData, token) => {
   try {
-    const now = new Date().toISOString();
-    const payload = {
-      ...booking,
-      booking_status: "requested",
-      payment_status: "pending",
-      request_time: now,
-      created_at: now,
-      updated_at: now,
-    };
-    const res = await fetch("http://localhost:4000/bookings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+    const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:8080/api/v1';
+    
+    const response = await fetch(`${BASE_URL}/bookings`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(bookingData),
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || `HTTP ${response.status}`);
+    }
+    
+    const data = await response.json();
     return { success: true, data };
-  } catch (e) {
-    return { success: false, error: e.message };
+  } catch (error) {
+    console.error('Booking creation error:', error);
+    return { success: false, error: error.message };
   }
+};
+
+
+ //TODO: Get coordinates from address using geocoding API
+
+export const getCoordinatesFromAddress = async (address) => {
+ 
+  const mockCoordinates = {
+    'marine drive': { lat: 18.9432, lng: 72.8234 },
+    'gateway of india': { lat: 18.9220, lng: 72.8347 },
+    'bandra': { lat: 19.0596, lng: 72.8295 },
+    'andheri': { lat: 19.1136, lng: 72.8697 },
+    'default': { lat: 19.0760, lng: 72.8777 },
+  };
+  
+  const key = address.toLowerCase().split(',')[0].trim();
+  return mockCoordinates[key] || mockCoordinates.default;
 };

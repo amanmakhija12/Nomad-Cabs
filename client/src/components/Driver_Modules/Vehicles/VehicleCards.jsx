@@ -3,32 +3,54 @@ import { toast, Bounce } from "react-toastify";
 import { formatDateSafe } from "../../../utils/DateUtil";
 import VehicleDetailModal from "./VehicleDetailModal";
 import { getVehicleIcon } from "./Vehicles";
-import {PlusCircle} from 'lucide-react'
+import { PlusCircle } from 'lucide-react';
 import AddVehicleModal from "./AddVehicleModal";
+import { vehicleService } from "../../../services/bookingService"; // ✅ Import from your service
 
 const VehicleCards = ({ ownerId }) => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
-  	const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
+  // ✅ Fetch vehicles from real backend
   const fetchVehicles = useCallback(async () => {
     if (!ownerId) return;
+    
     setLoading(true);
     try {
-      const response = await fetch(
-        `http://localhost:3007/vehicles?driver_id=${ownerId}`
-      );
+      console.log('🔍 Fetching vehicles...');
+      
+      // ✅ Use your existing service
+      const data = await vehicleService.getMyVehicles();
+      console.log('✅ Vehicles fetched:', data);
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch vehicles");
-      }
+      // ✅ Transform backend data to frontend format
+      const transformedVehicles = Array.isArray(data) ? data.map(v => ({
+        id: v.id,
+        driver_id: v.driverId,
+        vehicle_type: v.vehicleType?.toLowerCase(),
+        rc_number: v.registrationNumber,
+        puc_number: v.pucNumber,
+        insurance_policy_number: v.insuranceNumber,
+        puc_expiry: v.pucExpiryDate,
+        insurance_expiry: v.insuranceExpiryDate,
+        is_rc_verified: v.verificationStatus === 'APPROVED',
+        is_puc_verified: v.verificationStatus === 'APPROVED',
+        is_insurance_verified: v.verificationStatus === 'APPROVED',
+        created_at: v.createdAt,
+        updated_at: v.updatedAt,
+        manufacturer: v.manufacturer,
+        model: v.model,
+        year: v.year,
+        color: v.color,
+      })) : [];
 
-      const data = await response.json();
-      setVehicles(Array.isArray(data) ? data : []);
+      setVehicles(transformedVehicles);
+      
     } catch (error) {
-      console.error("Error fetching vehicles:", error);
-      toast.error("Failed to fetch vehicles", {
+      console.error('❌ Error fetching vehicles:', error);
+      toast.error(error.message || "Failed to fetch vehicles", {
         position: "top-right",
         autoClose: 4000,
         theme: "dark",
@@ -39,24 +61,29 @@ const VehicleCards = ({ ownerId }) => {
     }
   }, [ownerId]);
 
+  // ✅ Add vehicle using your service
   const addVehicle = async (vehicleData) => {
-		try {
-			const response = await fetch("http://localhost:3007/vehicles", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(vehicleData),
-			});
-			if (!response.ok) throw new Error("Failed to add vehicle");
-			toast.success("Vehicle added successfully!");
-			setShowCreateModal(false);
-			fetchVehicles();
-		} catch (error) {
-			console.error("Error adding vehicle:", error);
-			toast.error("Failed to add vehicle");
-		}
-	};
+    try {
+      console.log('➕ Adding vehicle:', vehicleData);
+      
+      // ✅ Use your existing service
+      await vehicleService.addVehicle(vehicleData);
+      
+      toast.success("Vehicle added successfully!", {
+        theme: "dark",
+        transition: Bounce,
+      });
+      
+      setShowCreateModal(false);
+      fetchVehicles();
+    } catch (error) {
+      console.error("❌ Error adding vehicle:", error);
+      toast.error(error.message || "Failed to add vehicle", {
+        theme: "dark",
+        transition: Bounce,
+      });
+    }
+  };
 
   useEffect(() => {
     fetchVehicles();
@@ -85,18 +112,21 @@ const VehicleCards = ({ ownerId }) => {
           <p className="text-sm text-gray-400 max-w-sm">
             You have not registered any vehicles yet. Add one to get started.
           </p>
-          <button className="h-11 px-8 rounded-xl bg-white text-black font-medium text-sm tracking-wide shadow hover:shadow-lg transition">
+          <button 
+            onClick={() => setShowCreateModal(true)}
+            className="h-11 px-8 rounded-xl bg-white text-black font-medium text-sm tracking-wide shadow hover:shadow-lg transition"
+          >
             + Add Vehicle
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 relative">
           {vehicles.map((vehicle) => {
             const Icon = getVehicleIcon(vehicle?.vehicle_type);
             return (
               <div
                 key={vehicle.id}
-                className="group bg[#141414] bg-[#141414] rounded-2xl p-6 border border-white/10 hover:border-white/20 hover:bg-[#181818] transition cursor-pointer relative overflow-hidden"
+                className="group bg-[#141414] rounded-2xl p-6 border border-white/10 hover:border-white/20 hover:bg-[#181818] transition cursor-pointer relative overflow-hidden"
                 onClick={() => setSelectedVehicle(vehicle)}
               >
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition pointer-events-none bg-gradient-to-br from-white/5 to-transparent" />
@@ -167,29 +197,35 @@ const VehicleCards = ({ ownerId }) => {
               </div>
             );
           })}
-		  <div className="absolute bottom-8 right-8">
-						<button
-							className="group bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold text-base
-                			hover:from-indigo-600 hover:to-purple-600 transform hover:scale-105 transition-all duration-300
-                			shadow-lg hover:shadow-xl flex items-center space-x-3 cursor-pointer"
-							onClick={() => setShowCreateModal(true)}
-						>
-							<PlusCircle className="group-hover:animate-pulse" size={20} />
-							<span>Add Vehicle</span>
-						</button>
-					</div>
+          
+          {/* Add Vehicle Button */}
+          <div className="absolute bottom-8 right-8">
+            <button
+              className="group bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold text-base
+                hover:from-indigo-600 hover:to-purple-600 transform hover:scale-105 transition-all duration-300
+                shadow-lg hover:shadow-xl flex items-center space-x-3 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowCreateModal(true);
+              }}
+            >
+              <PlusCircle className="group-hover:animate-pulse" size={20} />
+              <span>Add Vehicle</span>
+            </button>
+          </div>
         </div>
       )}
-		{showCreateModal && (
-				<AddVehicleModal
-					onClose={() => {
-						setShowCreateModal(false);
-						fetchVehicles();
-					}}
-					onSubmit={addVehicle}
-					ownerId={ownerId}
-				/>
-			)}
+
+      {showCreateModal && (
+        <AddVehicleModal
+          onClose={() => {
+            setShowCreateModal(false);
+            fetchVehicles();
+          }}
+          onSubmit={addVehicle}
+          ownerId={ownerId}
+        />
+      )}
 
       {selectedVehicle && (
         <VehicleDetailModal
@@ -201,6 +237,7 @@ const VehicleCards = ({ ownerId }) => {
   );
 };
 
+// Helper components (keep as is)
 const Row = ({ label, value }) => (
   <div className="flex items-center justify-between">
     <span className="text-gray-500 text-[11px] uppercase tracking-wide">

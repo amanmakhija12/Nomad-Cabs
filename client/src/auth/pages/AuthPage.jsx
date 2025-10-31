@@ -12,12 +12,21 @@ const AuthPage = () => {
 
   useEffect(() => {
     if (user) {
-      if (user.role === "admin") navigate("/admin");
-      else if (user.role === "driver") navigate("/driver");
-      else navigate("/rider");
+      console.log("AuthPage - Redirecting user:", user);
+      const role = user.role?.toUpperCase();
+      
+      if (role === "ADMIN") {
+        navigate("/admin");
+      } else if (role === "DRIVER") {
+        navigate("/driver");
+      } else if (role === "RIDER") {
+        navigate("/rider");
+      } else {
+        console.warn("Unknown role:", user.role);
+        navigate("/");
+      }
     }
   }, [user, navigate]);
-
 
   return (
     <div
@@ -25,7 +34,7 @@ const AuthPage = () => {
       className="flex md:flex-row flex-col text-center md:text-start cont items-center w-full h-[100vh] relative overflow-hidden border"
     >
       <div
-        className={`absolute left-0 top-0 w-full md:w-1/2 h-full flex flex-col justify-center  items-center transition-all duration-700 ease-in-out z-10 ${
+        className={`absolute left-0 top-0 w-full md:w-1/2 h-full flex flex-col justify-center items-center transition-all duration-700 ease-in-out z-10 ${
           mode === "login"
             ? "opacity-100 scale-100 pointer-events-auto"
             : "opacity-0 scale-95 pointer-events-none"
@@ -37,7 +46,7 @@ const AuthPage = () => {
         <div className="mb-4 text-lg text-[#ff4d31] font-semibold animate-words">
           "Welcome back! Your journey starts here."
         </div>
-        <LoginForm  />
+        <LoginForm />
         <p className="text-white mt-4">
           Don't have an account?
           <span
@@ -48,6 +57,7 @@ const AuthPage = () => {
           </span>
         </p>
       </div>
+      
       <div
         className={`absolute right-0 top-0 w-full md:w-1/2 h-full flex flex-col justify-center items-center transition-all duration-700 ease-in-out z-10 ${
           mode === "signup"
@@ -61,9 +71,7 @@ const AuthPage = () => {
         <div className="mb-4 text-lg text-[#ff4d31] font-semibold animate-words">
           "Create your account and ride the future!"
         </div>
-        <SignupForm
-          onSuccess={() => setMode("login")}
-        />
+        <SignupForm onSuccess={() => setMode("login")} />
         <p className="text-white mt-4">
           Already have an account?
           <span
@@ -74,8 +82,9 @@ const AuthPage = () => {
           </span>
         </p>
       </div>
+      
       <div
-        className={` w-full h-full flex items-center justify-center z-0 pointer-events-none ${
+        className={`w-full h-full flex items-center justify-center z-0 pointer-events-none ${
           mode === "signup"
             ? "absolute -left-90 top-0"
             : "absolute left-90 top-0"
@@ -89,10 +98,10 @@ const AuthPage = () => {
                 ? "animate-bg-slide-left"
                 : "animate-bg-slide-right"
             }`}
+            alt="Car"
           />
         </div>
       </div>
-      
     </div>
   );
 };
