@@ -39,7 +39,7 @@ const ManageDrivers = () => {
 
       // Enrich with user data
       const enrichedDrivers = await Promise.all(
-        driversData.map(async (driver) => {
+        driversData.content.map(async (driver) => {
           try {
             const userData = await userService.getUserById(driver.userId);
 
@@ -48,7 +48,7 @@ const ManageDrivers = () => {
               user_id: driver.userId,
               full_name: `${userData.firstName} ${userData.lastName}`.trim(),
               email: userData.email,
-              phone_number: userData.phoneNumber || "",
+              phoneNumber: userData.phoneNumber || "",
               aadhaarNumber: driver.aadhaarNumber,
               dlNumber: driver.dlNumber,
               driver_license: driver.dlNumber,
@@ -67,7 +67,7 @@ const ManageDrivers = () => {
               user_id: driver.userId,
               full_name: "Unknown Driver",
               email: "N/A",
-              phone_number: "",
+              phoneNumber: "",
               aadhaarNumber: driver.aadhaarNumber,
               dlNumber: driver.dlNumber,
               driver_license: driver.dlNumber,

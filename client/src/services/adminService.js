@@ -1,205 +1,177 @@
-const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:8080/api/v1';
-import { useAuthStore } from '../store/authStore';
-
-// Get token from store
-const getToken = () => useAuthStore.getState().token;
-const getAuthHeaders = () => {
-  const token = getToken();
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': token ? `Bearer ${token}` : '',
-  };
-};
-
-const apiCall = async (endpoint, options = {}) => {
-  try {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      ...options,
-      headers: {
-        ...getAuthHeaders(),
-        ...options.headers,
-      },
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(error || `HTTP ${response.status}`);
-    }
-
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      return await response.json();
-    }
-    
-    return null;
-  } catch (error) {
-    console.error('API call failed:', error);
-    throw error;
-  }
-};
+import api from "../utils/api";
 
 // ============================================
-// RIDER MANAGEMENT (NOW USES ADMIN ENDPOINTS)
+// RIDER MANAGEMENT
 // ============================================
 export const riderService = {
-  async getAllRiders() {
-    // Use admin endpoint with role filter
-    return apiCall('/admin/users?role=RIDER');
-  },
+  async getAllRiders(filters = {}) {
+    // We will build the query parameters from the filters object
+    const params = new URLSearchParams();
 
+    // Add all the keys from your filters object
+    // (role, page, size, filterType, searchTerm)
+    if (filters.role) params.append('role', filters.role);
+    if (filters.page) params.append('page', filters.page);
+    if (filters.size) params.append('size', filters.size);
+    if (filters.filterType) params.append('filterType', filters.filterType);
+    if (filters.searchTerm) params.append('searchTerm', filters.searchTerm);
+    
+    // Axios will automatically add the '?'
+    const response = await api.get('/admin/users', { params });
+    return response.data; // Returns the Page object
+  },
   async getRiderById(riderId) {
-    return apiCall(`/admin/users/${riderId}`);
+    // Calls GET /api/v1/admin/users/{riderId}
+    const response = await api.get(`/admin/users/${riderId}`);
+    return response.data;
   },
-
   async updateRider(riderId, data) {
-    return apiCall(`/admin/users/${riderId}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
+    // Calls PUT /api/v1/admin/users/{riderId}
+    const response = await api.put(`/admin/users/${riderId}`, data);
+    return response.data;
   },
-
   async deleteRider(riderId) {
-    return apiCall(`/admin/users/${riderId}`, {
-      method: 'DELETE',
-    });
+    // Calls DELETE /api/v1/admin/users/{riderId}
+    const response = await api.delete(`/admin/users/${riderId}`);
+    return response.data;
   },
 };
 
 // ============================================
-// DRIVER MANAGEMENT (NO CHANGES NEEDED)
+// DRIVER MANAGEMENT
 // ============================================
 export const driverService = {
-  async getAllDrivers() {
-    return apiCall('/admin/drivers');
+  async getAllDrivers(page = 0, size = 10) {
+    // Calls GET /api/v1/admin/drivers
+    const response = await api.get(`/admin/drivers?page=${page}&size=${size}`);
+    return response.data; // Returns Page object
   },
-
   async getDriverById(driverId) {
-    return apiCall(`/admin/drivers/${driverId}`);
+    // Calls GET /api/v1/admin/drivers/{driverId}
+    const response = await api.get(`/admin/drivers/${driverId}`);
+    return response.data;
   },
-
   async verifyDriver(driverId, action, reason = null) {
-    return apiCall(`/admin/drivers/${driverId}/verify`, {
-      method: 'PUT',
-      body: JSON.stringify({
-        action,
-        rejectionReason: reason,
-      }),
-    });
+    // Calls PUT /api/v1/admin/drivers/{driverId}/verify
+    const payload = { action: action.toUpperCase(), rejectionReason: reason };
+    const response = await api.put(`/admin/drivers/${driverId}/verify`, payload);
+    return response.data;
   },
 };
 
 // ============================================
-// VEHICLE MANAGEMENT (NO CHANGES NEEDED)
+// VEHICLE MANAGEMENT
 // ============================================
 export const vehicleService = {
   async getVehiclesByDriver(driverId) {
-    return apiCall(`/admin/vehicles?driverId=${driverId}`);
+    // Calls GET /api/v1/admin/vehicles?driverId=...
+    const response = await api.get(`/admin/vehicles?driverId=${driverId}`);
+    return response.data;
   },
-
   async getVehiclesByStatus(status) {
-    return apiCall(`/admin/vehicles?status=${status}`);
+    // Calls GET /api/v1/admin/vehicles?status=...
+    const response = await api.get(`/admin/vehicles?status=${status.toUpperCase()}`);
+    return response.data;
   },
-
   async verifyVehicle(vehicleId, action, reason = null) {
-    return apiCall(`/admin/vehicles/${vehicleId}/verify`, {
-      method: 'PUT',
-      body: JSON.stringify({
-        action,
-        rejectionReason: reason,
-      }),
-    });
+    // Calls PUT /api/v1/admin/vehicles/{vehicleId}/verify
+    const payload = { action: action.toUpperCase(), rejectionReason: reason };
+    const response = await api.put(`/admin/vehicles/${vehicleId}/verify`, payload);
+    return response.data;
   },
 };
 
 // ============================================
-// BOOKING MANAGEMENT (NOW USES ADMIN ENDPOINTS)
+// BOOKING MANAGEMENT
 // ============================================
 export const bookingService = {
-  async getAllBookings() {
-    const response = await apiCall('/admin/bookings?page=0&size=1000');
-    return response.content || response;
+  async getAllBookings(page = 0, size = 10) {
+    // Calls GET /api/v1/admin/bookings
+    const response = await api.get(`/admin/bookings?page=${page}&size=${size}`);
+    return response.data; // Returns Page object
   },
-
   async getBookingById(bookingId) {
-    return apiCall(`/admin/bookings/${bookingId}`);
+    // Calls GET /api/v1/admin/bookings/{bookingId}
+    const response = await api.get(`/admin/bookings/${bookingId}`);
+    return response.data;
   },
 };
 
 // ============================================
-// USER MANAGEMENT (NOW USES ADMIN ENDPOINTS)
+// USER MANAGEMENT
 // ============================================
 export const userService = {
   async getUserById(userId) {
-    return apiCall(`/admin/users/${userId}`);
+    // Calls GET /api/v1/admin/users/{userId}
+    const response = await api.get(`/admin/users/${userId}`);
+    return response.data;
   },
-
   async updateUser(userId, data) {
-    return apiCall(`/admin/users/${userId}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
+    // Calls PUT /api/v1/admin/users/{userId}
+    const response = await api.put(`/admin/users/${userId}`, data);
+    return response.data;
   },
-
   async updateUserStatus(userId, status) {
-    return apiCall(`/admin/users/${userId}/status`, {
-      method: 'PUT',
-      body: JSON.stringify({ status }),
-    });
+    // Calls PUT /api/v1/admin/users/{userId}/status
+    const response = await api.put(`/admin/users/${userId}/status`, { status: status.toUpperCase() });
+    return response.data;
   },
-
   async deleteUser(userId) {
-    return apiCall(`/admin/users/${userId}`, {
-      method: 'DELETE',
-    });
+    // Calls DELETE /api/v1/admin/users/{userId}
+    const response = await api.delete(`/admin/users/${userId}`);
+    return response.data;
   },
 };
 
 // ============================================
 // FARE MANAGEMENT (Keep as mock)
 // ============================================
-export const fareService = {
-  baseUrl: 'http://localhost:3008',
-
-  async getLocationPricing() {
-    const res = await fetch(`${this.baseUrl}/location_pricing`);
-    return res.json();
+export const fareConfigService = {
+  async getAllFares() {
+    // GET /api/v1/admin/finance/fares
+    const response = await api.get("/admin/finance/fares");
+    return response.data; // Axios returns data in .data
   },
 
-  async addLocationPricing(data) {
-    const res = await fetch(`${this.baseUrl}/location_pricing`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    return res.json();
+  async updateFare(id, fareData) {
+    // PUT /api/v1/admin/finance/fares/{id}
+    const response = await api.put(`/admin/finance/fares/${id}`, fareData);
+    return response.data;
   },
 
-  async updateLocationPricing(id, data) {
-    const res = await fetch(`${this.baseUrl}/location_pricing/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    return res.json();
+  async deleteFare(id) {
+    // DELETE /api/v1/admin/finance/fares/{id}
+    await api.delete(`/admin/finance/fares/${id}`);
+    return null; // Delete usually returns no content
+  },
+};
+
+// ============================================
+// COMMISSION STRUCTURE
+// ============================================
+export const commissionService = {
+  
+  async getAllCommission() {
+    // GET /api/v1/admin/finance/commission
+    const response = await api.get("/admin/finance/commission");
+    return response.data;
   },
 
-  async deleteLocationPricing(id) {
-    await fetch(`${this.baseUrl}/location_pricing/${id}`, {
-      method: 'DELETE',
-    });
+  async addCommission(commissionData) {
+    // POST /api/v1/admin/finance/commission
+    const response = await api.post("/admin/finance/commission", commissionData);
+    return response.data;
   },
 
-  async getCommissionStructure() {
-    const res = await fetch(`${this.baseUrl}/commission_structure`);
-    return res.json();
+  async updateCommission(id, commissionData) {
+    // PUT /api/v1/admin/finance/commission/{id}
+    const response = await api.put(`/admin/finance/commission/${id}`, commissionData);
+    return response.data;
   },
-
-  async updateCommissionStructure(id, data) {
-    const res = await fetch(`${this.baseUrl}/commission_structure/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    return res.json();
-  },
+  
+  async deleteCommission(id) {
+    // DELETE /api/v1/admin/finance/commission/{id}
+    await api.delete(`/admin/finance/commission/${id}`);
+    return null;
+  }
 };

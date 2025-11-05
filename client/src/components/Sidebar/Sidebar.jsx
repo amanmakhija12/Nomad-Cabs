@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
-  Home,
   Car,
   Users,
   MessageSquare,
@@ -15,6 +14,8 @@ import {
 import { useAuthStore } from "../../store/authStore";
 
 const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
+  const [openSidebar, setOpenSidebar] = useState(false);
+  
   const avatar = {
     path: "/src/assets/testimonials/kickButtowski.avif",
     name: "Kick Buttowski",
@@ -56,7 +57,6 @@ const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
     }
   };
 
-  const [openSidebar, setOpenSidebar] = useState(false);
   return (
     <div className="font-sans flex flex-col md:flex-row h-[100vh] bg-[#0f0f0f]">
       {/* Sidebar */}

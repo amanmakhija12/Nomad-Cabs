@@ -36,7 +36,7 @@ const ManageTransactions = () => {
       const driversMap = driversData.reduce((acc, d) => { acc[d.id] = d; return acc; }, {});
 
       const filteredBookings = bookingsData.filter(
-        (b) => b.booking_status === "completed" || b.booking_status === "cancelled"
+        (b) => b.bookingStatus === "completed" || b.bookingStatus === "cancelled"
       );
 
       const enriched = filteredBookings.map((b) => {
@@ -45,14 +45,14 @@ const ManageTransactions = () => {
         const driverUser = driver ? usersMap[driver.user_id] : null;
         return {
           ...b,
-          rider_name: rider ? `${rider.first_name} ${rider.last_name}` : "Unknown Rider",
-          rider_phone: rider ? rider.phone_number : "N/A",
-          driver_name: driverUser ? `${driverUser.first_name} ${driverUser.last_name}` : "Unknown Driver",
-          driver_phone: driverUser ? driverUser.phone_number : "N/A",
+          rider_name: rider ? `${rider.firstName} ${rider.lastName}` : "Unknown Rider",
+          rider_phone: rider ? rider.phoneNumber : "N/A",
+          driver_name: driverUser ? `${driverUser.firstName} ${driverUser.lastName}` : "Unknown Driver",
+          driver_phone: driverUser ? driverUser.phoneNumber : "N/A",
         };
       });
 
-      const sorted = enriched.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+      const sorted = enriched.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
       setTransactions(sorted);
       setFilteredTransactions(sorted.slice(0, 10));
     } catch (e) {
@@ -77,7 +77,7 @@ const ManageTransactions = () => {
     } else {
       let f = [...transactions];
       if (searchTerm) f = f.filter(t => t.id.toLowerCase().includes(searchTerm.toLowerCase()));
-      if (statusFilter !== "all") f = f.filter(t => t.booking_status === statusFilter);
+      if (statusFilter !== "all") f = f.filter(t => t.bookingStatus === statusFilter);
       if (fareFilter !== "all" && fareValue) {
         const val = parseFloat(fareValue);
         f = f.filter(t => {
@@ -87,7 +87,7 @@ const ManageTransactions = () => {
         });
       }
       if (dateFilter) {
-        f = f.filter(t => new Date(t.updated_at).toISOString().split('T')[0] === dateFilter);
+        f = f.filter(t => new Date(t.updatedAt).toISOString().split('T')[0] === dateFilter);
       }
       setFilteredTransactions(f);
       setIsFiltered(true);
@@ -262,18 +262,18 @@ const ManageTransactions = () => {
                     <div className="text-white/40 text-[11px] mt-1">{t.driver_phone}</div>
                   </td>
                   <td className="px-5 py-4">
-                    <div className="text-white/85 font-medium truncate max-w-56" title={t.pickup_address}>From: {t.pickup_address}</div>
+                    <div className="text-white/85 font-medium truncate max-w-56" title={t.pickupAddress}>From: {t.pickupAddress}</div>
                     <div className="text-white/40 text-[11px] truncate max-w-56 mt-1" title={t.drop_address}>To: {t.drop_address}</div>
                   </td>
                   <td className="px-5 py-4 font-semibold text-white">₹{t.fare}</td>
                   <td className="px-5 py-4">
-                    <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold border ${statusBadge(t.booking_status)}`}>{t.booking_status}</span>
+                    <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold border ${statusBadge(t.bookingStatus)}`}>{t.bookingStatus}</span>
                   </td>
                   <td className="px-5 py-4">
                     <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold border ${paymentBadge(t.payment_status)}`}>{t.payment_status}</span>
                   </td>
                   <td className="px-5 py-4 text-white/70">
-                    {formatDateSafe(t.updated_at, { locale: 'en-IN', timeZone: 'Asia/Kolkata', variant: 'date', fallback: '—', assumeUTCForMySQL: true })}
+                    {formatDateSafe(t.updatedAt, { locale: 'en-IN', timeZone: 'Asia/Kolkata', variant: 'date', fallback: '—', assumeUTCForMySQL: true })}
                   </td>
                 </tr>
               ))}

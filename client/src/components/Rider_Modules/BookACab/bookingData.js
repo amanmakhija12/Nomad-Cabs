@@ -1,7 +1,6 @@
 export const vehicleTypes = [
   {
     type: "bike",
-    name: "Bike",
     description: "Quick & economical",
     capacity: "1",
     icon: "🏍️",

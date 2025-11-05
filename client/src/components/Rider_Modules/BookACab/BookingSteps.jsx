@@ -4,12 +4,20 @@ import {
   Calendar,
   Clock,
   DollarSign,
-  Phone,
-  CreditCard,
   CheckCircle,
   AlertCircle,
 } from "lucide-react";
-import { vehicleTypes, paymentMethods, calculateFare } from "./bookingData";
+import { bookingService } from "../../../services/bookingService";
+import { toast } from "react-toastify";
+import { useEffect, useState } from "react";
+
+const getCoordinatesFromAddress = async (address, type) => {
+  if (type === 'pickup') {
+    return { lat: 13.0827, lng: 80.2707 };
+  } else {
+    return { lat: 13.0674, lng: 80.2376 };
+  }
+};
 
 export const StepsProgress = ({ step }) => (
   <div className="bg-[#141414] p-6 rounded-2xl border border-white/10 mb-8">
@@ -115,61 +123,189 @@ export const StepRideDetails = ({ data, onChange, onNext }) => {
   );
 };
 
-export const StepVehicle = ({ data, onChange, onNext, onBack }) => (
-  <div className="space-y-8">
-    <h2 className="text-2xl font-semibold tracking-tight">
-      Select Vehicle Type
-    </h2>
-    
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-      {vehicleTypes.map((v) => (
-        <div
-          key={v.type}
-          onClick={() => onChange("vehicleType", v.type)}
-          className={`group cursor-pointer rounded-2xl p-5 border border-white/10 bg-[#1a1a1a] shadow-sm transition relative overflow-hidden ${
-            data.vehicleType === v.type
-              ? "ring-2 ring-white bg-white/10"
-              : "hover:border-white/20 hover:bg-white/5"
-          }`}
-        >
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition pointer-events-none bg-gradient-to-br from-white/5 to-transparent"></div>
+export const StepVehicle = ({ data, onChange, onNext, onBack }) => {
+  // 1. Add state for vehicle types and loading
+  const [vehicleTypes, setVehicleTypes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // 2. Fetch vehicle types (with counts) on mount
+  useEffect(() => {
+    const fetchVehicleTypes = async () => {
+      setLoading(true);
+      try {
+        // This function must call your new GET /api/v1/booking/vehicle-types endpoint
+        const result = await bookingService.getVehicleTypesWithCounts(); 
+        setVehicleTypes(result);
+      } catch (error) {
+        console.error('Vehicle Types error:', error);
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch vehicle types';
+        toast.error(`${errorMessage}`, { theme: "dark" });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVehicleTypes();
+  }, []);
+
+  // Helper function to get static data (icons, etc.)
+  // You should have this in your bookingData.js or similar
+  const getVehicleInfo = (type) => {
+    const types = {
+      SEDAN: { icon: "🚗", description: "Comfortable sedans", capacity: 4 },
+      SUV: { icon: "🚙", description: "Spacious SUVs", capacity: 6 },
+      BIKE: { icon: "🏍️", description: "Quick bike rides", capacity: 1 },
+      AUTO: { icon: "🛺", description: "Local auto-rickshaws", capacity: 3 },
+    };
+    return types[type.toUpperCase()] || { icon: "❓", description: "...", capacity: 0 };
+  };
+  
+  return (
+    <div className="space-y-8">
+      <h2 className="text-2xl font-semibold tracking-tight">
+        Select Vehicle Type
+      </h2>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        
+        {/* Handle loading state */}
+        {loading && (
+          <p className="text-gray-400 col-span-full">Loading vehicle types...</p>
+        )}
+        
+        {/* Handle empty/error state */}
+        {!loading && !vehicleTypes?.length && (
+          <p className="text-red-400 col-span-full">Could not find any vehicle types. Please try again later.</p>
+        )}
+
+        {/* Render vehicle types */}
+        {vehicleTypes && vehicleTypes.map((v) => {
           
-          <div className="text-center space-y-2 relative">
-            <div className="text-4xl drop-shadow-sm">{v.icon}</div>
-            <h3 className="font-semibold tracking-wide text-sm">{v.name}</h3>
-            <p className="text-[11px] text-gray-400 leading-snug">
-              {v.description}
-            </p>
-            <p className="text-[10px] text-gray-500">Capacity: {v.capacity}</p>
-            <p className="text-xs font-semibold text-white/90">
-              ₹{v.baseFare} base + ₹{v.perKm}/km
-            </p>
-          </div>
-        </div>
-      ))}
+          // --- THIS IS THE NEW LOGIC ---
+          const isDisabled = v.availableCount === 0;
+          // --- END OF NEW LOGIC ---
+
+          return (
+            <div
+              key={v.id}
+              onClick={() => {
+                // 3. Only allow click if NOT disabled
+                if (!isDisabled) {
+                  onChange("vehicleCategory", v.vehicleCategory);
+                }
+              }}
+              className={`group cursor-pointer rounded-2xl p-5 border border-white/10 bg-[#1a1a1a] shadow-sm transition relative overflow-hidden ${
+                data.vehicleCategory === v.vehicleCategory
+                  ? "ring-2 ring-white bg-white/10" // Selected
+                  : isDisabled
+                  ? "opacity-40 cursor-not-allowed" // Disabled
+                  : "hover:border-white/20 hover:bg-white/5" // Default
+              }`}
+            >
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition pointer-events-none bg-gradient-to-br from-white/5 to-transparent"></div>
+              
+              {/* --- 4. UNAVAILABLE BADGE --- */}
+              {isDisabled && (
+                <div className="absolute top-2 right-2 bg-red-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full z-10">
+                  UNAVAILABLE
+                </div>
+              )}
+              {/* --- END OF NEW BADGE --- */}
+
+              <div className="text-center space-y-2 relative">
+                <div className="text-4xl drop-shadow-sm">{getVehicleInfo(v.vehicleCategory).icon}</div>
+                <h3 className="font-semibold tracking-wide text-sm">{v.vehicleCategory}</h3>
+                <p className="text-[11px] text-gray-400 leading-snug">
+                  {getVehicleInfo(v.vehicleCategory).description}
+                </p>
+                <p className="text-[10px] text-gray-500">Capacity: {getVehicleInfo(v.vehicleCategory).capacity}</p>
+                <p className="text-xs font-semibold text-white/90">
+                  ₹{v.baseFare} base + ₹{v.pricePerKm}/km
+                </p>
+                
+                {/* --- 5. SHOW AVAILABLE COUNT --- */}
+                {!isDisabled && (
+                  <p className="text-[10px] text-green-400 font-medium pt-1">
+                    {v.availableCount} {v.availableCount === 1 ? 'driver' : 'drivers'} available
+                  </p>
+                )}
+                {/* --- END OF NEW COUNT --- */}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      
+      <div className="flex justify-between">
+        <button
+          onClick={onBack}
+          className="btn-secondary h-11 px-6 rounded-xl bg-[#1d1d1d] border border-white/10 text-sm font-medium text-white/90 hover:bg-white/5 transition"
+        >
+          Back
+        </button>
+        <button
+          disabled={!data.vehicleCategory}
+          onClick={onNext}
+          className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed h-11 px-8 rounded-xl bg-white text-black font-medium text-sm tracking-wide shadow hover:shadow-lg transition"
+        >
+          Next: Review & Confirm
+        </button>
+      </div>
     </div>
-    
-    <div className="flex justify-between">
-      <button
-        onClick={onBack}
-        className="btn-secondary h-11 px-6 rounded-xl bg-[#1d1d1d] border border-white/10 text-sm font-medium text-white/90 hover:bg-white/5 transition"
-      >
-        Back
-      </button>
-      <button
-        disabled={!data.vehicleType}
-        onClick={onNext}
-        className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed h-11 px-8 rounded-xl bg-white text-black font-medium text-sm tracking-wide shadow hover:shadow-lg transition"
-      >
-        Next: Review & Confirm
-      </button>
-    </div>
-  </div>
-);
+  );
+};
 
 export const StepPayment = ({ data, onChange, onBack, onSubmit, loading }) => {
-  // Frontend estimation (backend will recalculate based on actual coordinates)
-  const estimatedFare = data.vehicleType ? calculateFare(5, data.vehicleType) : null;
+  // 1. Create state for the fare and its loading status
+  const [estimatedFare, setEstimatedFare] = useState(null);
+  const [fareLoading, setFareLoading] = useState(true);
+
+  // 2. Fix the useEffect hook
+  useEffect(() => {
+    // 3. Define an async function *inside* the hook
+    const fetchFare = async () => {
+      // 4. Check for required data
+      if (!data.pickupAddress || !data.dropoffAddress || !data.vehicleCategory) {
+        setFareLoading(false);
+        return;
+      }
+      
+      setFareLoading(true);
+      try {
+        const pickupCoords = await getCoordinatesFromAddress(data.pickupAddress, "pickup");
+        const dropoffCoords = await getCoordinatesFromAddress(data.dropoffAddress, "dropoff");
+        
+        const payload = {
+          pickupLat: pickupCoords.lat,
+          pickupLng: pickupCoords.lng,
+          dropoffLat: dropoffCoords.lat,
+          dropoffLng: dropoffCoords.lng,
+          vehicleCategory: data.vehicleCategory.toUpperCase(),
+          // Add addresses to payload
+          pickupAddress: data.pickupAddress,
+          dropoffAddress: data.dropoffAddress,
+        };
+        
+        const result = await bookingService.calculateEstimatedFare(payload);
+        
+        // 5. Set the fare from the API
+        setEstimatedFare(result);
+        console.log("Fare estimation result:", result);
+
+      } catch (error) {
+        console.error('Fare estimation error:', error);
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch estimated fare';
+        toast.error(`${errorMessage}`, { theme: "dark" });
+      } finally {
+        setFareLoading(false);
+      }
+    };
+
+    // 6. Call the async function
+    fetchFare();
+    
+    // 7. Add dependencies: re-run this effect if any of these change
+  }, [data.pickupAddress, data.dropoffAddress, data.vehicleCategory]);
   
   return (
     <div className="space-y-8">
@@ -177,32 +313,35 @@ export const StepPayment = ({ data, onChange, onBack, onSubmit, loading }) => {
         Review & Confirm Booking
       </h2>
       
-      {/* Estimated Fare */}
-      {estimatedFare && (
-        <div className="bg-[#141414] p-6 rounded-2xl border border-white/10">
-          <div className="flex items-start gap-3 mb-4">
-            <DollarSign className="w-5 h-5 text-green-400" />
-            <div className="flex-grow">
-              <h3 className="font-semibold mb-1 text-sm tracking-wide uppercase text-white/80">
-                Estimated Fare
-              </h3>
-              <p className="text-xs text-gray-400">
-                Final fare will be calculated based on actual distance
-              </p>
-            </div>
-          </div>
-          
-          <div className="space-y-2 text-sm">
-            <Row label="Base Fare" value={`₹${estimatedFare.baseFare}`} />
-            <Row label="Distance Fare" value={`₹${estimatedFare.distanceFare} (${estimatedFare.distanceKm} km)`} />
-            <Row label="Platform Fee" value={`₹${estimatedFare.platformFee}`} />
-            <div className="pt-2 mt-2 border-t border-white/10 flex justify-between text-lg font-semibold">
-              <span>Estimated Total</span>
-              <span className="text-green-400">₹{estimatedFare.total}</span>
-            </div>
+      <div className="bg-[#141414] p-6 rounded-2xl border border-white/10">
+        <div className="flex items-start gap-3 mb-4">
+          <DollarSign className="w-5 h-5 text-green-400" />
+          <div className="flex-grow">
+            <h3 className="font-semibold mb-1 text-sm tracking-wide uppercase text-white/80">
+              Estimated Fare
+            </h3>
+            <p className="text-xs text-gray-400">
+              Final fare will be calculated based on actual distance
+            </p>
           </div>
         </div>
-      )}
+        
+        {fareLoading ? (
+          <div className="text-sm text-gray-400">Calculating fare...</div>
+        ) : !estimatedFare ? (
+          <div className="text-sm text-red-400">Could not calculate fare. Please check details.</div>
+        ) : (
+          <div className="space-y-2 text-sm">
+            <Row label="Base Fare" value={`₹${estimatedFare.baseFare.toFixed(2)}`} />
+            <Row label="Distance Fare" value={`₹${estimatedFare.distanceFare.toFixed(2)} (${estimatedFare.distanceKm.toFixed(1)} km)`} />
+            <Row label="Platform Fee" value={`₹${estimatedFare.platformFee.toFixed(2)}`} />
+            <div className="pt-2 mt-2 border-t border-white/10 flex justify-between text-lg font-semibold">
+              <span>Estimated Total</span>
+              <span className="text-green-400">₹{estimatedFare.totalFare.toFixed(2)}</span>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Booking Summary */}
       <div className="bg-[#141414] p-6 rounded-2xl border border-white/10">
@@ -223,7 +362,7 @@ export const StepPayment = ({ data, onChange, onBack, onSubmit, loading }) => {
           />
           <Row 
             label="Vehicle" 
-            value={vehicleTypes.find(v => v.type === data.vehicleType)?.name || "—"} 
+            value={data.vehicleCategory || "—"} 
           />
           {data.scheduledDate && (
             <Row 

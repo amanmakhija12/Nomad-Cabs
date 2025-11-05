@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { useAuthStore } from "../../store/authStore";
 import { toast } from "react-toastify";
+import api from "../../utils/api";
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const setAuth = useAuthStore((s) => s.setAuth);
   const [loading, setLoading] = useState(false);
-
-  const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:8080/api/v1";
 
   const validate = () => {
     if (!formData.email.trim() || !formData.password.trim()) {
@@ -19,10 +18,6 @@ const LoginForm = () => {
       toast.error("Invalid email format", { theme: "dark" });
       return false;
     }
-    if (formData.password.length < 6) {
-      toast.error("Password must be at least 6 chars", { theme: "dark" });
-      return false;
-    }
     return true;
   };
 
@@ -32,47 +27,32 @@ const LoginForm = () => {
     
     try {
       setLoading(true);
-    
-      const loginRes = await fetch(`${BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
       
-      const loginData = await loginRes.json();
+      const response = await api.post("/auth/login", formData);
       
-      if (!loginRes.ok) {
-        throw new Error(loginData.message || "Login failed");
-      }
-      
-      const token = loginData.token;
-      
-      if (!token) {
-        throw new Error("No token received");
-      }
-      
+      const loginData = response.data;
 
-      const userRes = await fetch(`${BASE_URL}/users/me`, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      
-      const userData = await userRes.json();
-      
-      if (!userRes.ok) {
-        throw new Error(userData.message || "Failed to fetch user data");
+      if (!loginData.token) {
+        throw new Error("Login failed: No token received from server.");
       }
-      
-      setAuth(userData, token);
-      
+      localStorage.setItem("token", loginData.token);
+
+      const userData = api.get("/auth/profile/me").then(({data}) => {
+        const user = {
+          userId: data.id,
+          role: data.role,
+          email: data.email,
+        };
+
+        setAuth(user, loginData.token);
+      });
+
       toast.success("Login successful", { theme: "dark" });
-      
     } catch (err) {
       console.error("Login error:", err);
-      toast.error(err.message, { theme: "dark" });
+      // This will show the "Invalid credentials" message from your Spring backend
+      const errorMessage = err.response?.data || "Login failed. Please check your credentials.";
+      toast.error(errorMessage, { theme: "dark" });
     } finally {
       setLoading(false);
     }

@@ -13,13 +13,13 @@ const DriverDetailsView = ({
   onShowVehicles,
   onClose,
 }) => {
-  const initials = `${(user?.first_name?.[0] || "").toUpperCase()}${(
-    user?.last_name?.[0] || ""
+  const initials = `${(user?.firstName?.[0] || "").toUpperCase()}${(
+    user?.lastName?.[0] || ""
   ).toUpperCase()}`;
   const panelBase = "bg-[#1b1b1b] border border-white/10 rounded-xl p-5";
 
   const editableFields = [
-    { label: "Phone Number", name: "phone_number" },
+    { label: "Phone Number", name: "phoneNumber" },
     { label: "City", name: "city" },
     { label: "State", name: "state" },
     { label: "Role Description", name: "role_description" },
@@ -28,8 +28,8 @@ const DriverDetailsView = ({
   const staticFields = [
     { label: "Email", value: user?.email || "—", isBadge: false },
     { label: "Role", value: user?.role || "driver", isBadge: true },
-    { label: "Created At", value: formData.created_at || "—", isBadge: false },
-    { label: "Updated At", value: formData.updated_at || "—", isBadge: false },
+    { label: "Created At", value: formData.createdAt || "—", isBadge: false },
+    { label: "Updated At", value: formData.updatedAt || "—", isBadge: false },
   ];
 
   const docs = [
@@ -67,7 +67,7 @@ const DriverDetailsView = ({
             <div>
               <h2 className="text-2xl font-semibold tracking-tight text-white">
                 {user
-                  ? `${user.first_name} ${user.last_name || ""}`.trim()
+                  ? `${user.firstName} ${user.lastName || ""}`.trim()
                   : "—"}
               </h2>
               <div className="mt-2 flex flex-wrap gap-3 text-[11px]">

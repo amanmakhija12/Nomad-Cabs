@@ -6,13 +6,13 @@ import BookingCards from "./BookingCards";
 import { useAuthStore } from "../../../store/authStore";
 import { bookingService, driverBookingService } from "../../../services/bookingService";
 import { toast } from "react-toastify";
+import { useDebounce } from "../../../hooks/useDebounce";
 
 const Bookings = ({ isRider = false }) => {
   const [selectedBooking, setSelectedBooking] = useState(null);
-  const [currentPage, setCurrentPage] = useState(0); // Backend uses 0-based
-  const [filterType, setFilterType] = useState("pickup");
+  const [currentPage, setCurrentPage] = useState(0);
+  const [filterType, setFilterType] = useState("pickupAddress");
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [bookingsData, setBookingsData] = useState({
     content: [],
@@ -25,18 +25,21 @@ const Bookings = ({ isRider = false }) => {
   const openBooking = (booking) => setSelectedBooking(booking);
   const closeBooking = () => setSelectedBooking(null);
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
   // Fetch bookings from backend
   useEffect(() => {
     const fetchBookings = async () => {
       try {
         setLoading(true);
         
+        // We just pass the filterType and searchTerm directly.
+        // The backend will handle the "one filter at a time" logic.
         const filters = {
-          filterType: filterType !== "status" ? filterType : undefined,
-          searchTerm: filterType !== "status" ? searchTerm : undefined,
-          status: filterType === "status" ? searchTerm : statusFilter,
           page: currentPage,
           size: 10,
+          filterType: debouncedSearchTerm ? filterType : null,
+          searchTerm: debouncedSearchTerm ? debouncedSearchTerm : null,
         };
 
         let data;
@@ -58,7 +61,8 @@ const Bookings = ({ isRider = false }) => {
     if (user) {
       fetchBookings();
     }
-  }, [user, isRider, filterType, searchTerm, statusFilter, currentPage]);
+    
+  }, [user, isRider, filterType, debouncedSearchTerm, currentPage]);
 
   useEffect(() => {
     if (selectedBooking) {
@@ -84,7 +88,7 @@ const Bookings = ({ isRider = false }) => {
     <div className="min-h-screen bg-[#151212] text-white">
       <div className="mb-8">
         <h1 className="text-4xl font-semibold text-white mb-3">
-          {`Good Morning${user?.first_name ? ", " + user.first_name : ""}!`}
+          {`Good Morning${user?.firstName ? ", " + user.firstName : ""}!`}
         </h1>
         <p className="text-gray-300">Manage your ride bookings efficiently</p>
       </div>
@@ -118,7 +122,7 @@ const Bookings = ({ isRider = false }) => {
         totalPages={bookingsData.totalPages || 1}
         onPageChange={(page) => setCurrentPage(page - 1)} // Convert to 0-based
         position="relative"
-        showLabels={false}
+        showLabels={true}
         variant="dark"
       />
 

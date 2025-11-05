@@ -13,50 +13,38 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "../../../store/authStore";
 import { toast } from "react-toastify";
+import api from "../../../utils/api";
 
 const ManageAccount = () => {
   const [userDetails, setUserDetails] = useState({
     id: "",
     email: "",
-    phone_number: "",
-    first_name: "",
-    last_name: "",
+    phoneNumber: "",
+    firstName: "",
+    lastName: "",
     city: "",
     state: "",
     is_email_verified: false,
     role: "",
     status: "",
-    created_at: "",
+    createdAt: "",
   });
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   
-  const { token, setUser } = useAuthStore();
-  const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:8080/api/v1";
+  const { setUser } = useAuthStore();
 
   // Fetch user details on mount
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/users/me`, {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to load user details");
-        }
-
-        const data = await response.json();
+        const response = await api.get("/auth/profile/me");
+        const { data } = response;
         setUserDetails(data);
         
         // Update store if needed
         setUser(data);
-        
       } catch (error) {
         console.error("Error fetching user details:", error);
         toast.error("Failed to load account details", { theme: "dark" });
@@ -65,12 +53,8 @@ const ManageAccount = () => {
       }
     };
 
-    if (token) {
-      fetchUserDetails();
-    } else {
-      setLoading(false);
-    }
-  }, [token, BASE_URL, setUser]);
+    fetchUserDetails();
+  }, [setUser]);
 
   // Handle profile update
   const handleSubmit = async (e) => {
@@ -81,29 +65,16 @@ const ManageAccount = () => {
       
       // Only send editable fields
       const updatePayload = {
-        first_name: userDetails.first_name,
-        last_name: userDetails.last_name,
+        firstName: userDetails.firstName,
+        lastName: userDetails.lastName,
         city: userDetails.city,
         state: userDetails.state,
       };
 
-      const response = await fetch(`${BASE_URL}/users/me`, {
-        method: "PUT",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatePayload),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Update failed");
-      }
-
-      const updatedUser = await response.json();
-      setUserDetails(updatedUser);
-      setUser(updatedUser);
+      const response = await api.put("/auth/profile", updatePayload);
+      const {data} = response;
+      setUserDetails(data);
+      setUser(data);
       setIsEditing(false);
       
       toast.success("Profile updated successfully", { theme: "dark" });
@@ -129,8 +100,8 @@ const ManageAccount = () => {
     );
   }
 
-  const fullName = `${userDetails.first_name || ""} ${
-    userDetails.last_name || ""
+  const fullName = `${userDetails.firstName || ""} ${
+    userDetails.lastName || ""
   }`.trim();
 
   return (
@@ -191,11 +162,11 @@ const ManageAccount = () => {
                 <Field label="First Name" icon={User}>
                   <input
                     type="text"
-                    value={userDetails.first_name || ""}
+                    value={userDetails.firstName || ""}
                     onChange={(e) =>
                       setUserDetails({
                         ...userDetails,
-                        first_name: e.target.value,
+                        firstName: e.target.value,
                       })
                     }
                     disabled={!isEditing}
@@ -206,11 +177,11 @@ const ManageAccount = () => {
                 <Field label="Last Name" icon={User}>
                   <input
                     type="text"
-                    value={userDetails.last_name || ""}
+                    value={userDetails.lastName || ""}
                     onChange={(e) =>
                       setUserDetails({
                         ...userDetails,
-                        last_name: e.target.value,
+                        lastName: e.target.value,
                       })
                     }
                     disabled={!isEditing}
@@ -229,7 +200,7 @@ const ManageAccount = () => {
                 <Field label="Phone Number" icon={Phone}>
                   <input
                     type="tel"
-                    value={userDetails.phone_number || "Not provided"}
+                    value={userDetails.phoneNumber || "Not provided"}
                     disabled
                     className={inputClass(false)}
                   />
@@ -290,8 +261,8 @@ const ManageAccount = () => {
                   <input
                     type="text"
                     value={
-                      userDetails.created_at
-                        ? new Date(userDetails.created_at).toLocaleDateString(
+                      userDetails.createdAt
+                        ? new Date(userDetails.createdAt).toLocaleDateString(
                             "en-US",
                             { year: "numeric", month: "long", day: "numeric" }
                           )
@@ -305,8 +276,8 @@ const ManageAccount = () => {
                   <input
                     type="text"
                     value={
-                      userDetails.updated_at
-                        ? new Date(userDetails.updated_at).toLocaleDateString(
+                      userDetails.updatedAt
+                        ? new Date(userDetails.updatedAt).toLocaleDateString(
                             "en-US",
                             { year: "numeric", month: "long", day: "numeric" }
                           )

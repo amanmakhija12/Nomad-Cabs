@@ -1,6 +1,6 @@
 // Contact Information Component
 const ContactInfo = ({ driver }) => {
-  if (!driver.email && !driver.phone_number) return null;
+  if (!driver.email && !driver.phoneNumber) return null;
 
   return (
     <div className="border-t border-white/10 pt-4 mt-4 space-y-2 text-xs">
@@ -14,13 +14,13 @@ const ContactInfo = ({ driver }) => {
           </span>
         </div>
       )}
-      {driver.phone_number && (
+      {driver.phoneNumber && (
         <div className="flex items-center gap-2">
           <span className="text-white/40 uppercase tracking-wide text-[10px] w-16">
             Phone
           </span>
           <span className="text-white/80 font-medium">
-            {driver.phone_number}
+            {driver.phoneNumber}
           </span>
         </div>
       )}

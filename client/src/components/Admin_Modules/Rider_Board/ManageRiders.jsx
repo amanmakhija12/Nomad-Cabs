@@ -3,93 +3,95 @@ import { Search, Mail, Phone, MapPin, Shield, ArrowRight, ChevronLeft, ChevronRi
 import RiderCards from "./RiderCards";
 import { riderService, userService } from "../../../services/adminService";
 import { toast, Bounce } from "react-toastify";
+import { useDebounce } from "../../../hooks/useDebounce";
 
 const filterOptions = [
   { label: "Email", value: "email" },
-  { label: "Phone Number", value: "phone_number" },
+  { label: "Phone Number", value: "phoneNumber" },
 ];
 
 const ManageRiders = () => {
   const [selectedRider, setSelectedRider] = useState(null);
-  const [allRiders, setAllRiders] = useState([]);
+  
   const [riders, setRiders] = useState([]);
+
   const [filterType, setFilterType] = useState(filterOptions[0].value);
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const ridersPerPage = 8;
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   const openRider = (r) => setSelectedRider(r);
   const closeRider = () => setSelectedRider(null);
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  useEffect(() => {
+    const fetchRiders = async () => {
+      setLoading(true);
+      try {
+        // Build query params
+        const params = {
+          page: currentPage - 1,
+          size: 10,
+          role: "RIDER",
+          
+          // Add search filters only if searchTerm exists
+          filterType: debouncedSearchTerm ? filterType : null,
+          searchTerm: debouncedSearchTerm ? debouncedSearchTerm : null,
+        };
+
+        // Call your admin service with the filters
+        const data = await riderService.getAllRiders(params); 
+        
+        // Transform and set data
+        const transformedRiders = data.content.map(user => ({
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+          city: user.city,
+          state: user.state,
+          role: user.role?.toLowerCase(),
+          status: user.status?.toLowerCase(),
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+          is_email_verified: user.isEmailVerified,
+          is_phone_verified: false, 
+          role_description: '', 
+        }));
+
+        setRiders(transformedRiders);
+        setTotalPages(data.totalPages);
+        setTotalItems(data.totalElements);
+        
+      } catch (e) {
+        console.error('Failed to fetch riders:', e);
+        toast.error('Failed to fetch riders: ' + e.message, { theme: 'dark', transition: Bounce });
+        setRiders([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchRiders();
+    
+    // This hook re-runs whenever the user stops typing, changes filter, or changes page
+  }, [currentPage, debouncedSearchTerm, filterType]);
+
   useEffect(() => {
     if (selectedRider) {
-      const prev = document.body.style.overflow;
       document.body.style.overflow = "hidden";
-      return () => (document.body.style.overflow = prev);
+      return () => (document.body.style.overflow = "auto");
     }
   }, [selectedRider]);
 
-  const fetchRiders = async () => {
-    try {
-      setLoading(true);
-      
-      // Get all users from backend
-      const users = await riderService.getAllRiders();
-      
-      // Filter only riders (users with role RIDER)
-      const ridersOnly = users.filter(u => u.role?.toLowerCase() === 'rider');
-      
-      // Transform backend format to match your frontend format
-      const transformedRiders = ridersOnly.map(user => ({
-        id: user.id,
-        first_name: user.firstName,
-        last_name: user.lastName,
-        email: user.email,
-        phone_number: user.phoneNumber,
-        city: user.city,
-        state: user.state,
-        role: user.role?.toLowerCase(),
-        status: user.status?.toLowerCase(),
-        created_at: user.createdAt,
-        updated_at: user.updatedAt,
-        is_email_verified: user.isEmailVerified,
-        is_phone_verified: false, // Backend doesn't have this
-        role_description: '', // Backend doesn't have this
-      }));
-      
-      setAllRiders(transformedRiders);
-    } catch (e) {
-      console.error('Failed to fetch riders:', e);
-      toast.error('Failed to fetch riders', { theme: 'dark', transition: Bounce });
-      setAllRiders([]);
-    } finally {
-      setLoading(false);
-    }
+  const handlePageChange = (page) => {
+    setCurrentPage(page); // This will trigger the useEffect to refetch
   };
-
-  useEffect(() => {
-    fetchRiders();
-  }, []);
-
-  useEffect(() => {
-    const term = searchTerm.trim().toLowerCase();
-    if (!term) {
-      setRiders(allRiders);
-    } else {
-      setRiders(
-        allRiders.filter((r) =>
-          (r[filterType] || "").toString().toLowerCase().includes(term)
-        )
-      );
-    }
-    setCurrentPage(1);
-  }, [allRiders, filterType, searchTerm]);
-
-  // Pagination
-  const totalPages = Math.max(1, Math.ceil(riders.length / ridersPerPage));
-  const start = (currentPage - 1) * ridersPerPage;
-  const currentRiders = riders.slice(start, start + ridersPerPage);
 
   const statusClass = (s = "") => {
     const v = s.toLowerCase();
@@ -150,9 +152,7 @@ const ManageRiders = () => {
 
       <div className="flex items-center justify-between mb-5">
         <div className="text-sm text-white/60">
-          {loading ? 'Loading...' : riders.length
-            ? `Found ${riders.length} rider${riders.length !== 1 ? "s" : ""}`
-            : "No riders found"}
+          {loading ? 'Loading...' : `Found ${totalItems} rider${totalItems !== 1 ? "s" : ""}`}
         </div>
         <div className="text-xs text-white/40 tracking-wider uppercase">
           Page {currentPage} of {totalPages}
@@ -167,13 +167,13 @@ const ManageRiders = () => {
           </li>
         )}
 
-        {!loading && currentRiders.length === 0 && (
-          <li className="h-40 flex items-center justify-center rounded-2xl bg-[#141414] border border-white/10 text-white/40 text-sm">
+        {!loading && riders.length === 0 && (
+          <li className="h-40 flex items-center justify-center ...">
             No riders match your search
           </li>
         )}
 
-        {!loading && currentRiders.map((rider) => (
+        {!loading && riders.map((rider) => (
           <li
             key={rider.id}
             onClick={() => openRider(rider)}
@@ -185,15 +185,15 @@ const ManageRiders = () => {
               <div className="flex items-start space-x-4 flex-grow">
                 <div className="flex-shrink-0">
                   <div className="w-14 h-14 rounded-full bg-gradient-to-b from-white to-white/80 text-black font-bold flex items-center justify-center shadow-md group-hover:shadow-lg transition">
-                    {(rider.first_name?.[0] || "").toUpperCase()}
-                    {(rider.last_name?.[0] || "").toUpperCase()}
+                    {(rider.firstName?.[0] || "").toUpperCase()}
+                    {(rider.lastName?.[0] || "").toUpperCase()}
                   </div>
                 </div>
 
                 <div className="flex-grow min-w-0">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="text-lg font-semibold text-white tracking-tight truncate group-hover:text-white/90">
-                      {rider.first_name} {rider.last_name}
+                      {rider.firstName} {rider.lastName}
                     </h3>
                     {rider.status && (
                       <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-semibold tracking-wide border ${statusClass(rider.status)}`}>
@@ -209,7 +209,7 @@ const ManageRiders = () => {
                     </div>
                     <div className="flex items-center gap-2 text-white/60">
                       <Phone className="w-3.5 h-3.5 text-white/40" />
-                      <span className="font-medium">{rider.phone_number || 'N/A'}</span>
+                      <span className="font-medium">{rider.phoneNumber || 'N/A'}</span>
                     </div>
                     {rider.city && (
                       <div className="flex items-center gap-2 text-white/60">
@@ -242,7 +242,7 @@ const ManageRiders = () => {
         <div className="mt-10 flex justify-center">
           <div className="flex items-center gap-2 bg-[#141414] border border-white/10 rounded-full px-3 py-2 shadow-lg">
             <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
               className="h-9 w-9 flex items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition"
             >
@@ -267,7 +267,7 @@ const ManageRiders = () => {
                       <span className="h-9 w-9 flex items-center justify-center text-white/30">…</span>
                     )}
                     <button
-                      onClick={() => setCurrentPage(n)}
+                      onClick={() => handlePageChange(n)}
                       className={`h-9 w-9 rounded-full text-sm font-medium transition ${
                         currentPage === n
                           ? "bg-white text-black shadow"
@@ -281,7 +281,7 @@ const ManageRiders = () => {
               })}
 
             <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
               className="h-9 w-9 flex items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition"
             >
@@ -292,7 +292,7 @@ const ManageRiders = () => {
       )}
 
       {selectedRider && (
-        <RiderCards rider={selectedRider} onClose={closeRider} onRefresh={fetchRiders} />
+        <RiderCards rider={selectedRider} onClose={closeRider} onRefresh={handlePageChange} />
       )}
     </div>
   );

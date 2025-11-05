@@ -1,7 +1,7 @@
 const filterOptions = [
-  { label: "Pickup Address", value: "pickup" },
-  { label: "Dropoff Address", value: "dropoff" },
-  { label: "Date of Travelling", value: "travel_date" },
+  { label: "Pickup Address", value: "pickupAddress" },
+  { label: "Dropoff Address", value: "dropoffAddress" },
+  { label: "Date of Travelling", value: "date" },
   { label: "Booking Status", value: "status" },
 ];
 
@@ -52,19 +52,19 @@ const SearchFilter = ({
                 <option value="" className="bg-[#0f0f0f]">
                   All statuses
                 </option>
-                <option value="pending" className="bg-[#0f0f0f]">
-                  Pending
+                <option value="REQUESTED" className="bg-[#0f0f0f]">
+                  Requested
                 </option>
-                <option value="accepted" className="bg-[#0f0f0f]">
+                <option value="ACCEPTED" className="bg-[#0f0f0f]">
                   Accepted
                 </option>
-                <option value="started" className="bg-[#0f0f0f]">
-                  Started
+                <option value="IN_PROGRESS" className="bg-[#0f0f0f]">
+                  In Progress
                 </option>
-                <option value="completed" className="bg-[#0f0f0f]">
+                <option value="COMPLETED" className="bg-[#0f0f0f]">
                   Completed
                 </option>
-                <option value="cancelled" className="bg-[#0f0f0f]">
+                <option value="CANCELLED" className="bg-[#0f0f0f]">
                   Cancelled
                 </option>
               </select>

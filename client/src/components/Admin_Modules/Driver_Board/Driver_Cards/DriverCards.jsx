@@ -12,13 +12,13 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const [formData, setFormData] = useState({
-    phone_number: "",
+    phoneNumber: "",
     city: "",
     state: "",
     role_description: "",
     status: "active",
-    created_at: "",
-    updated_at: "",
+    createdAt: "",
+    updatedAt: "",
   });
 
   useEffect(() => {
@@ -30,13 +30,13 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
       .then((u) => {
         setUser(u);
         setFormData({
-          phone_number: u.phoneNumber || "",
+          phoneNumber: u.phoneNumber || "",
           city: u.city || "",
           state: u.state || "",
           role_description: u.roleDescription || "",
           status: u.status?.toLowerCase() || "active",
-          created_at: u.createdAt || "",
-          updated_at: u.updatedAt || "",
+          createdAt: u.createdAt || "",
+          updatedAt: u.updatedAt || "",
         });
       })
       .catch((err) => {
@@ -59,7 +59,7 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        phoneNumber: formData.phone_number,
+        phoneNumber: formData.phoneNumber,
         city: formData.city,
         state: formData.state,
         role: user.role,
@@ -153,8 +153,8 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
 
   // Transform user data to match frontend format
   const transformedUser = user ? {
-    first_name: user.firstName,
-    last_name: user.lastName,
+    firstName: user.firstName,
+    lastName: user.lastName,
     email: user.email,
     role: user.role?.toLowerCase(),
     is_email_verified: user.isEmailVerified,

@@ -8,24 +8,24 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState({
-    phone_number: "",
+    phoneNumber: "",
     city: "",
     state: "",
     status: "active",
-    created_at: "",
-    updated_at: "",
+    createdAt: "",
+    updatedAt: "",
     is_email_verified: false,
   });
 
   useEffect(() => {
     if (rider) {
       setFormData({
-        phone_number: rider.phone_number || "",
+        phoneNumber: rider.phoneNumber || "",
         city: rider.city || "",
         state: rider.state || "",
         status: rider.status || "active",
-        created_at: rider.created_at || "",
-        updated_at: rider.updated_at || "",
+        createdAt: rider.createdAt || "",
+        updatedAt: rider.updatedAt || "",
         is_email_verified: rider.is_email_verified || false,
       });
     }
@@ -44,10 +44,10 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
     try {
       // Transform to backend format
       const payload = {
-        firstName: rider.first_name,
-        lastName: rider.last_name,
+        firstName: rider.firstName,
+        lastName: rider.lastName,
         email: rider.email,
-        phoneNumber: formData.phone_number,
+        phoneNumber: formData.phoneNumber,
         city: formData.city,
         state: formData.state,
         role: rider.role.toUpperCase(),
@@ -150,7 +150,7 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
   const editableFields = [
     {
       label: "Phone Number",
-      name: "phone_number",
+      name: "phoneNumber",
       icon: <Phone className="w-4 h-4 text-white/40" />,
     },
     {
@@ -179,7 +179,7 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
     },
     {
       label: "Created At",
-      value: formatDateSafe(formData.created_at, {
+      value: formatDateSafe(formData.createdAt, {
         locale: "en-IN",
         timeZone: "Asia/Kolkata",
         variant: "datetime",
@@ -189,7 +189,7 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
     },
     {
       label: "Updated At",
-      value: formatDateSafe(formData.updated_at, {
+      value: formatDateSafe(formData.updatedAt, {
         locale: "en-IN",
         timeZone: "Asia/Kolkata",
         variant: "datetime",
@@ -222,12 +222,12 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pr-14">
             <div className="flex items-center gap-5">
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-b from-white to-white/80 text-black flex items-center justify-center text-4xl font-bold shadow-lg">
-                {(rider.first_name?.[0] || "").toUpperCase()}
-                {(rider.last_name?.[0] || "").toUpperCase()}
+                {(rider.firstName?.[0] || "").toUpperCase()}
+                {(rider.lastName?.[0] || "").toUpperCase()}
               </div>
               <div>
                 <h2 className="text-2xl font-semibold tracking-tight text-white">
-                  {rider.first_name} {rider.last_name}
+                  {rider.firstName} {rider.lastName}
                 </h2>
                 <div className="mt-2 flex flex-wrap gap-3 text-[11px]">
                   <span className={badgeClass(formData.is_email_verified)}>

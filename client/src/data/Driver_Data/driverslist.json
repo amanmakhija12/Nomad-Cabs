@@ -13,16 +13,16 @@
       "is_aadhaar_verified": true,
       "is_pan_verified": true,
       "is_driver_license_verified": true,
-      "created_at": "2025-09-01 10:00:00",
-      "updated_at": "2025-09-01 10:00:00"
+      "createdAt": "2025-09-01 10:00:00",
+      "updatedAt": "2025-09-01 10:00:00"
     },
     {
       "id": "2c29b5b3-9960-4965-a67b-f6c686f6768e",
       "user_id": "018fe39e-a8f6-41b8-9be4-1bf2626ba93d",
       "aadhar_card": "712031856788",
       "pan_card": "FWDWC1574D",
-      "first_name": "Amit",
-      "last_name": "Sharma",
+      "firstName": "Amit",
+      "lastName": "Sharma",
       "vehicleType": "car",
       "vehicleId": "CAR-1234",
       "is_aadhaar_verified": true,
@@ -33,8 +33,8 @@
       "profile_photo_mime": "image/jpeg",
       "profile_photo_size": 45678,
       "is_driver_license_verified": false,
-      "created_at": "2025-09-01 10:00:00",
-      "updated_at": "2025-09-01 10:00:00"
+      "createdAt": "2025-09-01 10:00:00",
+      "updatedAt": "2025-09-01 10:00:00"
     },
     {
       "id": "64220273-5c2f-43a3-b14e-7a3657caf588",
@@ -49,8 +49,8 @@
       "is_aadhaar_verified": true,
       "is_pan_verified": true,
       "is_driver_license_verified": true,
-      "created_at": "2025-09-01 10:00:00",
-      "updated_at": "2025-09-01 10:00:00"
+      "createdAt": "2025-09-01 10:00:00",
+      "updatedAt": "2025-09-01 10:00:00"
     },
     {
       "id": "7e0958f2-3951-429b-af7c-0d8178893bc7",
@@ -65,8 +65,8 @@
       "is_aadhaar_verified": false,
       "is_pan_verified": true,
       "is_driver_license_verified": true,
-      "created_at": "2025-09-01 10:00:00",
-      "updated_at": "2025-09-01 10:00:00"
+      "createdAt": "2025-09-01 10:00:00",
+      "updatedAt": "2025-09-01 10:00:00"
     },
     {
       "id": "61de5775-05c2-4b0a-80db-80c8c1e06957",
@@ -81,8 +81,8 @@
       "is_aadhaar_verified": true,
       "is_pan_verified": true,
       "is_driver_license_verified": true,
-      "created_at": "2025-09-01 10:00:00",
-      "updated_at": "2025-09-01 10:00:00"
+      "createdAt": "2025-09-01 10:00:00",
+      "updatedAt": "2025-09-01 10:00:00"
     },
     {
       "id": "32c100bf-a90a-491f-97c4-3f5f87253822",
@@ -97,8 +97,8 @@
       "is_aadhaar_verified": true,
       "is_pan_verified": true,
       "is_driver_license_verified": true,
-      "created_at": "2025-09-01 10:00:00",
-      "updated_at": "2025-09-01 10:00:00"
+      "createdAt": "2025-09-01 10:00:00",
+      "updatedAt": "2025-09-01 10:00:00"
     },
     {
       "id": "2fab162d-ded0-4900-877b-d67e286b1810",
@@ -113,8 +113,8 @@
       "is_aadhaar_verified": true,
       "is_pan_verified": true,
       "is_driver_license_verified": false,
-      "created_at": "2025-09-01 10:00:00",
-      "updated_at": "2025-09-01 10:00:00"
+      "createdAt": "2025-09-01 10:00:00",
+      "updatedAt": "2025-09-01 10:00:00"
     },
     {
       "id": "0fab69af-d5ab-498f-9e67-2d2b16401106",
@@ -129,8 +129,8 @@
       "is_aadhaar_verified": true,
       "is_pan_verified": true,
       "is_driver_license_verified": true,
-      "created_at": "2025-09-01 10:00:00",
-      "updated_at": "2025-09-01 10:00:00"
+      "createdAt": "2025-09-01 10:00:00",
+      "updatedAt": "2025-09-01 10:00:00"
     },
     {
       "id": "f8a52e1d-3b9c-4f2a-8e7d-1c2b3a4f5e6d",
@@ -145,8 +145,8 @@
       "is_aadhaar_verified": false,
       "is_pan_verified": false,
       "is_driver_license_verified": false,
-      "created_at": "2025-09-01 11:00:00",
-      "updated_at": "2025-09-01 11:00:00"
+      "createdAt": "2025-09-01 11:00:00",
+      "updatedAt": "2025-09-01 11:00:00"
     },
     {
       "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
@@ -161,8 +161,8 @@
       "is_aadhaar_verified": true,
       "is_pan_verified": false,
       "is_driver_license_verified": true,
-      "created_at": "2025-09-02 09:30:00",
-      "updated_at": "2025-09-02 09:30:00"
+      "createdAt": "2025-09-02 09:30:00",
+      "updatedAt": "2025-09-02 09:30:00"
     },
     {
       "id": "b2c3d4e5-f6g7-8901-bcde-f23456789012",
@@ -177,8 +177,8 @@
       "is_aadhaar_verified": false,
       "is_pan_verified": true,
       "is_driver_license_verified": false,
-      "created_at": "2025-09-02 14:15:00",
-      "updated_at": "2025-09-02 14:15:00"
+      "createdAt": "2025-09-02 14:15:00",
+      "updatedAt": "2025-09-02 14:15:00"
     },
     {
       "id": "c3d4e5f6-g7h8-9012-cdef-345678901234",
@@ -193,8 +193,8 @@
       "is_aadhaar_verified": true,
       "is_pan_verified": true,
       "is_driver_license_verified": true,
-      "created_at": "2025-09-03 16:45:00",
-      "updated_at": "2025-09-03 16:45:00"
+      "createdAt": "2025-09-03 16:45:00",
+      "updatedAt": "2025-09-03 16:45:00"
     },
     {
       "id": "d4e5f6g7-h8i9-0123-def4-56789012345",
@@ -209,8 +209,8 @@
       "is_aadhaar_verified": true,
       "is_pan_verified": false,
       "is_driver_license_verified": true,
-      "created_at": "2025-09-04 08:20:00",
-      "updated_at": "2025-09-04 08:20:00"
+      "createdAt": "2025-09-04 08:20:00",
+      "updatedAt": "2025-09-04 08:20:00"
     },
     {
       "id": "e5f6g7h8-i9j0-1234-ef56-789012345678",
@@ -225,8 +225,8 @@
       "is_aadhaar_verified": false,
       "is_pan_verified": false,
       "is_driver_license_verified": false,
-      "created_at": "2025-09-04 12:10:00",
-      "updated_at": "2025-09-04 12:10:00"
+      "createdAt": "2025-09-04 12:10:00",
+      "updatedAt": "2025-09-04 12:10:00"
     },
     {
       "id": "f6g7h8i9-j0k1-2345-fg67-890123456789",
@@ -241,18 +241,18 @@
       "is_aadhaar_verified": true,
       "is_pan_verified": true,
       "is_driver_license_verified": false,
-      "created_at": "2025-09-05 19:35:00",
-      "updated_at": "2025-09-05 19:35:00"
+      "createdAt": "2025-09-05 19:35:00",
+      "updatedAt": "2025-09-05 19:35:00"
     }
   ],
   "users": [
     {
       "id": "b7f370ce-eee1-4a20-af06-0774d5358d22",
       "email": "user1@example.com",
-      "phone_number": "+917185091921",
+      "phoneNumber": "+917185091921",
       "password_hash": "hashed_password_1",
-      "first_name": "Arjun",
-      "last_name": "Kumar",
+      "firstName": "Arjun",
+      "lastName": "Kumar",
       "city": "Mumbai",
       "state": "Maharashtra",
       "is_email_verified": true,
@@ -260,16 +260,16 @@
       "role": "driver",
       "role_description": "Professional driver",
       "status": "suspended",
-      "created_at": "2025-09-01 10:00:00",
-      "updated_at": "2025-09-30 04:21:53"
+      "createdAt": "2025-09-01 10:00:00",
+      "updatedAt": "2025-09-30 04:21:53"
     },
     {
       "id": "018fe39e-a8f6-41b8-9be4-1bf2626ba93d",
       "email": "user2@example.com",
-      "phone_number": "+918765432109",
+      "phoneNumber": "+918765432109",
       "password_hash": "hashed_password_2",
-      "first_name": "Priya",
-      "last_name": "Sharma",
+      "firstName": "Priya",
+      "lastName": "Sharma",
       "city": "Delhi",
       "state": "Delhi",
       "is_email_verified": true,
@@ -277,16 +277,16 @@
       "role": "driver",
       "role_description": "Experienced driver",
       "status": "active",
-      "created_at": "2025-09-01 10:00:00",
-      "updated_at": "2025-09-13 12:21:09"
+      "createdAt": "2025-09-01 10:00:00",
+      "updatedAt": "2025-09-13 12:21:09"
     },
     {
       "id": "b270c42f-7f20-4464-a0df-382f1684b167",
       "email": "user3@example.com",
-      "phone_number": "+919742519917",
+      "phoneNumber": "+919742519917",
       "password_hash": "hashed_password_3",
-      "first_name": "Rahul",
-      "last_name": "Reddy",
+      "firstName": "Rahul",
+      "lastName": "Reddy",
       "city": "Bangalore",
       "state": "Karnataka",
       "is_email_verified": true,
@@ -294,16 +294,16 @@
       "role": "driver",
       "role_description": "Registered driver",
       "status": "active",
-      "created_at": "2025-09-01 10:00:00",
-      "updated_at": "2025-09-01 10:00:00"
+      "createdAt": "2025-09-01 10:00:00",
+      "updatedAt": "2025-09-01 10:00:00"
     },
     {
       "id": "86d67536-94ec-4ae7-9b61-096b04372b9a",
       "email": "user4@example.com",
-      "phone_number": "+918658746897",
+      "phoneNumber": "+918658746897",
       "password_hash": "hashed_password_4",
-      "first_name": "Sneha",
-      "last_name": "Iyer",
+      "firstName": "Sneha",
+      "lastName": "Iyer",
       "city": "Hyderabad",
       "state": "Telangana",
       "is_email_verified": true,
@@ -311,16 +311,16 @@
       "role": "driver",
       "role_description": "Registered driver",
       "status": "active",
-      "created_at": "2025-09-01 10:00:00",
-      "updated_at": "2025-09-05 12:16:33"
+      "createdAt": "2025-09-01 10:00:00",
+      "updatedAt": "2025-09-05 12:16:33"
     },
     {
       "id": "e2438682-32cf-4519-bff9-ce6be649ea16",
       "email": "user5@example.com",
-      "phone_number": "+919237139161",
+      "phoneNumber": "+919237139161",
       "password_hash": "hashed_password_5",
-      "first_name": "Vikram",
-      "last_name": "Patel",
+      "firstName": "Vikram",
+      "lastName": "Patel",
       "city": "Chennai",
       "state": "Tamil Nadu",
       "is_email_verified": true,
@@ -328,16 +328,16 @@
       "role": "driver",
       "role_description": "Registered driver",
       "status": "active",
-      "created_at": "2025-09-01 10:00:00",
-      "updated_at": "2025-09-19 11:27:57"
+      "createdAt": "2025-09-01 10:00:00",
+      "updatedAt": "2025-09-19 11:27:57"
     },
     {
       "id": "051e745c-77d2-42ab-b9cd-4c3b2491522f",
       "email": "user6@example.com",
-      "phone_number": "+917533255968",
+      "phoneNumber": "+917533255968",
       "password_hash": "hashed_password_6",
-      "first_name": "Neha",
-      "last_name": "Mehta",
+      "firstName": "Neha",
+      "lastName": "Mehta",
       "city": "Mumbai",
       "state": "Maharashtra",
       "is_email_verified": true,
@@ -345,16 +345,16 @@
       "role": "driver",
       "role_description": "Registered driver",
       "status": "active",
-      "created_at": "2025-09-01 10:00:00",
-      "updated_at": "2025-09-01 10:00:00"
+      "createdAt": "2025-09-01 10:00:00",
+      "updatedAt": "2025-09-01 10:00:00"
     },
     {
       "id": "e5d528ed-a3bb-4205-95ef-bc328f6c4201",
       "email": "user7@example.com",
-      "phone_number": "+917651106686",
+      "phoneNumber": "+917651106686",
       "password_hash": "hashed_password_7",
-      "first_name": "Ravi",
-      "last_name": "Singh",
+      "firstName": "Ravi",
+      "lastName": "Singh",
       "city": "Delhi",
       "state": "Delhi",
       "is_email_verified": true,
@@ -362,16 +362,16 @@
       "role": "driver",
       "role_description": "Registered driver",
       "status": "active",
-      "created_at": "2025-09-01 10:00:00",
-      "updated_at": "2025-09-01 10:00:00"
+      "createdAt": "2025-09-01 10:00:00",
+      "updatedAt": "2025-09-01 10:00:00"
     },
     {
       "id": "a98b739d-aad9-459e-bd51-cfc5d963deca",
       "email": "user8@example.com",
-      "phone_number": "+918656984213",
+      "phoneNumber": "+918656984213",
       "password_hash": "hashed_password_8",
-      "first_name": "Anjali",
-      "last_name": "Jain",
+      "firstName": "Anjali",
+      "lastName": "Jain",
       "city": "Bangalore",
       "state": "Karnataka",
       "is_email_verified": true,
@@ -379,16 +379,16 @@
       "role": "driver",
       "role_description": "Registered driver",
       "status": "active",
-      "created_at": "2025-09-01 10:00:00",
-      "updated_at": "2025-09-29 07:56:58"
+      "createdAt": "2025-09-01 10:00:00",
+      "updatedAt": "2025-09-29 07:56:58"
     },
     {
       "id": "c9d8e7f6-5a4b-3c2d-1e0f-9g8h7i6j5k4l",
       "email": "user9@example.com",
-      "phone_number": "+917068971176",
+      "phoneNumber": "+917068971176",
       "password_hash": "hashed_password_9",
-      "first_name": "Manish",
-      "last_name": "Gupta",
+      "firstName": "Manish",
+      "lastName": "Gupta",
       "city": "Kolkata",
       "state": "West Bengal",
       "is_email_verified": false,
@@ -396,16 +396,16 @@
       "role": "driver",
       "role_description": "New driver",
       "status": "active",
-      "created_at": "2025-09-01 11:00:00",
-      "updated_at": "2025-09-01 11:00:00"
+      "createdAt": "2025-09-01 11:00:00",
+      "updatedAt": "2025-09-01 11:00:00"
     },
     {
       "id": "12345678-90ab-cdef-1234-567890abcdef",
       "email": "user10@example.com",
-      "phone_number": "+919123456789",
+      "phoneNumber": "+919123456789",
       "password_hash": "hashed_password_10",
-      "first_name": "Kavya",
-      "last_name": "Nair",
+      "firstName": "Kavya",
+      "lastName": "Nair",
       "city": "Kochi",
       "state": "Kerala",
       "is_email_verified": true,
@@ -413,16 +413,16 @@
       "role": "driver",
       "role_description": "Part-time driver",
       "status": "active",
-      "created_at": "2025-09-02 09:30:00",
-      "updated_at": "2025-09-02 09:30:00"
+      "createdAt": "2025-09-02 09:30:00",
+      "updatedAt": "2025-09-02 09:30:00"
     },
     {
       "id": "23456789-01bc-def2-3456-789012bcdef3",
       "email": "user11@example.com",
-      "phone_number": "+918234567890",
+      "phoneNumber": "+918234567890",
       "password_hash": "hashed_password_11",
-      "first_name": "Aditya",
-      "last_name": "Singh",
+      "firstName": "Aditya",
+      "lastName": "Singh",
       "city": "Jaipur",
       "state": "Rajasthan",
       "is_email_verified": true,
@@ -430,16 +430,16 @@
       "role": "driver",
       "role_description": "Full-time driver",
       "status": "suspended",
-      "created_at": "2025-09-02 14:15:00",
-      "updated_at": "2025-09-02 14:15:00"
+      "createdAt": "2025-09-02 14:15:00",
+      "updatedAt": "2025-09-02 14:15:00"
     },
     {
       "id": "34567890-12cd-ef34-5678-90123cdef456",
       "email": "user12@example.com",
-      "phone_number": "+917345678901",
+      "phoneNumber": "+917345678901",
       "password_hash": "hashed_password_12",
-      "first_name": "Deepika",
-      "last_name": "Rao",
+      "firstName": "Deepika",
+      "lastName": "Rao",
       "city": "Pune",
       "state": "Maharashtra",
       "is_email_verified": true,
@@ -447,16 +447,16 @@
       "role": "driver",
       "role_description": "Senior driver",
       "status": "active",
-      "created_at": "2025-09-03 16:45:00",
-      "updated_at": "2025-09-03 16:45:00"
+      "createdAt": "2025-09-03 16:45:00",
+      "updatedAt": "2025-09-03 16:45:00"
     },
     {
       "id": "45678901-23de-f456-7890-1234def56789",
       "email": "user13@example.com",
-      "phone_number": "+916456789012",
+      "phoneNumber": "+916456789012",
       "password_hash": "hashed_password_13",
-      "first_name": "Rajesh",
-      "last_name": "Verma",
+      "firstName": "Rajesh",
+      "lastName": "Verma",
       "city": "Lucknow",
       "state": "Uttar Pradesh",
       "is_email_verified": false,
@@ -464,16 +464,16 @@
       "role": "driver",
       "role_description": "Experienced driver",
       "status": "active",
-      "created_at": "2025-09-04 08:20:00",
-      "updated_at": "2025-09-04 08:20:00"
+      "createdAt": "2025-09-04 08:20:00",
+      "updatedAt": "2025-09-04 08:20:00"
     },
     {
       "id": "56789012-34ef-5678-9012-345ef6789012",
       "email": "user14@example.com",
-      "phone_number": "+915567890123",
+      "phoneNumber": "+915567890123",
       "password_hash": "hashed_password_14",
-      "first_name": "Sunita",
-      "last_name": "Agarwal",
+      "firstName": "Sunita",
+      "lastName": "Agarwal",
       "city": "Bhopal",
       "state": "Madhya Pradesh",
       "is_email_verified": true,
@@ -481,16 +481,16 @@
       "role": "driver",
       "role_description": "New driver",
       "status": "active",
-      "created_at": "2025-09-04 12:10:00",
-      "updated_at": "2025-09-04 12:10:00"
+      "createdAt": "2025-09-04 12:10:00",
+      "updatedAt": "2025-09-04 12:10:00"
     },
     {
       "id": "67890123-45fg-6789-0123-456fg7890123",
       "email": "user15@example.com",
-      "phone_number": "+914678901234",
+      "phoneNumber": "+914678901234",
       "password_hash": "hashed_password_15",
-      "first_name": "Amit",
-      "last_name": "Joshi",
+      "firstName": "Amit",
+      "lastName": "Joshi",
       "city": "Ahmedabad",
       "state": "Gujarat",
       "is_email_verified": true,
@@ -498,8 +498,8 @@
       "role": "driver",
       "role_description": "Professional driver",
       "status": "active",
-      "created_at": "2025-09-05 19:35:00",
-      "updated_at": "2025-09-05 19:35:00"
+      "createdAt": "2025-09-05 19:35:00",
+      "updatedAt": "2025-09-05 19:35:00"
     }
   ]
 }

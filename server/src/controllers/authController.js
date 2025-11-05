@@ -19,8 +19,8 @@ const publicUser = (row) => {
 
 async function signup(req, res) {
   try {
-    const { email, password, role, first_name, last_name } = req.body;
-    if (!email || !password || !role || !first_name) {
+    const { email, password, role, firstName, lastName } = req.body;
+    if (!email || !password || !role || !firstName) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -33,8 +33,8 @@ async function signup(req, res) {
     const id = uuid();
 
     await q(
-      "INSERT INTO users (id,email,password_hash,role,first_name,last_name,status) VALUES (?,?,?,?,?,?,?)",
-      [id, email, hash, role, first_name, last_name || null, "active"]
+      "INSERT INTO users (id,email,password_hash,role,firstName,lastName,status) VALUES (?,?,?,?,?,?,?)",
+      [id, email, hash, role, firstName, lastName || null, "active"]
     );
     const rows = await q("SELECT * FROM users WHERE id=?", [id]);
     res.status(201).json({ user: publicUser(rows[0]) });

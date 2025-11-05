@@ -6,30 +6,34 @@ import {
   StepVehicle,
   StepPayment,
 } from "./BookingSteps";
-import {
-  vehicleTypes,
-  paymentMethods,
-  createBooking,
-  calculateFare,
-  getCoordinatesFromAddress,
-} from "./bookingData";
+import { bookingService } from "../../../services/bookingService";
 import { toast } from "react-toastify";
-import { useAuthStore } from "../../../store/authStore";
+
+// --- MOCK GEOCODING ---
+// In a real app, you would replace this with an async call
+// to a service like Google Maps Geocoding API.
+const getCoordinatesFromAddress = async (address, type) => {
+  if (type === 'pickup') {
+    return { lat: 13.0827, lng: 80.2707 };
+  } else {
+    return { lat: 13.0674, lng: 80.2376 };
+  }
+};
 
 const BookCab = () => {
-  const user = useAuthStore((s) => s.user);
-  const token = useAuthStore((s) => s.token);
   const navigate = useNavigate();
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  
+  // Use camelCase here to match the backend DTO from the start
   const [bookingData, setBookingData] = useState({
-    pickup_address: "",
-    dropoff_address: "",
-    scheduled_date: "",
-    scheduled_time: "",
-    vehicle_type: "",
-    payment_method: "cash",
+    pickupAddress: "",
+    dropoffAddress: "",
+    scheduledDate: "", // Note: Our backend doesn't support this yet
+    scheduledTime: "", // Note: Our backend doesn't support this yet
+    vehicleCategory: "",
+    paymentMethod: "cash",
   });
 
   const updateField = (field, value) =>
@@ -42,56 +46,51 @@ const BookCab = () => {
     setLoading(true);
     
     try {
-      // Get coordinates from addresses
-      const pickupCoords = await getCoordinatesFromAddress(bookingData.pickupAddress);
-      const dropoffCoords = await getCoordinatesFromAddress(bookingData.dropoffAddress);
+      // 1. Get coordinates from addresses
+      const pickupCoords = await getCoordinatesFromAddress(bookingData.pickupAddress, "pickup");
+      const dropoffCoords = await getCoordinatesFromAddress(bookingData.dropoffAddress, "dropoff");
       
-      // Prepare payload for backend
+      // 2. Prepare payload for backend (MUST match RideRequestDTO.java)
       const payload = {
-        pickup_latitude: pickupCoords.lat,
-        pickup_longitude: pickupCoords.lng,
-        pickup_address: bookingData.pickupAddress,
-        dropoff_latitude: dropoffCoords.lat,
-        dropoff_longitude: dropoffCoords.lng,
-        dropoff_address: bookingData.dropoffAddress,
-        vehicle_type: bookingData.vehicleType.toUpperCase(), // Backend expects uppercase
+        pickupLat: pickupCoords.lat,
+        pickupLng: pickupCoords.lng,
+        pickupAddress: bookingData.pickupAddress,
+        dropoffLat: dropoffCoords.lat,
+        dropoffLng: dropoffCoords.lng,
+        dropoffAddress: bookingData.dropoffAddress,
+        vehicleCategory: bookingData.vehicleCategory.toUpperCase(),
       };
       
-      console.log('Creating booking with payload:', payload);
+      // 3. Call backend API (Axios handles errors in catch block)
+      const result = await bookingService.createBooking(payload);
       
-      // Call backend API
-      const result = await createBooking(payload, token);
+      // 'result' is the RideResponseDTO from the backend
+      toast.success("Booking created! Finding drivers...", {
+        theme: "dark",
+        autoClose: 3000,
+      });
       
-      if (result.success) {
-        toast.success("🎉 Booking created successfully! Finding nearby drivers...", {
-          theme: "dark",
-          autoClose: 3000,
-        });
-        
-        // Reset form
-        setBookingData({
-          pickup_address: "",
-          dropoff_address: "",
-          scheduled_date: "",
-          scheduled_time: "",
-          vehicle_type: "",
-          payment_method: "cash",
-        });
-        setStep(1);
-        
-        // Navigate to bookings page after 2 seconds
-        setTimeout(() => {
-          navigate("/rider/bookings");
-        }, 2000);
-      } else {
-        toast.error(`❌ ${result.error}`, {
-          theme: "dark",
-          autoClose: 5000,
-        });
-      }
+      // Reset form
+      setBookingData({
+        pickupAddress: "",
+        dropoffAddress: "",
+        scheduledDate: "",
+        scheduledTime: "",
+        vehicleCategory: "",
+        paymentMethod: "cash",
+      });
+      setStep(1);
+      
+      // Navigate to bookings page
+      setTimeout(() => {
+        navigate("/rider");
+      }, 2000);
+
     } catch (error) {
+      // 4. Handle errors from Axios
       console.error('Booking error:', error);
-      toast.error(`❌ ${error.message || 'Failed to create booking'}`, {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to create booking';
+      toast.error(`${errorMessage}`, {
         theme: "dark",
         autoClose: 5000,
       });

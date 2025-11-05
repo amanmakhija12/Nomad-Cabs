@@ -1,22 +1,21 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
+import api from "../../utils/api";
 
 const SignupForm = ({ onSuccess }) => {
   const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
+    firstName: "",
+    lastName: "",
     email: "",
+    phoneNumber: "",
     password: "",
     confirmPassword: "",
     role: "",
   });
   const [loading, setLoading] = useState(false);
 
-  const BASE_URL =
-    import.meta.env.VITE_BASE_URL || "http://localhost:8080/api/v1";
-
   const validate = () => {
-    if (!formData.first_name.trim()) {
+    if (!formData.firstName.trim()) {
       toast.error("First name required", { theme: "dark" });
       return false;
     }
@@ -27,6 +26,14 @@ const SignupForm = ({ onSuccess }) => {
     const emailOk = /.+@.+\..+/.test(formData.email.trim());
     if (!emailOk) {
       toast.error("Invalid email format", { theme: "dark" });
+      return false;
+    }
+    if (!formData.phoneNumber.trim()) {
+      toast.error("Phone number required", { theme: "dark" });
+      return false;
+    }
+    if (formData.phoneNumber.length<10) {
+      toast.error("Invalid phone number", { theme: "dark" });
       return false;
     }
     if (!formData.role) {
@@ -49,31 +56,34 @@ const SignupForm = ({ onSuccess }) => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validate()) return;
-  try {
+    e.preventDefault();
+    if (!validate()) return;
+    
     setLoading(true);
-    const res = await fetch(`${BASE_URL}/auth/signup`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        email: formData.email,
-        password: formData.password,
-        role: formData.role.toUpperCase(), 
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Signup failed");
-    toast.success("Account created! Please login.", { theme: "dark" });
-    onSuccess?.();
-  } catch (err) {
-    toast.error(err.message, { theme: "dark" });
-  } finally {
-    setLoading(false);
-  }
-};
+    
+    const payload = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      phoneNumber: formData.phoneNumber,
+      password: formData.password,
+      role: formData.role.toUpperCase(),
+    };
+
+    try {
+      await api.post("/auth/register", payload);
+      
+      toast.success("Account created! Please login.", { theme: "dark" });
+      onSuccess?.();
+      
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || err.response?.data || "Signup failed";
+      toast.error(errorMessage, { theme: "dark" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <form
       className="flex gap-3 flex-col mt-5 min-w-100"
@@ -82,18 +92,18 @@ const SignupForm = ({ onSuccess }) => {
     >
       <input
         type="text"
-        name="first_name"
+        name="firstName"
         placeholder="First name"
         className="w-full p-2 border text-white rounded-md mb-2 bg-transparent"
-        value={formData.first_name}
+        value={formData.firstName}
         onChange={handleChange}
       />
       <input
         type="text"
-        name="last_name"
+        name="lastName"
         placeholder="Last name"
         className="w-full p-2 border text-white rounded-md mb-2 bg-transparent"
-        value={formData.last_name}
+        value={formData.lastName}
         onChange={handleChange}
       />
       <input
@@ -102,6 +112,14 @@ const SignupForm = ({ onSuccess }) => {
         placeholder="Enter email"
         className="w-full p-2 border text-white rounded-md mb-2 bg-transparent"
         value={formData.email}
+        onChange={handleChange}
+      />
+      <input
+        type="tel"
+        name="phoneNumber"
+        placeholder="Phone number"
+        className="w-full p-2 border text-white rounded-md mb-2 bg-transparent"
+        value={formData.phoneNumber}
         onChange={handleChange}
       />
       <input

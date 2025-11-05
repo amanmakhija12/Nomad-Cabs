@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { toast, Bounce } from "react-toastify";
-import LocationPricingCard from "./LocationPricingCard";
+import VehicleCategoryPricingCard from "./VehicleCategoryPricingCard";
 import CommissionCard from "./CommissionCard";
+import { fareConfigService, commissionService } from "../../../services/adminService";
 
 const ManageFare = () => {
-  const [locationPricing, setLocationPricing] = useState([]);
+  const [fareConfigs, setFareConfigs] = useState([]);
   const [commissionStructure, setCommissionStructure] = useState([]);
   const [loading, setLoading] = useState(false);
   const hasShownErrorRef = useRef(false);
@@ -12,20 +13,21 @@ const ManageFare = () => {
   const fetchFareData = useCallback(async (silent = false) => {
     try {
       setLoading(true);
-      const locationResponse = await fetch(
-        "http://localhost:3008/location_pricing"
-      );
-      const locationData = await locationResponse.json();
-      const commissionResponse = await fetch(
-        "http://localhost:3008/commission_structure"
-      );
-      const commissionData = await commissionResponse.json();
-      setLocationPricing(locationData || []);
-      setCommissionStructure(commissionData || []);
+      
+      // Use Promise.all to fetch both in parallel
+      const [fareResponse, commissionResponse] = await Promise.all([
+        fareConfigService.getAllFares(),
+        commissionService.getAllCommission()
+      ]);
+      
+      // Axios response is in .data
+      setFareConfigs(fareResponse || []); 
+      setCommissionStructure(commissionResponse || []);
+      
     } catch (error) {
       console.error("Error fetching fare data:", error);
       if (!silent && !hasShownErrorRef.current) {
-        toast.error("Failed to fetch fare data", {
+        toast.error(error.message || "Failed to fetch fare data", {
           theme: "dark",
           transition: Bounce,
           position: "top-right",
@@ -39,7 +41,6 @@ const ManageFare = () => {
 
   useEffect(() => {
     fetchFareData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading) {
@@ -60,12 +61,12 @@ const ManageFare = () => {
           Fare Board
         </h1>
         <p className="text-white/50 mt-3 text-sm md:text-base">
-          Manage location pricing & commission structure
+          Manage vehicle category pricing & commission structure
         </p>
         <div className="mt-6 flex items-center gap-4 text-[11px] uppercase tracking-wider text-white/35">
           <span>
-            Locations:{" "}
-            <strong className="text-white/70">{locationPricing.length}</strong>
+            Vehicle Category:{" "}
+            <strong className="text-white/70">{fareConfigs.length}</strong>
           </span>
           <span>
             Commission Tiers:{" "}
@@ -76,14 +77,16 @@ const ManageFare = () => {
         </div>
       </div>
 
-      <LocationPricingCard
-        locationPricing={locationPricing}
-        setLocationPricing={setLocationPricing}
+      <VehicleCategoryPricingCard
+        fareConfigs={fareConfigs}
+        setFareConfigs={setFareConfigs}
+        fareConfigService={fareConfigService}
       />
 
       <CommissionCard
         commissionStructure={commissionStructure}
         setCommissionStructure={setCommissionStructure}
+        commissionService={commissionService}
       />
     </div>
   );

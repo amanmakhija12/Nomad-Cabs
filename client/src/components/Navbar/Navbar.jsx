@@ -36,8 +36,8 @@ const Navbar = () => {
                 </button>
               </Link>
               <span className="text-sm font-medium text-white/90">
-                {user.first_name}
-                {user.last_name ? ` ${user.last_name}` : ""}
+                {user.firstName}
+                {user.lastName ? ` ${user.lastName}` : ""}
               </span>
 
               <button

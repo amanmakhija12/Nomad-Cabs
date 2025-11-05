@@ -5,47 +5,47 @@
       "city": "coimbatore",
       "state": "tamil nadu",
       "price_per_km": 13,
-      "created_at": "2025-09-01T10:00:00Z",
-      "updated_at": "2025-09-13T12:49:27.688Z"
+      "createdAt": "2025-09-01T10:00:00Z",
+      "updatedAt": "2025-09-13T12:49:27.688Z"
     },
     {
       "id": "2",
       "city": "chennai",
       "state": "tamil nadu",
       "price_per_km": 20,
-      "created_at": "2025-09-01T10:00:00Z",
-      "updated_at": "2025-09-08T17:25:24.826Z"
+      "createdAt": "2025-09-01T10:00:00Z",
+      "updatedAt": "2025-09-08T17:25:24.826Z"
     },
     {
       "id": "3",
       "city": "bangalore",
       "state": "karnataka",
       "price_per_km": 18,
-      "created_at": "2025-09-01T10:00:00Z",
-      "updated_at": "2025-09-01T10:00:00Z"
+      "createdAt": "2025-09-01T10:00:00Z",
+      "updatedAt": "2025-09-01T10:00:00Z"
     },
     {
       "id": "4",
       "city": "mumbai",
       "state": "maharashtra",
       "price_per_km": 20,
-      "created_at": "2025-09-01T10:00:00Z",
-      "updated_at": "2025-09-01T10:00:00Z"
+      "createdAt": "2025-09-01T10:00:00Z",
+      "updatedAt": "2025-09-01T10:00:00Z"
     },
     {
       "id": "5",
       "city": "hyderabad",
       "state": "telangana",
       "price_per_km": 14,
-      "created_at": "2025-09-01T10:00:00Z",
-      "updated_at": "2025-09-01T10:00:00Z"
+      "createdAt": "2025-09-01T10:00:00Z",
+      "updatedAt": "2025-09-01T10:00:00Z"
     },
     {
       "city": "bareilly",
       "state": "uttar pradesh",
       "price_per_km": 9,
-      "created_at": "2025-09-19T08:56:47.848Z",
-      "updated_at": "2025-09-19T08:56:47.848Z",
+      "createdAt": "2025-09-19T08:56:47.848Z",
+      "updatedAt": "2025-09-19T08:56:47.848Z",
       "id": "0HB-8n8"
     }
   ],
@@ -56,8 +56,8 @@
       "max_value": 200,
       "commission_percentage": 5,
       "description": "Up to ₹100",
-      "created_at": "2025-09-01T10:00:00Z",
-      "updated_at": "2025-09-13T12:46:23.010Z"
+      "createdAt": "2025-09-01T10:00:00Z",
+      "updatedAt": "2025-09-13T12:46:23.010Z"
     },
     {
       "id": "2",
@@ -65,8 +65,8 @@
       "max_value": 500,
       "commission_percentage": 10,
       "description": "₹101 to ₹500",
-      "created_at": "2025-09-01T10:00:00Z",
-      "updated_at": "2025-09-08T17:22:55.365Z"
+      "createdAt": "2025-09-01T10:00:00Z",
+      "updatedAt": "2025-09-08T17:22:55.365Z"
     },
     {
       "id": "3",
@@ -74,8 +74,8 @@
       "max_value": 10000,
       "commission_percentage": 30,
       "description": "₹501 to ₹10000",
-      "created_at": "2025-09-01T10:00:00Z",
-      "updated_at": "2025-09-24T00:15:34.247Z"
+      "createdAt": "2025-09-01T10:00:00Z",
+      "updatedAt": "2025-09-24T00:15:34.247Z"
     }
   ]
 }

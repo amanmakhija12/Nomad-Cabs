@@ -1,8 +1,15 @@
 import { useState } from "react";
-import { toast, Bounce } from "react-toastify";
+import { toast } from "react-toastify";
+import { Plus, Save, X, Edit, Trash2 } from "lucide-react";
 
-const CommissionCard = ({ commissionStructure, setCommissionStructure }) => {
+const CommissionCard = ({ commissionStructure, setCommissionStructure, commissionService }) => {
   const [editingCommission, setEditingCommission] = useState(null);
+  const [newTier, setNewTier] = useState({
+    description: "",
+    minValue: "",
+    maxValue: "",
+    commissionPercentage: "",
+  });
 
   const inputBase =
     "h-11 w-full rounded-lg bg-[#1b1b1b] border border-white/10 text-sm px-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-white/15";
@@ -12,37 +19,59 @@ const CommissionCard = ({ commissionStructure, setCommissionStructure }) => {
   };
 
   const handleCommissionSave = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:3008/commission_structure/${editingCommission.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...editingCommission,
-            updated_at: new Date().toISOString(),
-          }),
-        }
-      );
+    const payload = {
+      description: editingCommission.description,
+      minValue: parseFloat(editingCommission.min_value),
+      maxValue: parseFloat(editingCommission.max_value),
+      commissionPercentage: parseFloat(editingCommission.commission_percentage),
+    };
 
-      if (response.ok) {
-        setCommissionStructure((prev) =>
-          prev.map((comm) =>
-            comm.id === editingCommission.id ? editingCommission : comm
-          )
-        );
-        setEditingCommission(null);
-        toast.success("Commission updated", {
-          theme: "dark",
-          transition: Bounce,
-        });
-      }
+    try {
+      const updatedTier = await commissionService.updateCommission(editingCommission.id, payload);
+
+      setCommissionStructure((prev) =>
+        prev.map((comm) =>
+          comm.id === updatedTier.id ? updatedTier : comm
+        )
+      );
+      setEditingCommission(null);
+      toast.success("Commission updated", { theme: "dark" });
     } catch (error) {
       console.error("Error updating commission:", error);
-      toast.error("Failed to update commission", {
-        theme: "dark",
-        transition: Bounce,
-      });
+      toast.error(error.message || "Failed to update commission", { theme: "dark" });
+    }
+  };
+  
+  const handleCommissionDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this tier?")) return;
+    
+    try {
+      await commissionService.deleteCommission(id);
+      setCommissionStructure((prev) => prev.filter((comm) => comm.id !== id));
+      toast.success("Commission tier deleted", { theme: "dark" });
+    } catch (error) {
+      console.error("Error deleting commission:", error);
+      toast.error(error.message || "Failed to delete commission", { theme: "dark" });
+    }
+  };
+
+  const handleCommissionAdd = async (e) => {
+    e.preventDefault();
+    const payload = {
+      description: newTier.description,
+      minValue: parseFloat(newTier.minValue),
+      maxValue: parseFloat(newTier.maxValue),
+      commissionPercentage: parseFloat(newTier.commissionPercentage),
+    };
+
+    try {
+      const addedTier = await commissionService.addCommission(payload);
+      setCommissionStructure((prev) => [...prev, addedTier]);
+      setNewTier({ description: "", minValue: "", maxValue: "", commissionPercentage: "" });
+      toast.success("New commission tier added", { theme: "dark" });
+    } catch (error) {
+      console.error("Error adding commission:", error);
+      toast.error(error.message || "Failed to add commission", { theme: "dark" });
     }
   };
 
@@ -52,10 +81,10 @@ const CommissionCard = ({ commissionStructure, setCommissionStructure }) => {
 
   const calculateCommission = (fareAmount) => {
     for (let tier of commissionStructure) {
-      if (fareAmount >= tier.min_value && fareAmount <= tier.max_value) {
+      if (fareAmount >= tier.minValue && fareAmount <= tier.maxValue) {
         return {
-          percentage: tier.commission_percentage,
-          amount: (fareAmount * tier.commission_percentage) / 100,
+          percentage: tier.commissionPercentage,
+          amount: (fareAmount * tier.commissionPercentage) / 100,
           tier: tier.description,
         };
       }
@@ -116,18 +145,18 @@ const CommissionCard = ({ commissionStructure, setCommissionStructure }) => {
                   {editingCommission?.id === commission.id ? (
                     <input
                       type="number"
-                      value={editingCommission.min_value}
+                      value={editingCommission.minValue}
                       onChange={(e) =>
                         setEditingCommission((prev) => ({
                           ...prev,
-                          min_value: parseFloat(e.target.value),
+                          min_value: e.target.value,
                         }))
                       }
                       className={inputBase}
                     />
                   ) : (
                     <span className="text-white font-medium">
-                      ₹{commission.min_value}
+                      ₹{commission.minValue.toFixed(2)}
                     </span>
                   )}
                 </td>
@@ -135,18 +164,18 @@ const CommissionCard = ({ commissionStructure, setCommissionStructure }) => {
                   {editingCommission?.id === commission.id ? (
                     <input
                       type="number"
-                      value={editingCommission.max_value}
+                      value={editingCommission.maxValue}
                       onChange={(e) =>
                         setEditingCommission((prev) => ({
                           ...prev,
-                          max_value: parseFloat(e.target.value),
+                          max_value: e.target.value,
                         }))
                       }
                       className={inputBase}
                     />
                   ) : (
                     <span className="text-white font-medium">
-                      ₹{commission.max_value}
+                      ₹{commission.maxValue.toFixed(2)}
                     </span>
                   )}
                 </td>
@@ -154,49 +183,65 @@ const CommissionCard = ({ commissionStructure, setCommissionStructure }) => {
                   {editingCommission?.id === commission.id ? (
                     <input
                       type="number"
-                      step="0.01"
-                      value={editingCommission.commission_percentage}
+                      step="0.1"
+                      value={editingCommission.commissionPercentage}
                       onChange={(e) =>
                         setEditingCommission((prev) => ({
                           ...prev,
-                          commission_percentage: parseFloat(e.target.value),
+                          commission_percentage: e.target.value,
                         }))
                       }
                       className={inputBase}
                     />
                   ) : (
                     <span className="text-white font-medium">
-                      {commission.commission_percentage}%
+                      {commission.commissionPercentage}%
                     </span>
                   )}
                 </td>
                 <td className="px-5 py-3 align-middle">
                   {editingCommission?.id === commission.id ? (
                     <div className="flex gap-2">
-                      <button
-                        onClick={handleCommissionSave}
-                        className="h-9 px-4 rounded-lg bg-white text-black text-xs font-semibold hover:shadow-lg transition"
-                      >
-                        Save
+                      <button onClick={handleCommissionSave} className="h-9 w-9 flex items-center justify-center rounded-lg bg-white text-black hover:shadow-lg transition">
+                        <Save size={16} />
                       </button>
-                      <button
-                        onClick={handleCommissionCancel}
-                        className="h-9 px-4 rounded-lg bg-white/10 text-white text-xs font-semibold border border-white/15 hover:bg-white/15 transition"
-                      >
-                        Cancel
+                      <button onClick={handleCommissionCancel} className="h-9 w-9 flex items-center justify-center rounded-lg bg-white/10 text-white border border-white/15 hover:bg-white/15 transition">
+                        <X size={16} />
                       </button>
                     </div>
                   ) : (
-                    <button
-                      onClick={() => handleCommissionEdit(commission)}
-                      className="h-9 px-4 rounded-lg bg-white/10 text-white text-xs font-semibold border border-white/15 hover:bg-white/15 transition"
-                    >
-                      Edit
-                    </button>
+                    <div className="flex gap-2">
+                      <button onClick={() => handleCommissionEdit(commission)} className="h-9 w-9 flex items-center justify-center rounded-lg bg-white/10 text-white border border-white/15 hover:bg-white/15 transition">
+                        <Edit size={16} />
+                      </button>
+                      <button onClick={() => handleCommissionDelete(commission.id)} className="h-9 w-9 flex items-center justify-center rounded-lg bg-red-900/40 text-red-300 border border-red-700 hover:bg-red-900/60 transition">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   )}
                 </td>
               </tr>
             ))}
+            
+            <tr className="border-t-2 border-white/10 bg-[#1f1f1f]">
+              <td className="px-5 py-3">
+                <input type="text" placeholder="New Tier (e.g., 0-500)" value={newTier.description} onChange={(e) => setNewTier(prev => ({...prev, description: e.target.value}))} className={inputBase} />
+              </td>
+              <td className="px-5 py-3">
+                <input type="number" placeholder="0" value={newTier.minValue} onChange={(e) => setNewTier(prev => ({...prev, minValue: e.target.value}))} className={inputBase} />
+              </td>
+              <td className="px-5 py-3">
+                <input type="number" placeholder="500" value={newTier.maxValue} onChange={(e) => setNewTier(prev => ({...prev, maxValue: e.target.value}))} className={inputBase} />
+              </td>
+              <td className="px-5 py-3">
+                <input type="number" step="0.1" placeholder="15.0" value={newTier.commissionPercentage} onChange={(e) => setNewTier(prev => ({...prev, commissionPercentage: e.target.value}))} className={inputBase} />
+              </td>
+              <td className="px-5 py-3">
+                <button onClick={handleCommissionAdd} className="h-9 w-full px-4 rounded-lg bg-emerald-500 text-black text-xs font-semibold hover:bg-emerald-400 transition flex items-center justify-center gap-2">
+                  <Plus size={16} /> Add Tier
+                </button>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>

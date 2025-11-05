@@ -82,11 +82,11 @@ const VehicleDetailModal = ({ vehicle, onClose }) => {
               />
               <InfoRow
                 label="Created At"
-                value={formatDateSafe(vehicle.created_at)}
+                value={formatDateSafe(vehicle.createdAt)}
               />
               <InfoRow
                 label="Last Updated"
-                value={formatDateSafe(vehicle.updated_at)}
+                value={formatDateSafe(vehicle.updatedAt)}
               />
             </InfoPanel>
           </div>

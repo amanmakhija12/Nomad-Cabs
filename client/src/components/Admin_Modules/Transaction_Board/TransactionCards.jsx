@@ -110,10 +110,10 @@ const TransactionCards = ({ transaction, onClose }) => {
             <div className="mt-2">
               <span
                 className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadge(
-                  transaction.booking_status
+                  transaction.bookingStatus
                 )}`}
               >
-                {transaction.booking_status}
+                {transaction.bookingStatus}
               </span>
             </div>
           </div>
@@ -126,7 +126,7 @@ const TransactionCards = ({ transaction, onClose }) => {
                 Pickup Location
               </label>
               <div className="text-stone-900 font-medium">
-                {transaction.pickup_address}
+                {transaction.pickupAddress}
               </div>
               <div className="text-xs text-stone-500 mt-1">
                 📍 {transaction.pickup_lat}, {transaction.pickup_lng}
@@ -239,7 +239,7 @@ const TransactionCards = ({ transaction, onClose }) => {
               </label>
               <div className="text-stone-900 font-medium">
                 🗓️{" "}
-                {formatDateSafe(transaction.created_at, {
+                {formatDateSafe(transaction.createdAt, {
                   locale: "en-IN",
                   timeZone: "Asia/Kolkata",
                   variant: "datetime",
@@ -255,7 +255,7 @@ const TransactionCards = ({ transaction, onClose }) => {
               </label>
               <div className="text-stone-900 font-medium">
                 🔄{" "}
-                {formatDateSafe(transaction.updated_at, {
+                {formatDateSafe(transaction.updatedAt, {
                   locale: "en-IN",
                   timeZone: "Asia/Kolkata",
                   variant: "datetime",
