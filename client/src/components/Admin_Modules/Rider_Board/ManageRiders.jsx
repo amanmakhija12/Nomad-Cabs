@@ -45,29 +45,10 @@ const ManageRiders = () => {
 
         // Call your admin service with the filters
         const data = await riderService.getAllRiders(params); 
-        
-        // Transform and set data
-        const transformedRiders = data.content.map(user => ({
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          phoneNumber: user.phoneNumber,
-          city: user.city,
-          state: user.state,
-          role: user.role?.toLowerCase(),
-          status: user.status?.toLowerCase(),
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt,
-          is_email_verified: user.isEmailVerified,
-          is_phone_verified: false, 
-          role_description: '', 
-        }));
 
-        setRiders(transformedRiders);
+        setRiders(data.content);
         setTotalPages(data.totalPages);
         setTotalItems(data.totalElements);
-        
       } catch (e) {
         console.error('Failed to fetch riders:', e);
         toast.error('Failed to fetch riders: ' + e.message, { theme: 'dark', transition: Bounce });

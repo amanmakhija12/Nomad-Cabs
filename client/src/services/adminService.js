@@ -41,10 +41,21 @@ export const riderService = {
 // DRIVER MANAGEMENT
 // ============================================
 export const driverService = {
-  async getAllDrivers(page = 0, size = 10) {
-    // Calls GET /api/v1/admin/drivers
-    const response = await api.get(`/admin/drivers?page=${page}&size=${size}`);
-    return response.data; // Returns Page object
+   async getAllDrivers(filters = {}) {
+    // We will build the query parameters from the filters object
+    const params = new URLSearchParams();
+
+    // Add all the keys from your filters object
+    // (role, page, size, filterType, searchTerm)
+    if (filters.role) params.append('role', filters.role);
+    if (filters.page) params.append('page', filters.page);
+    if (filters.size) params.append('size', filters.size);
+    if (filters.filterType) params.append('filterType', filters.filterType);
+    if (filters.searchTerm) params.append('searchTerm', filters.searchTerm);
+    
+    // Axios will automatically add the '?'
+    const response = await api.get('/admin/users', { params });
+    return response.data; // Returns the Page object
   },
   async getDriverById(driverId) {
     // Calls GET /api/v1/admin/drivers/{driverId}

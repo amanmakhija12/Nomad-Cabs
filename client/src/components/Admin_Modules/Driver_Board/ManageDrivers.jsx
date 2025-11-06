@@ -4,6 +4,7 @@ import ManageCard from "./Manage_Driver_Card/ManageCard";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { driverService, userService } from "../../../services/adminService";
 import { toast, Bounce } from "react-toastify";
+import { useDebounce } from "../../../hooks/useDebounce";
 
 const filterOptions = [
   { label: "Aadhaar", value: "aadhaarNumber" },
@@ -14,13 +15,19 @@ const ManageDrivers = () => {
   const [selectedDriver, setSelectedDriver] = useState(null);
   const openDriver = (driver) => setSelectedDriver(driver);
   const closeDriver = () => setSelectedDriver(null);
+
   const [drivers, setDrivers] = useState([]);
-  const [allDrivers, setAllDrivers] = useState([]);
+
   const [filterType, setFilterType] = useState(filterOptions[0].value);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const driversPerPage = 9;
+
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   useEffect(() => {
     if (selectedDriver) {
@@ -30,94 +37,88 @@ const ManageDrivers = () => {
     }
   }, [selectedDriver]);
 
-  const fetchData = async () => {
-    try {
+  useEffect(() => {
+    const fetchData = async () => {
       setLoading(true);
+      try {
+        const params = {
+          page: currentPage - 1,
+          size: 10,
+          role: "DRIVER",
+          
+          // Add search filters only if searchTerm exists
+          filterType: debouncedSearchTerm ? filterType : null,
+          searchTerm: debouncedSearchTerm ? debouncedSearchTerm : null,
+        };
 
-      // Get all drivers from backend
-      const driversData = await driverService.getAllDrivers();
+        const driversData = await driverService.getAllDrivers(params);
+        console.log("Fetched drivers data:", driversData);
 
-      // Enrich with user data
-      const enrichedDrivers = await Promise.all(
-        driversData.content.map(async (driver) => {
-          try {
-            const userData = await userService.getUserById(driver.userId);
+        const enrichedDrivers = await Promise.all(
+          driversData.content.map(async (driver) => {
+            try {
+              const userData = await userService.getUserById(driver.id);
+              return {
+                id: driver.id,
+                user_id: driver.id,
+                full_name: `${userData.firstName} ${userData.lastName}`.trim(),
+                email: userData.email,
+                phoneNumber: userData.phoneNumber || "",
+                aadhaarNumber: driver.aadhaarNumber,
+                dlNumber: driver.dlNumber,
+                driver_license: driver.dlNumber,
+                driver_license_expiry: driver.dlExpiryDate,
+                pan_card: "",
+                aadhar_card: driver.aadhaarNumber,
+                is_aadhaar_verified: driver.verificationStatus === "APPROVED",
+                is_pan_verified: false,
+                is_driver_license_verified:
+                  driver.verificationStatus === "APPROVED",
+                verification_status: driver.verificationStatus,
+              };
+            } catch (err) {
+              console.error("Error fetching user for driver:", driver.id, err);
+              return {
+                id: driver.id,
+                user_id: driver.userId,
+                full_name: "Unknown Driver",
+                email: "N/A",
+                phoneNumber: "",
+                aadhaarNumber: driver.aadhaarNumber,
+                dlNumber: driver.dlNumber,
+                driver_license: driver.dlNumber,
+                driver_license_expiry: driver.dlExpiryDate,
+                pan_card: "",
+                aadhar_card: driver.aadhaarNumber,
+                is_aadhaar_verified: false,
+                is_pan_verified: false,
+                is_driver_license_verified: false,
+                verification_status: driver.verificationStatus,
+              };
+            }
+          })
+        );
 
-            return {
-              id: driver.id,
-              user_id: driver.userId,
-              full_name: `${userData.firstName} ${userData.lastName}`.trim(),
-              email: userData.email,
-              phoneNumber: userData.phoneNumber || "",
-              aadhaarNumber: driver.aadhaarNumber,
-              dlNumber: driver.dlNumber,
-              driver_license: driver.dlNumber,
-              driver_license_expiry: driver.dlExpiryDate,
-              pan_card: "", // Backend doesn't have PAN
-              aadhar_card: driver.aadhaarNumber,
-              is_aadhaar_verified: driver.verificationStatus === "APPROVED",
-              is_pan_verified: false,
-              is_driver_license_verified: driver.verificationStatus === "APPROVED",
-              verification_status: driver.verificationStatus,
-            };
-          } catch (err) {
-            console.error("Error fetching user for driver:", driver.id, err);
-            return {
-              id: driver.id,
-              user_id: driver.userId,
-              full_name: "Unknown Driver",
-              email: "N/A",
-              phoneNumber: "",
-              aadhaarNumber: driver.aadhaarNumber,
-              dlNumber: driver.dlNumber,
-              driver_license: driver.dlNumber,
-              driver_license_expiry: driver.dlExpiryDate,
-              pan_card: "",
-              aadhar_card: driver.aadhaarNumber,
-              is_aadhaar_verified: false,
-              is_pan_verified: false,
-              is_driver_license_verified: false,
-              verification_status: driver.verificationStatus,
-            };
-          }
-        })
-      );
+        setDrivers(enrichedDrivers);
+        setTotalPages(driversData.totalPages);
+        setTotalItems(driversData.totalElements);
+      } catch (error) {
+        console.error("Error fetching drivers:", error);
+        toast.error("Failed to fetch drivers", {
+          theme: "dark",
+          transition: Bounce,
+        });
+        setDrivers([]);
+        setTotalPages(1);
+        setTotalItems(0);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      setAllDrivers(enrichedDrivers);
-      setDrivers(enrichedDrivers);
-      setCurrentPage(1);
-    } catch (error) {
-      console.error("Error fetching drivers:", error);
-      toast.error("Failed to fetch drivers", {
-        theme: "dark",
-        transition: Bounce,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
     fetchData();
-  }, []);
-
-  useEffect(() => {
-    const term = searchTerm.trim().toLowerCase();
-    if (!term) {
-      setDrivers(allDrivers);
-    } else {
-      const filtered = allDrivers.filter((driver) =>
-        (driver[filterType] || "").toLowerCase().includes(term)
-      );
-      setDrivers(filtered);
-    }
-    setCurrentPage(1);
-  }, [searchTerm, filterType, allDrivers]);
-
-  const indexOfLastDriver = currentPage * driversPerPage;
-  const indexOfFirstDriver = indexOfLastDriver - driversPerPage;
-  const currentDrivers = drivers.slice(indexOfFirstDriver, indexOfLastDriver);
-  const totalPages = Math.ceil(drivers.length / driversPerPage) || 1;
+    // This effect now depends on the debounced term and page
+  }, [currentPage, debouncedSearchTerm, filterType]);
 
   return (
     <div className="p-6 flex flex-col min-h-[500px] pb-10 bg-[#151212] text-white rounded-3xl">
@@ -179,8 +180,8 @@ const ManageDrivers = () => {
         <span>
           {loading
             ? "Loading..."
-            : drivers.length > 0
-            ? `Found ${drivers.length} driver${drivers.length !== 1 ? "s" : ""}`
+            : totalItems > 0
+            ? `Found ${totalItems} driver${totalItems !== 1 ? "s" : ""}`
             : "No drivers found"}
         </span>
         <span>
@@ -193,11 +194,15 @@ const ManageDrivers = () => {
         <div className="flex items-center justify-center py-20">
           <div className="animate-spin h-12 w-12 rounded-full border-2 border-white/10 border-t-white" />
         </div>
-      ) : (
+      ) : drivers.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {currentDrivers.map((driver) => (
+          {drivers.map((driver) => (
             <ManageCard key={driver.id} driver={driver} onClick={openDriver} />
           ))}
+        </div>
+      ) : (
+        <div className="flex items-center justify-center py-20 text-white/50">
+          No drivers found
         </div>
       )}
 
