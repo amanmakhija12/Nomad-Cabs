@@ -36,8 +36,6 @@ const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
         return Car;
       case "Manage Vehicles":
         return Car;
-      case "Grievances":
-        return MessageSquare;
       case "Manage Account":
         return ShieldCheck;
       case "Rider Board":
@@ -46,8 +44,6 @@ const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
         return Car;
       case "Verification":
         return ShieldCheck;
-      case "Feedback":
-        return MessageSquare;
       case "Fare Board":
         return IndianRupee;
       case "Transactions":

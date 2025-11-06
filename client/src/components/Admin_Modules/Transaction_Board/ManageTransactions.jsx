@@ -3,106 +3,77 @@ import { toast, Bounce } from "react-toastify";
 import { formatDateSafe } from "../../../utils/DateUtil";
 import TransactionCards from "./TransactionCards";
 import {ChevronLeft,ChevronRight} from 'lucide-react'
+import { transactionService } from "../../../services/adminService";
+import { useDebounce } from "../../../hooks/useDebounce";
 
 const ManageTransactions = () => {
-  const [transactions, setTransactions] = useState([]);
-  const [filteredTransactions, setFilteredTransactions] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [transactionsData, setTransactionsData] = useState({ content: [], totalPages: 0, totalElements: 0 });
+  const [loading, setLoading] = useState(true);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
-  const [isFiltered, setIsFiltered] = useState(false);
-  const hasShownErrorRef = useRef(false);
+
   // filters
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [fareFilter, setFareFilter] = useState("all");
   const [fareValue, setFareValue] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+
   // pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 10;
+  
+  // --- 2. DEBOUNCE inputs to prevent API spam ---
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const debouncedFareValue = useDebounce(fareValue, 500);
+  const hasShownErrorRef = useRef(false);
 
+  // --- 3. REFACTORED fetchTransactions ---
   const fetchTransactions = useCallback(async (silent = false) => {
     try {
       setLoading(true);
-      hasShownErrorRef.current = false;
-      const response = await fetch("http://localhost:4001/bookings");
-      const bookingsData = await response.json();
-      const usersResponse = await fetch("http://localhost:4001/users");
-      const usersData = await usersResponse.json();
-      const driversResponse = await fetch("http://localhost:4001/drivers");
-      const driversData = await driversResponse.json();
+      if(!silent) hasShownErrorRef.current = false;
 
-      const usersMap = usersData.reduce((acc, u) => { acc[u.id] = u; return acc; }, {});
-      const driversMap = driversData.reduce((acc, d) => { acc[d.id] = d; return acc; }, {});
+      // 1. Build filters object
+      const filters = {
+        page: currentPage - 1,
+        size: 10,
+        searchTerm: debouncedSearchTerm || null,
+        status: statusFilter === "all" ? null : statusFilter,
+        fareFilter: fareFilter === "all" ? null : fareFilter,
+        fareValue: debouncedFareValue || null,
+        dateFilter: dateFilter || null,
+      };
 
-      const filteredBookings = bookingsData.filter(
-        (b) => b.bookingStatus === "completed" || b.bookingStatus === "cancelled"
-      );
+      // 4. SINGLE, POWERFUL API CALL
+      // This function must be in your adminService.js and call GET /api/v1/admin/bookings
+      const data = await transactionService.fetchTransactions(filters);
+      
+      setTransactionsData(data);
 
-      const enriched = filteredBookings.map((b) => {
-        const rider = usersMap[b.rider_id];
-        const driver = driversMap[b.driver_id];
-        const driverUser = driver ? usersMap[driver.user_id] : null;
-        return {
-          ...b,
-          rider_name: rider ? `${rider.firstName} ${rider.lastName}` : "Unknown Rider",
-          rider_phone: rider ? rider.phoneNumber : "N/A",
-          driver_name: driverUser ? `${driverUser.firstName} ${driverUser.lastName}` : "Unknown Driver",
-          driver_phone: driverUser ? driverUser.phoneNumber : "N/A",
-        };
-      });
-
-      const sorted = enriched.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-      setTransactions(sorted);
-      setFilteredTransactions(sorted.slice(0, 10));
     } catch (e) {
       console.error("Error fetching transactions:", e);
       if (!silent && !hasShownErrorRef.current) {
-        toast.error("Failed to fetch transactions", { theme: "dark", transition: Bounce });
+        toast.error(e.message || "Failed to fetch transactions", { theme: "dark", transition: Bounce });
         hasShownErrorRef.current = true;
       }
     } finally {
       setLoading(false);
     }
-  }, []);
+    // 5. Update dependency array
+  }, [currentPage, debouncedSearchTerm, statusFilter, fareFilter, debouncedFareValue, dateFilter]);
 
-  useEffect(() => { fetchTransactions(); }, [fetchTransactions]);
-  const handleRefresh = useCallback(() => fetchTransactions(true), [fetchTransactions]);
-
+  // This useEffect now triggers on any filter change
   useEffect(() => {
-    const active = searchTerm || statusFilter !== "all" || (fareFilter !== "all" && fareValue) || dateFilter;
-    if (!active) {
-      setFilteredTransactions(transactions.slice(0, 10));
-      setIsFiltered(false);
-    } else {
-      let f = [...transactions];
-      if (searchTerm) f = f.filter(t => t.id.toLowerCase().includes(searchTerm.toLowerCase()));
-      if (statusFilter !== "all") f = f.filter(t => t.bookingStatus === statusFilter);
-      if (fareFilter !== "all" && fareValue) {
-        const val = parseFloat(fareValue);
-        f = f.filter(t => {
-          if (fareFilter === "equal") return t.fare === val;
-          if (fareFilter === "greater") return t.fare >= val;
-            return t.fare <= val; // less
-        });
-      }
-      if (dateFilter) {
-        f = f.filter(t => new Date(t.updatedAt).toISOString().split('T')[0] === dateFilter);
-      }
-      setFilteredTransactions(f);
-      setIsFiltered(true);
-    }
-    setCurrentPage(1);
-  }, [transactions, searchTerm, statusFilter, fareFilter, fareValue, dateFilter]);
+    fetchTransactions();
+  }, [fetchTransactions]);
+
+  const handleRefresh = useCallback(() => fetchTransactions(true), [fetchTransactions]);
 
   const openTransaction = (t) => setSelectedTransaction(t);
   const closeTransaction = () => setSelectedTransaction(null);
 
-  const indexOfLast = currentPage * recordsPerPage;
-  const currentTransactions = filteredTransactions.slice(indexOfLast - recordsPerPage, indexOfLast);
-  const totalPages = Math.ceil(filteredTransactions.length / recordsPerPage) || 1;
-
-  const getTableHeight = () => 64 + 80 * Math.min(currentTransactions.length, recordsPerPage);
+  // --- 7. PAGINATION is now driven by backend data ---
+  const currentTransactions = transactionsData.content || [];
+  const totalPages = transactionsData.totalPages || 1;
 
   const statusBadge = (s) => ({
     completed: "bg-emerald-900/40 text-emerald-300 border-emerald-700",
@@ -129,6 +100,8 @@ const ManageTransactions = () => {
     );
   }
 
+  console.log("Rendered with transactionsData:", transactionsData);
+
   return (
     <div className="p-6 flex flex-col min-h-[500px] pb-10 bg-[#151212] text-white rounded-3xl">
       {/* Header */}
@@ -137,9 +110,7 @@ const ManageTransactions = () => {
           <h1 className="text-3xl md:text-4xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">Transaction Logs</h1>
           <p className="text-white/50 mt-3 text-sm md:text-base">Manage and view all booking transactions</p>
           <div className="mt-6 flex items-center gap-4 text-[11px] uppercase tracking-wider text-white/35">
-            <span>Total: <strong className="text-white/70">{transactions.length}</strong></span>
-            <span>Showing: <strong className="text-white/70">{filteredTransactions.length}</strong></span>
-            {isFiltered && <span className="text-amber-300">Filtered</span>}
+            <span>Total: <strong className="text-white/70">{transactionsData.totalElements}</strong></span>
           </div>
         </div>
       </div>
@@ -214,7 +185,6 @@ const ManageTransactions = () => {
                 setFareFilter("all");
                 setFareValue("");
                 setDateFilter("");
-                setFilteredTransactions(transactions.slice(0, 10));
                 setIsFiltered(false);
                 setCurrentPage(1);
               }}
@@ -224,14 +194,11 @@ const ManageTransactions = () => {
             </button>
           </div>
         </div>
-        <div className="pt-6 border-t border-white/10 text-xs text-white/40">
-          {isFiltered ? `Showing ${filteredTransactions.length} of ${transactions.length} (filtered)` : `Showing latest ${Math.min(10, transactions.length)} of ${transactions.length}`}
-        </div>
       </div>
 
       {/* Table */}
       <div className="bg-[#141414] rounded-2xl border border-white/10 overflow-hidden mb-12">
-        <div className="overflow-x-auto" style={{ height: `${getTableHeight()}px` }}>
+        <div className="overflow-x-auto h-full">
           <table className="w-full h-full text-sm">
             <thead className="bg-[#1f1f1f] text-white/60 text-xs uppercase tracking-wide sticky top-0 z-10">
               <tr>
@@ -254,23 +221,23 @@ const ManageTransactions = () => {
                 >
                   <td className="px-5 py-4 font-medium text-white/90">{t.id}</td>
                   <td className="px-5 py-4">
-                    <div className="text-white/85 font-medium">{t.rider_name}</div>
-                    <div className="text-white/40 text-[11px] mt-1">{t.rider_phone}</div>
+                    <div className="text-white/85 font-medium">{t.riderName || "-"}</div>
+                    <div className="text-white/40 text-[11px] mt-1">{t.riderPhone}</div>
                   </td>
                   <td className="px-5 py-4">
-                    <div className="text-white/85 font-medium">{t.driver_name}</div>
-                    <div className="text-white/40 text-[11px] mt-1">{t.driver_phone}</div>
+                    <div className="text-white/85 font-medium">{t.driverName || t.driverId}</div>
+                    <div className="text-white/40 text-[11px] mt-1">{t.driverPhone}</div>
                   </td>
                   <td className="px-5 py-4">
                     <div className="text-white/85 font-medium truncate max-w-56" title={t.pickupAddress}>From: {t.pickupAddress}</div>
-                    <div className="text-white/40 text-[11px] truncate max-w-56 mt-1" title={t.drop_address}>To: {t.drop_address}</div>
+                    <div className="text-white/40 text-[11px] truncate max-w-56 mt-1" title={t.dropoffAddress}>To: {t.dropoffAddress}</div>
                   </td>
-                  <td className="px-5 py-4 font-semibold text-white">₹{t.fare}</td>
+                  <td className="px-5 py-4 font-semibold text-white">₹{t.totalFare}</td>
                   <td className="px-5 py-4">
                     <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold border ${statusBadge(t.bookingStatus)}`}>{t.bookingStatus}</span>
                   </td>
                   <td className="px-5 py-4">
-                    <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold border ${paymentBadge(t.payment_status)}`}>{t.payment_status}</span>
+                    <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold border ${paymentBadge(t.paymentStatus)}`}>{t.paymentStatus}</span>
                   </td>
                   <td className="px-5 py-4 text-white/70">
                     {formatDateSafe(t.updatedAt, { locale: 'en-IN', timeZone: 'Asia/Kolkata', variant: 'date', fallback: '—', assumeUTCForMySQL: true })}

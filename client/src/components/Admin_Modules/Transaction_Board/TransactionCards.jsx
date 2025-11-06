@@ -129,7 +129,7 @@ const TransactionCards = ({ transaction, onClose }) => {
                 {transaction.pickupAddress}
               </div>
               <div className="text-xs text-stone-500 mt-1">
-                📍 {transaction.pickup_lat}, {transaction.pickup_lng}
+                📍 {transaction.pickupLat}, {transaction.pickupLng}
               </div>
             </div>
 
@@ -138,10 +138,10 @@ const TransactionCards = ({ transaction, onClose }) => {
                 Drop Location
               </label>
               <div className="text-stone-900 font-medium">
-                {transaction.drop_address}
+                {transaction.dropoffAddress}
               </div>
               <div className="text-xs text-stone-500 mt-1">
-                📍 {transaction.drop_lat}, {transaction.drop_lng}
+                📍 {transaction.dropoffLat}, {transaction.dropoffLng}
               </div>
             </div>
 
@@ -150,7 +150,7 @@ const TransactionCards = ({ transaction, onClose }) => {
                 Distance
               </label>
               <div className="text-stone-900 font-medium">
-                🚗 {transaction.distance_km} km
+                🚗 {transaction.distanceKm} km
               </div>
             </div>
 
@@ -159,7 +159,7 @@ const TransactionCards = ({ transaction, onClose }) => {
                 Duration
               </label>
               <div className="text-stone-900 font-medium">
-                ⏱️ {transaction.estimated_duration_min} min
+                ⏱️ {transaction.estimatedDurationMin} min
               </div>
             </div>
 
@@ -171,16 +171,16 @@ const TransactionCards = ({ transaction, onClose }) => {
               <div className="text-stone-900 font-medium">
                 <span
                   className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold ${getPaymentBadge(
-                    transaction.payment_status
+                    transaction.paymentStatus
                   )}`}
                 >
-                  {transaction.payment_status === "paid" && "✅ "}
-                  {transaction.payment_status === "cancelled" && "❌ "}
-                  {transaction.payment_status === "pending" && "⏳ "}
-                  {transaction.payment_status === "failed" && "❌ "}
-                  {`${transaction.payment_status
+                  {transaction.paymentStatus === "paid" && "✅ "}
+                  {transaction.paymentStatus === "cancelled" && "❌ "}
+                  {transaction.paymentStatus === "pending" && "⏳ "}
+                  {transaction.paymentStatus === "failed" && "❌ "}
+                  {`${transaction.paymentStatus
                     .charAt(0)
-                    .toUpperCase()}${transaction.payment_status.slice(1)}`}
+                    .toUpperCase()}${transaction.paymentStatus.slice(1)}`}
                 </span>
               </div>
             </div>
@@ -192,7 +192,7 @@ const TransactionCards = ({ transaction, onClose }) => {
               <div className="text-stone-900 font-medium">
                 💰 ₹
                 {transaction.distance_km > 0
-                  ? (transaction.fare / transaction.distance_km).toFixed(2)
+                  ? (transaction.totalFare / transaction.distanceKm).toFixed(2)
                   : "0.00"}
                 /km
               </div>
@@ -204,7 +204,7 @@ const TransactionCards = ({ transaction, onClose }) => {
                 Rider Name
               </label>
               <div className="text-stone-900 font-medium">
-                👤 {transaction.rider_name}
+                👤 {transaction.riderName}
               </div>
             </div>
 
@@ -221,7 +221,7 @@ const TransactionCards = ({ transaction, onClose }) => {
                 Driver Name
               </label>
               <div className="text-stone-900 font-medium">
-                🚗 {transaction.driver_name}
+                🚗 {transaction.driverName}
               </div>
             </div>
 
@@ -273,7 +273,7 @@ const TransactionCards = ({ transaction, onClose }) => {
             </label>
             <div className="text-center">
               <div className="text-4xl font-bold text-emerald-600">
-                ₹{transaction.fare}
+                ₹{transaction.totalFare}
               </div>
             </div>
           </div>

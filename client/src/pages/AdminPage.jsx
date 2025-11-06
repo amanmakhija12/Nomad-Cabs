@@ -11,7 +11,6 @@ const NAV_ITEMS = [
   { id: "riderBoard", label: "Rider Board" },
   { id: "driverBoard", label: "Driver Board"},
   { id: "verification", label: "Verification" },
-  { id: "feedback", label: "Feedback"},
   { id: "fare", label: "Fare Board" },
   { id: "transaction", label: "Transactions"},
 ];
@@ -30,12 +29,6 @@ const AdminPage = () => {
           {activeSection === "verification" && (
             <PlaceHolder
               moduleName="Document & Verification"
-              onBack={() => setActiveSection(null)}
-            />
-          )}
-          {activeSection === "feedback" && (
-            <PlaceHolder
-              moduleName="Feedback & Grievance"
               onBack={() => setActiveSection(null)}
             />
           )}

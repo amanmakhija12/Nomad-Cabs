@@ -13,7 +13,6 @@ const driverNavItems = [
   { id: "bookings", label: "My Bookings" },
   { id: "vehicles", label: "Manage Vehicles" },
   { id: "verification", label: "Verification" },
-  { id: "feedback", label: "Grievances" },
   { id: "account", label: "Manage Account" },
 ];
 
@@ -31,7 +30,6 @@ const DriverPage = () => {
       {activeSection === "bookings" && <Bookings userRole="driver" />}
       {activeSection === "vehicles" && <VehicleCards ownerId={user?.id} />}
       {activeSection === "verification" && <Verification />}
-      {activeSection === "feedback" && <PlaceHolder moduleName="Grievances" />}
       {activeSection === "account" && <ManageAccount />}
     </Sidebar>
   );

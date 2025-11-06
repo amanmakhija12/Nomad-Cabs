@@ -175,3 +175,47 @@ export const commissionService = {
     return null;
   }
 };
+
+// ============================================
+// TRANSACTION MANAGEMENT
+// ============================================
+export const transactionService = {
+
+  async fetchTransactions(page = 0, size = 10, filters = {}) {
+    const params = new URLSearchParams();
+    params.append('page', page);
+    params.append('size', size);
+    for (const key in filters) {
+      if (filters[key]) {
+        params.append(key, filters[key]);
+      }
+    }
+
+    const response = await api.get(`/wallet/admin/transactions?${params.toString()}`);
+    return response.data;
+  },
+  
+  async getAllCommission() {
+    // GET /api/v1/admin/finance/commission
+    const response = await api.get("/admin/finance/commission");
+    return response.data;
+  },
+
+  async addCommission(commissionData) {
+    // POST /api/v1/admin/finance/commission
+    const response = await api.post("/admin/finance/commission", commissionData);
+    return response.data;
+  },
+
+  async updateCommission(id, commissionData) {
+    // PUT /api/v1/admin/finance/commission/{id}
+    const response = await api.put(`/admin/finance/commission/${id}`, commissionData);
+    return response.data;
+  },
+  
+  async deleteCommission(id) {
+    // DELETE /api/v1/admin/finance/commission/{id}
+    await api.delete(`/admin/finance/commission/${id}`);
+    return null;
+  }
+};
