@@ -1,4 +1,3 @@
-import React from "react";
 import VehicleCards from "../Vehicle_Cards/VehicleCards";
 
 export default function VehicleView({ ownerId, onBack }) {

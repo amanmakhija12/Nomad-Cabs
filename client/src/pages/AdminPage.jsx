@@ -6,6 +6,7 @@ import ManageTransactions from "../components/Admin_Modules/Transaction_Board/Ma
 import Navigator from "../components/Admin_Modules/Utils/Navigator";
 import PlaceHolder from "../components/Common/PlaceHolder";
 import Sidebar from "../components/Sidebar/Sidebar";
+import ManageVerification from "../components/Admin_Modules/Verification/ManageVerifications";
 
 const NAV_ITEMS = [
   { id: "riderBoard", label: "Rider Board" },
@@ -26,12 +27,7 @@ const AdminPage = () => {
           {activeSection === "driverBoard" && <ManageDrivers />}
           {activeSection === "fare" && <ManageFare />}
           {activeSection === "transaction" && <ManageTransactions />}
-          {activeSection === "verification" && (
-            <PlaceHolder
-              moduleName="Document & Verification"
-              onBack={() => setActiveSection(null)}
-            />
-          )}
+          {activeSection === "verification" && <ManageVerification />}
           {!activeSection && <Navigator onSelect={setActiveSection} />}
         </main>
       </Sidebar>

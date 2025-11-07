@@ -26,11 +26,9 @@ const VehicleCard = ({ vehicle, onClick }) => {
     "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold border";
   const verifiedCls = "bg-emerald-900/40 text-emerald-300 border-emerald-700";
 
-  const rcOk = asBool(vehicle?.is_rc_verified);
-  const pucOk = asBool(vehicle?.is_puc_verified);
-  const insOk = asBool(
-    vehicle?.is_insurance_verified ?? vehicle?.is_ins_verified
-  );
+  const rcOk = asBool(vehicle?.rcVerified);
+  const pucOk = asBool(vehicle?.pucVerified);
+  const insOk = asBool(vehicle?.insuranceVerified);
 
   // DRY helpers
   const verifs = [
@@ -43,7 +41,7 @@ const VehicleCard = ({ vehicle, onClick }) => {
     { label: "PUC Expires", value: formatDateSafe(vehicle.puc_expiry) },
     {
       label: "Insurance Expires",
-      value: formatDateSafe(vehicle.insurance_expiry),
+      value: formatDateSafe(vehicle.insuranceExpiry),
     },
   ];
 
@@ -59,15 +57,15 @@ const VehicleCard = ({ vehicle, onClick }) => {
         <div className="flex items-center gap-4 min-w-0">
           <div className="w-14 h-14 rounded-xl bg-gradient-to-b from-white to-white/70 text-black flex items-center justify-center shadow ring-1 ring-white/10">
             <span className="text-2xl leading-none">
-              {getVehicleIcon(vehicle.vehicle_type)}
+              {getVehicleIcon(vehicle.vehicleType)}
             </span>
           </div>
           <div className="min-w-0">
             <h3 className="font-semibold text-white/90 capitalize tracking-tight truncate">
-              {vehicle.vehicle_type}
+              {vehicle.vehicleType}
             </h3>
             <p className="text-[11px] text-white/40 font-mono mt-1 truncate">
-              {vehicle.rc_number}
+              {vehicle.rcNumber}
             </p>
           </div>
         </div>

@@ -19,11 +19,8 @@ const VehicleCards = ({ ownerId }) => {
     
     setLoading(true);
     try {
-      console.log('🔍 Fetching vehicles...');
-      
       // ✅ Use your existing service
       const data = await vehicleService.getMyVehicles();
-      console.log('✅ Vehicles fetched:', data);
 
       // ✅ Transform backend data to frontend format
       const transformedVehicles = Array.isArray(data) ? data.map(v => ({
@@ -64,8 +61,6 @@ const VehicleCards = ({ ownerId }) => {
   // ✅ Add vehicle using your service
   const addVehicle = async (vehicleData) => {
     try {
-      console.log('➕ Adding vehicle:', vehicleData);
-      
       // ✅ Use your existing service
       await vehicleService.addVehicle(vehicleData);
       

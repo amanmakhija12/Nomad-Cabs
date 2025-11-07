@@ -12,7 +12,6 @@ const AuthPage = () => {
 
   useEffect(() => {
     if (user) {
-      console.log("AuthPage - Redirecting user:", user);
       const role = user.role?.toUpperCase();
       
       if (role === "ADMIN") {

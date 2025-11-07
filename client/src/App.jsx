@@ -18,7 +18,6 @@ const ProtectedRoute = ({ children, roles }) => {
   const user = useAuthStore((s) => s.user);
   
   if (!user) {
-    console.log("No user, redirecting to /auth");
     return <Navigate to="/auth" replace />;
   }
   
@@ -27,7 +26,6 @@ const ProtectedRoute = ({ children, roles }) => {
   const allowedRoles = roles?.map(r => r.toUpperCase());
   
   if (roles && !allowedRoles.includes(userRole)) {
-    console.log(`Role ${userRole} not in ${allowedRoles}, redirecting to /auth`);
     return <Navigate to="/auth" replace />;
   }
   

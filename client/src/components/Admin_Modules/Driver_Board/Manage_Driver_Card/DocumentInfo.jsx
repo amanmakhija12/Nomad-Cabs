@@ -5,16 +5,16 @@ const DocumentInfo = ({ driver }) => (
         License
       </span>
       <span className="text-white/80 font-medium truncate flex-1">
-        {driver.driver_license || "—"}
+        {driver.licenseNumber || "—"}
       </span>
       <span
         className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
-          driver.is_driver_license_verified
+          driver.driverLicenseVerified
             ? "bg-emerald-900/40 text-emerald-300 border-emerald-700"
             : "bg-red-900/40 text-red-300 border-red-700"
         }`}
       >
-        {driver.is_driver_license_verified ? "OK" : "NO"}
+        {driver.driverLicenseVerified ? "OK" : "NO"}
       </span>
     </div>
 
@@ -23,7 +23,7 @@ const DocumentInfo = ({ driver }) => (
         Expiry
       </span>
       <span className="text-white/80 font-medium flex-1">
-        {driver.driver_license_expiry || "—"}
+        {driver.driverLicenseExpiry || "—"}
       </span>
     </div>
 
@@ -32,16 +32,16 @@ const DocumentInfo = ({ driver }) => (
         PAN
       </span>
       <span className="text-white/80 font-medium truncate flex-1">
-        {driver.pan_card || "—"}
+        {driver.panCard || "—"}
       </span>
       <span
         className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
-          driver.is_pan_verified
+          driver.panVerified
             ? "bg-emerald-900/40 text-emerald-300 border-emerald-700"
             : "bg-red-900/40 text-red-300 border-red-700"
         }`}
       >
-        {driver.is_pan_verified ? "OK" : "NO"}
+        {driver.panVerified ? "OK" : "NO"}
       </span>
     </div>
 
@@ -50,16 +50,16 @@ const DocumentInfo = ({ driver }) => (
         Aadhaar
       </span>
       <span className="text-white/80 font-medium truncate flex-1">
-        {driver.aadhar_card || "—"}
+        {driver.aadharNumber || "—"}
       </span>
       <span
         className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
-          driver.is_aadhaar_verified
+          driver.aadhaarVerified
             ? "bg-emerald-900/40 text-emerald-300 border-emerald-700"
             : "bg-red-900/40 text-red-300 border-red-700"
         }`}
       >
-        {driver.is_aadhaar_verified ? "OK" : "NO"}
+        {driver.aadhaarVerified ? "OK" : "NO"}
       </span>
     </div>
   </div>

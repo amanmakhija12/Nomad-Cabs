@@ -92,16 +92,6 @@ const ManageTransactions = () => {
   const inputBase = "h-11 w-full rounded-lg bg-[#1b1b1b] border border-white/10 text-sm px-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-white/15";
   const selectBase = inputBase;
 
-  if (loading) {
-    return (
-      <div className="p-6 flex items-center justify-center min-h-[400px] bg-[#0f0f0f] rounded-2xl border border-white/10">
-        <div className="text-sm font-medium text-white/60">Loading transactions...</div>
-      </div>
-    );
-  }
-
-  console.log("Rendered with transactionsData:", transactionsData);
-
   return (
     <div className="p-6 flex flex-col min-h-[500px] pb-10 bg-[#151212] text-white rounded-3xl">
       {/* Header */}
@@ -137,8 +127,11 @@ const ManageTransactions = () => {
               className={selectBase}
             >
               <option value="all">All Status</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
+              <option value="REQUESTED">Requested</option>
+              <option value="ACCEPTED">Accepted</option>
+              <option value="STARTED">Started</option>
+              <option value="COMPLETED">Completed</option>
+              <option value="CANCELLED">Cancelled</option>
             </select>
           </div>
           <div>
@@ -185,7 +178,6 @@ const ManageTransactions = () => {
                 setFareFilter("all");
                 setFareValue("");
                 setDateFilter("");
-                setIsFiltered(false);
                 setCurrentPage(1);
               }}
               className="h-11 w-full rounded-lg bg-white/10 text-white text-sm font-medium border border-white/15 hover:bg-white/15 transition"
@@ -197,60 +189,66 @@ const ManageTransactions = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-[#141414] rounded-2xl border border-white/10 overflow-hidden mb-12">
-        <div className="overflow-x-auto h-full">
-          <table className="w-full h-full text-sm">
-            <thead className="bg-[#1f1f1f] text-white/60 text-xs uppercase tracking-wide sticky top-0 z-10">
-              <tr>
-                <th className="px-5 py-4 text-left font-semibold min-w-[120px]">Booking ID</th>
-                <th className="px-5 py-4 text-left font-semibold min-w-[150px]">Rider</th>
-                <th className="px-5 py-4 text-left font-semibold min-w-[150px]">Driver</th>
-                <th className="px-5 py-4 text-left font-semibold min-w-[220px]">Route</th>
-                <th className="px-5 py-4 text-left font-semibold min-w-[100px]">Fare (₹)</th>
-                <th className="px-5 py-4 text-left font-semibold min-w-[100px]">Status</th>
-                <th className="px-5 py-4 text-left font-semibold min-w-[100px]">Payment</th>
-                <th className="px-5 py-4 text-left font-semibold min-w-[120px]">Updated</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentTransactions.map((t, idx) => (
-                <tr
-                  key={t.id}
-                  onClick={() => openTransaction(t)}
-                  className={`h-20 border-t border-white/5 hover:bg-white/5 transition cursor-pointer ${idx === currentTransactions.length - 1 ? 'border-b border-white/5' : ''}`}
-                >
-                  <td className="px-5 py-4 font-medium text-white/90">{t.id}</td>
-                  <td className="px-5 py-4">
-                    <div className="text-white/85 font-medium">{t.riderName || "-"}</div>
-                    <div className="text-white/40 text-[11px] mt-1">{t.riderPhone}</div>
-                  </td>
-                  <td className="px-5 py-4">
-                    <div className="text-white/85 font-medium">{t.driverName || t.driverId}</div>
-                    <div className="text-white/40 text-[11px] mt-1">{t.driverPhone}</div>
-                  </td>
-                  <td className="px-5 py-4">
-                    <div className="text-white/85 font-medium truncate max-w-56" title={t.pickupAddress}>From: {t.pickupAddress}</div>
-                    <div className="text-white/40 text-[11px] truncate max-w-56 mt-1" title={t.dropoffAddress}>To: {t.dropoffAddress}</div>
-                  </td>
-                  <td className="px-5 py-4 font-semibold text-white">₹{t.totalFare}</td>
-                  <td className="px-5 py-4">
-                    <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold border ${statusBadge(t.bookingStatus)}`}>{t.bookingStatus}</span>
-                  </td>
-                  <td className="px-5 py-4">
-                    <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold border ${paymentBadge(t.paymentStatus)}`}>{t.paymentStatus}</span>
-                  </td>
-                  <td className="px-5 py-4 text-white/70">
-                    {formatDateSafe(t.updatedAt, { locale: 'en-IN', timeZone: 'Asia/Kolkata', variant: 'date', fallback: '—', assumeUTCForMySQL: true })}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {loading ? (
+        <div className="p-6 flex items-center justify-center min-h-[400px] bg-[#0f0f0f] rounded-2xl border border-white/10">
+          <div className="text-sm font-medium text-white/60">Loading transactions...</div>
         </div>
-        {currentTransactions.length === 0 && (
-          <div className="p-10 text-center text-white/40 text-sm">No transactions found.</div>
-        )}
-      </div>
+      ) : (
+        <div className="bg-[#141414] rounded-2xl border border-white/10 overflow-hidden mb-12">
+          <div className="overflow-x-auto h-full">
+            <table className="w-full h-full text-sm">
+              <thead className="bg-[#1f1f1f] text-white/60 text-xs uppercase tracking-wide sticky top-0 z-10">
+                <tr>
+                  <th className="px-5 py-4 text-left font-semibold min-w-[120px]">Booking ID</th>
+                  <th className="px-5 py-4 text-left font-semibold min-w-[150px]">Rider</th>
+                  <th className="px-5 py-4 text-left font-semibold min-w-[150px]">Driver</th>
+                  <th className="px-5 py-4 text-left font-semibold min-w-[220px]">Route</th>
+                  <th className="px-5 py-4 text-left font-semibold min-w-[100px]">Fare (₹)</th>
+                  <th className="px-5 py-4 text-left font-semibold min-w-[100px]">Status</th>
+                  <th className="px-5 py-4 text-left font-semibold min-w-[100px]">Payment</th>
+                  <th className="px-5 py-4 text-left font-semibold min-w-[120px]">Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentTransactions.map((t, idx) => (
+                  <tr
+                    key={t.id}
+                    onClick={() => openTransaction(t)}
+                    className={`h-20 border-t border-white/5 hover:bg-white/5 transition cursor-pointer ${idx === currentTransactions.length - 1 ? 'border-b border-white/5' : ''}`}
+                  >
+                    <td className="px-5 py-4 font-medium text-white/90">{t.id}</td>
+                    <td className="px-5 py-4">
+                      <div className="text-white/85 font-medium">{t.riderName || "-"}</div>
+                      <div className="text-white/40 text-[11px] mt-1">{t.riderPhone}</div>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="text-white/85 font-medium">{t.driverName || t.driverId}</div>
+                      <div className="text-white/40 text-[11px] mt-1">{t.driverPhone}</div>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="text-white/85 font-medium truncate max-w-56" title={t.pickupAddress}>From: {t.pickupAddress}</div>
+                      <div className="text-white/40 text-[11px] truncate max-w-56 mt-1" title={t.dropoffAddress}>To: {t.dropoffAddress}</div>
+                    </td>
+                    <td className="px-5 py-4 font-semibold text-white">₹{t.totalFare}</td>
+                    <td className="px-5 py-4">
+                      <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold border ${statusBadge(t.bookingStatus)}`}>{t.bookingStatus}</span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold border ${paymentBadge(t.paymentStatus)}`}>{t.paymentStatus}</span>
+                    </td>
+                    <td className="px-5 py-4 text-white/70">
+                      {formatDateSafe(t.updatedAt, { locale: 'en-IN', timeZone: 'Asia/Kolkata', variant: 'date', fallback: '—', assumeUTCForMySQL: true })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {currentTransactions.length === 0 && (
+            <div className="p-10 text-center text-white/40 text-sm">No transactions found.</div>
+          )}
+        </div>
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (

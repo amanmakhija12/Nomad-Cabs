@@ -3,9 +3,9 @@ const VerificationStatus = ({ driver }) => {
     "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-medium border tracking-wide";
 
   const allVerified =
-    driver.is_aadhaar_verified &&
-    driver.is_pan_verified &&
-    driver.is_driver_license_verified;
+    driver.aadhaarVerified &&
+    driver.panVerified &&
+    driver.driverLicenseVerified;
 
   if (allVerified) {
     return (
@@ -18,9 +18,9 @@ const VerificationStatus = ({ driver }) => {
   }
 
   const someVerified =
-    driver.is_aadhaar_verified ||
-    driver.is_pan_verified ||
-    driver.is_driver_license_verified;
+    driver.aadhaarVerified ||
+    driver.panVerified ||
+    driver.driverLicenseVerified;
 
   if (someVerified) {
     return (

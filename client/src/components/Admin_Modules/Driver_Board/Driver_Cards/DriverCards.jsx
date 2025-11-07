@@ -2,10 +2,9 @@ import { useEffect, useState } from "react";
 import { toast, Bounce } from "react-toastify";
 import DriverDetailsView from "./DriverDetailsView";
 import VehicleView from "./VehicleView";
-import { userService, driverService } from "../../../../services/adminService";
+import { userService } from "../../../../services/adminService";
 
 const DriverCards = ({ Driver, onClose, onRefresh }) => {
-  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showVehicles, setShowVehicles] = useState(false);
@@ -15,36 +14,10 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
     phoneNumber: "",
     city: "",
     state: "",
-    role_description: "",
     status: "active",
     createdAt: "",
     updatedAt: "",
   });
-
-  useEffect(() => {
-    if (!Driver?.user_id) return;
-    setLoading(true);
-    
-    userService
-      .getUserById(Driver.user_id)
-      .then((u) => {
-        setUser(u);
-        setFormData({
-          phoneNumber: u.phoneNumber || "",
-          city: u.city || "",
-          state: u.state || "",
-          role_description: u.roleDescription || "",
-          status: u.status?.toLowerCase() || "active",
-          createdAt: u.createdAt || "",
-          updatedAt: u.updatedAt || "",
-        });
-      })
-      .catch((err) => {
-        console.error("Error loading user:", err);
-        toast.error("Error loading user", { theme: "dark", transition: Bounce });
-      })
-      .finally(() => setLoading(false));
-  }, [Driver?.user_id]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -52,7 +25,7 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
   };
 
   const handleUpdate = async () => {
-    if (!user || !Driver?.user_id) return;
+    if (!user || !Driver?.userId) return;
     try {
       // Transform to backend format
       const payload = {
@@ -65,11 +38,11 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
         role: user.role,
       };
 
-      await userService.updateUser(Driver.user_id, payload);
+      await userService.updateUser(Driver.userId, payload);
       
       // Update status if changed
       if (formData.status !== user.status?.toLowerCase()) {
-        await userService.updateUserStatus(Driver.user_id, formData.status.toUpperCase());
+        await userService.updateUserStatus(Driver.userId, formData.status.toUpperCase());
       }
 
       setIsEditing(false);
@@ -136,7 +109,7 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
     
     try {
       // Delete user (which will cascade delete driver)
-      await userService.deleteUser(Driver.user_id);
+      await userService.deleteUser(Driver.userId);
       toast.success("Driver deleted", { theme: "dark", transition: Bounce });
       onRefresh && onRefresh();
       onClose();
@@ -151,16 +124,6 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
 
   if (!Driver) return null;
 
-  // Transform user data to match frontend format
-  const transformedUser = user ? {
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    role: user.role?.toLowerCase(),
-    is_email_verified: user.isEmailVerified,
-    is_phone_verified: false, // Backend doesn't have this
-  } : null;
-
   return (
     <div
       className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
@@ -172,7 +135,6 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
       >
         {!showVehicles ? (
           <DriverDetailsView
-            user={transformedUser}
             Driver={Driver}
             formData={formData}
             isEditing={isEditing}
@@ -188,7 +150,7 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
           />
         ) : (
           <VehicleView
-            ownerId={Driver.id}
+            ownerId={Driver.userId}
             onBack={() => setShowVehicles(false)}
           />
         )}

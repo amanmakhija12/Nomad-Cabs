@@ -290,8 +290,6 @@ export const StepPayment = ({ data, onChange, onBack, onSubmit, loading }) => {
         
         // 5. Set the fare from the API
         setEstimatedFare(result);
-        console.log("Fare estimation result:", result);
-
       } catch (error) {
         console.error('Fare estimation error:', error);
         const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch estimated fare';

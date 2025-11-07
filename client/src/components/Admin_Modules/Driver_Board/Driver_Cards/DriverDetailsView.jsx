@@ -1,5 +1,6 @@
+import { formatDateSafe } from "../../../../utils/DateUtil";
+
 const DriverDetailsView = ({
-  user,
   Driver,
   formData,
   isEditing,
@@ -13,8 +14,8 @@ const DriverDetailsView = ({
   onShowVehicles,
   onClose,
 }) => {
-  const initials = `${(user?.firstName?.[0] || "").toUpperCase()}${(
-    user?.lastName?.[0] || ""
+  const initials = `${(Driver?.firstName?.[0] || "").toUpperCase()}${(
+    Driver?.lastName?.[0] || ""
   ).toUpperCase()}`;
   const panelBase = "bg-[#1b1b1b] border border-white/10 rounded-xl p-5";
 
@@ -22,23 +23,21 @@ const DriverDetailsView = ({
     { label: "Phone Number", name: "phoneNumber" },
     { label: "City", name: "city" },
     { label: "State", name: "state" },
-    { label: "Role Description", name: "role_description" },
   ];
 
   const staticFields = [
-    { label: "Email", value: user?.email || "—", isBadge: false },
-    { label: "Role", value: user?.role || "driver", isBadge: true },
-    { label: "Created At", value: formData.createdAt || "—", isBadge: false },
-    { label: "Updated At", value: formData.updatedAt || "—", isBadge: false },
+    { label: "Email", value: Driver?.email || "—", isBadge: false },
+    { label: "Created At", value: formatDateSafe(Driver?.createdAt) || "—", isBadge: false },
+    { label: "Updated At", value: formatDateSafe(Driver?.updatedAt) || "—", isBadge: false },
   ];
 
   const docs = [
-    { label: "PAN", value: Driver.pan_card },
-    { label: "Aadhaar", value: Driver.aadhar_card },
+    { label: "PAN", value: Driver.panCard },
+    { label: "Aadhaar", value: Driver.aadharCard },
     {
       label: "DL No. (Expiry)",
-      value: `${Driver.driver_license || "—"}${
-        Driver.driver_license_expiry ? ` (${Driver.driver_license_expiry})` : ""
+      value: `${Driver.driverLicense || "—"}${
+        Driver.driverLicenseExpiry ? ` (${Driver.driverLicenseExpiry})` : ""
       }`,
     },
   ];
@@ -66,31 +65,19 @@ const DriverDetailsView = ({
             </div>
             <div>
               <h2 className="text-2xl font-semibold tracking-tight text-white">
-                {user
-                  ? `${user.firstName} ${user.lastName || ""}`.trim()
+                {Driver
+                  ? `${Driver.firstName} ${Driver.lastName || ""}`.trim()
                   : "—"}
               </h2>
               <div className="mt-2 flex flex-wrap gap-3 text-[11px]">
                 <span
                   className={`inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold border ${
-                    user?.is_email_verified
+                    Driver?.is_email_verified
                       ? "bg-emerald-900/40 text-emerald-300 border-emerald-700"
                       : "bg-red-900/40 text-red-300 border-red-700"
                   }`}
                 >
-                  Email {user?.is_email_verified ? "Verified" : "Unverified"}
-                </span>
-                <span
-                  className={`inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold border ${
-                    user?.is_phone_verified
-                      ? "bg-emerald-900/40 text-emerald-300 border-emerald-700"
-                      : "bg-red-900/40 text-red-300 border-red-700"
-                  }`}
-                >
-                  Phone {user?.is_phone_verified ? "Verified" : "Unverified"}
-                </span>
-                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold bg-white text-black border border-white">
-                  {user?.role || "driver"}
+                  Email {Driver?.isEmailVerified ? "Verified" : "Unverified"}
                 </span>
               </div>
             </div>
@@ -178,29 +165,32 @@ const DriverDetailsView = ({
           </div>
 
           {/* Verification panels (mapped) */}
-          {[
-            { label: "Email Verified", ok: user?.is_email_verified },
-            { label: "Phone Verified", ok: user?.is_phone_verified },
-          ].map((it) => (
-            <div className={panelBase} key={it.label}>
-              <p className="text-[11px] uppercase tracking-wider text-white/40">
-                {it.label}
-              </p>
-              <span
-                className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border ${
-                  it.ok
-                    ? "bg-emerald-900/40 text-emerald-300 border-emerald-700"
-                    : "bg-red-900/40 text-red-300 border-red-700"
-                }`}
-              >
-                {it.ok ? "VERIFIED" : "NOT VERIFIED"}
-              </span>
-            </div>
-          ))}
+          <div className={panelBase}>
+            <p className="text-[11px] uppercase tracking-wider text-white/40">
+              Email Verified
+            </p>
+            <span
+              className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border ${
+                Driver?.isEmailVerified
+                  ? "bg-emerald-900/40 text-emerald-300 border-emerald-700"
+                  : "bg-red-900/40 text-red-300 border-red-700"
+              }`}
+            >
+              {Driver?.isEmailVerified ? "VERIFIED" : "NOT VERIFIED"}
+            </span>
+          </div>
+
+          <div className={panelBase}>
+            <p className="text-[11px] uppercase tracking-wider text-white/40">
+              Role
+            </p>
+            <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold bg-white text-black border border-white">
+              driver
+            </span>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
-
           <div className="space-y-6">
             {editableFields.map((f) => (
               <div className={panelBase} key={f.name}>
@@ -210,13 +200,13 @@ const DriverDetailsView = ({
                 {isEditing ? (
                   <input
                     name={f.name}
-                    value={formData[f.name]}
+                    value={Driver[f.name]}
                     onChange={onChange}
                     className="h-11 w-full rounded-lg bg-[#242424] text-white text-sm px-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/15"
                   />
                 ) : (
                   <div className="text-white/90 text-sm font-medium break-words">
-                    {formData[f.name] || "—"}
+                    {Driver[f.name] || "—"}
                   </div>
                 )}
               </div>

@@ -16,28 +16,7 @@ const VehicleCards = ({ ownerId }) => {
       setLoading(true);
       try {
         const data = await vehicleService.getVehiclesByDriver(ownerId);
-        
-        // Transform backend format to frontend format
-        const transformedVehicles = data.map(v => ({
-          id: v.id,
-          owner_id: v.driverId,
-          vehicle_type: v.vehicleType?.toLowerCase(),
-          rc_number: v.registrationNumber,
-          puc_number: v.pucNumber,
-          puc_expiry: v.pucExpiryDate,
-          insurance_expiry: v.insuranceExpiryDate,
-          is_rc_verified: v.verificationStatus === "APPROVED",
-          is_puc_verified: v.verificationStatus === "APPROVED",
-          is_insurance_verified: v.verificationStatus === "APPROVED",
-          is_ins_verified: v.verificationStatus === "APPROVED",
-          verification_status: v.verificationStatus,
-          manufacturer: v.manufacturer,
-          model: v.model,
-          year: v.year,
-          color: v.color,
-        }));
-        
-        setVehicles(transformedVehicles);
+        setVehicles(data);
       } catch (error) {
         console.error("Error fetching vehicles:", error);
         toast.error("Failed to fetch vehicles", {
@@ -119,10 +98,10 @@ const VehicleCards = ({ ownerId }) => {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-white capitalize">
-                {vehicle?.vehicle_type}
+                {vehicle?.vehicleType}
               </h3>
               <p className="text-xs text-white/50 font-mono">
-                {vehicle?.rc_number}
+                {vehicle?.rcNumber}
               </p>
             </div>
           </div>
@@ -148,9 +127,9 @@ const VehicleCards = ({ ownerId }) => {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
           {[
-            { label: "RC", ok: !!vehicle?.is_rc_verified },
-            { label: "PUC", ok: !!vehicle?.is_puc_verified },
-            { label: "INS", ok: !!vehicle?.is_insurance_verified },
+            { label: "RC", ok: !!vehicle?.rcVerified },
+            { label: "PUC", ok: !!vehicle?.pucVerified },
+            { label: "INS", ok: !!vehicle?.insuranceVerified },
           ].map(({ label, ok }) => (
             <div
               key={label}
@@ -216,7 +195,7 @@ const VehicleCards = ({ ownerId }) => {
               Vehicle Type
             </p>
             <p className="text-sm text-white/85 font-medium capitalize">
-              {vehicle?.vehicle_type || "—"}
+              {vehicle?.vehicleType || "—"}
             </p>
           </div>
           <div className="bg-[#1b1b1b] p-4 rounded-xl border border-white/10">
@@ -224,7 +203,7 @@ const VehicleCards = ({ ownerId }) => {
               RC Number
             </p>
             <p className="text-sm text-white/85 font-medium">
-              {vehicle?.rc_number || "—"}
+              {vehicle?.rcNumber || "—"}
             </p>
           </div>
           <div className="bg-[#1b1b1b] p-4 rounded-xl border border-white/10">
@@ -232,7 +211,7 @@ const VehicleCards = ({ ownerId }) => {
               PUC Number
             </p>
             <p className="text-sm text-white/85 font-medium">
-              {vehicle?.puc_number || "—"}
+              {vehicle?.pucNumber || "—"}
             </p>
           </div>
           <div className="bg-[#1b1b1b] p-4 rounded-xl border border-white/10">
@@ -240,7 +219,7 @@ const VehicleCards = ({ ownerId }) => {
               PUC Expiry
             </p>
             <p className="text-sm text-white/85 font-medium">
-              {formatDateSafe(vehicle?.puc_expiry)}
+              {formatDateSafe(vehicle?.pucExpiry)}
             </p>
           </div>
           <div className="bg-[#1b1b1b] p-4 rounded-xl border border-white/10">
@@ -248,7 +227,7 @@ const VehicleCards = ({ ownerId }) => {
               Insurance Expiry
             </p>
             <p className="text-sm text-white/85 font-medium">
-              {formatDateSafe(vehicle?.insurance_expiry)}
+              {formatDateSafe(vehicle?.insuranceExpiry)}
             </p>
           </div>
           {vehicle?.manufacturer && (

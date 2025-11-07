@@ -42,20 +42,14 @@ export const riderService = {
 // ============================================
 export const driverService = {
    async getAllDrivers(filters = {}) {
-    // We will build the query parameters from the filters object
     const params = new URLSearchParams();
-
-    // Add all the keys from your filters object
-    // (role, page, size, filterType, searchTerm)
-    if (filters.role) params.append('role', filters.role);
     if (filters.page) params.append('page', filters.page);
     if (filters.size) params.append('size', filters.size);
     if (filters.filterType) params.append('filterType', filters.filterType);
     if (filters.searchTerm) params.append('searchTerm', filters.searchTerm);
-    
-    // Axios will automatically add the '?'
-    const response = await api.get('/admin/users', { params });
-    return response.data; // Returns the Page object
+
+    const response = await api.get('/admin/drivers', { params });
+    return response.data;
   },
   async getDriverById(driverId) {
     // Calls GET /api/v1/admin/drivers/{driverId}
@@ -66,6 +60,17 @@ export const driverService = {
     // Calls PUT /api/v1/admin/drivers/{driverId}/verify
     const payload = { action: action.toUpperCase(), rejectionReason: reason };
     const response = await api.put(`/admin/drivers/${driverId}/verify`, payload);
+    return response.data;
+  },
+  async getVerificationQueue(page = 0, size = 10) {
+    // Calls GET /api/v1/admin/verification-queue
+    const params = { page, size };
+    const response = await api.get('/admin/verification-queue', { params });
+    return response.data;
+  },
+  async verifyDriverDoc(driverId, docType, approved) {
+    const payload = { driverId, docType, approved };
+    const response = await api.post('/admin/verify/driver-doc', payload);
     return response.data;
   },
 };
@@ -88,6 +93,11 @@ export const vehicleService = {
     // Calls PUT /api/v1/admin/vehicles/{vehicleId}/verify
     const payload = { action: action.toUpperCase(), rejectionReason: reason };
     const response = await api.put(`/admin/vehicles/${vehicleId}/verify`, payload);
+    return response.data;
+  },
+  async verifyVehicleDoc(vehicleId, docType, approved) {
+    const payload = { vehicleId, docType, approved };
+    const response = await api.post('/admin/verify/vehicle-doc', payload);
     return response.data;
   },
 };
@@ -192,10 +202,8 @@ export const commissionService = {
 // ============================================
 export const transactionService = {
 
-  async fetchTransactions(page = 0, size = 10, filters = {}) {
+  async fetchTransactions(filters = {}) {
     const params = new URLSearchParams();
-    params.append('page', page);
-    params.append('size', size);
     for (const key in filters) {
       if (filters[key]) {
         params.append(key, filters[key]);

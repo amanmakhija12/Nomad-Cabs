@@ -16,7 +16,7 @@ const ManageCard = ({ driver, onClick }) => (
         <DriverAvatar driver={driver} />
         <div className="flex-grow min-w-0">
           <h3 className="text-base font-semibold text-white/90 group-hover:text-white truncate tracking-tight">
-            {driver.full_name}
+            {driver.firstName} {driver.lastName}
           </h3>
           <VerificationStatus driver={driver} />
         </div>

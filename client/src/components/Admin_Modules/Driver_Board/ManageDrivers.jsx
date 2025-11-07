@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import DriverCards from "./Driver_Cards/DriverCards";
 import ManageCard from "./Manage_Driver_Card/ManageCard";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
-import { driverService, userService } from "../../../services/adminService";
+import { driverService } from "../../../services/adminService";
 import { toast, Bounce } from "react-toastify";
 import { useDebounce } from "../../../hooks/useDebounce";
+import { useAuthStore } from "../../../store/authStore";
 
 const filterOptions = [
   { label: "Aadhaar", value: "aadhaarNumber" },
@@ -22,12 +23,12 @@ const ManageDrivers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const driversPerPage = 9;
 
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const user = useAuthStore((s) => s.user);
 
   useEffect(() => {
     if (selectedDriver) {
@@ -37,88 +38,44 @@ const ManageDrivers = () => {
     }
   }, [selectedDriver]);
 
+  const fetchData = useCallback(async () => {
+    // 5. Don't run if the user (admin) isn't loaded yet
+    if (!user) return; 
+
+    setLoading(true);
+    try {
+      const params = {
+        page: currentPage - 1, // 6. Convert to 0-based for the API
+        size: 10,
+        // 7. Remove 'role: "DRIVER"', the backend endpoint doesn't need it
+        filterType: debouncedSearchTerm ? filterType : null,
+        searchTerm: debouncedSearchTerm ? debouncedSearchTerm : null,
+      };
+
+      const driversData = await driverService.getAllDrivers(params);
+
+      setDrivers(driversData.content);
+      setTotalPages(driversData.totalPages);
+      setTotalItems(driversData.totalElements);
+    } catch (error) {
+      console.error("Error fetching drivers:", error);
+      toast.error(error.message || "Failed to fetch drivers", {
+        theme: "dark",
+        transition: Bounce,
+      });
+      setDrivers([]);
+      setTotalPages(1);
+      setTotalItems(0);
+    } finally {
+      setLoading(false);
+    }
+    // 8. Add all dependencies for this function
+  }, [user, currentPage, debouncedSearchTerm, filterType]);
+
+  // 9. This useEffect now triggers the 'fetchData' function
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const params = {
-          page: currentPage - 1,
-          size: 10,
-          role: "DRIVER",
-          
-          // Add search filters only if searchTerm exists
-          filterType: debouncedSearchTerm ? filterType : null,
-          searchTerm: debouncedSearchTerm ? debouncedSearchTerm : null,
-        };
-
-        const driversData = await driverService.getAllDrivers(params);
-        console.log("Fetched drivers data:", driversData);
-
-        const enrichedDrivers = await Promise.all(
-          driversData.content.map(async (driver) => {
-            try {
-              const userData = await userService.getUserById(driver.id);
-              return {
-                id: driver.id,
-                user_id: driver.id,
-                full_name: `${userData.firstName} ${userData.lastName}`.trim(),
-                email: userData.email,
-                phoneNumber: userData.phoneNumber || "",
-                aadhaarNumber: driver.aadhaarNumber,
-                dlNumber: driver.dlNumber,
-                driver_license: driver.dlNumber,
-                driver_license_expiry: driver.dlExpiryDate,
-                pan_card: "",
-                aadhar_card: driver.aadhaarNumber,
-                is_aadhaar_verified: driver.verificationStatus === "APPROVED",
-                is_pan_verified: false,
-                is_driver_license_verified:
-                  driver.verificationStatus === "APPROVED",
-                verification_status: driver.verificationStatus,
-              };
-            } catch (err) {
-              console.error("Error fetching user for driver:", driver.id, err);
-              return {
-                id: driver.id,
-                user_id: driver.userId,
-                full_name: "Unknown Driver",
-                email: "N/A",
-                phoneNumber: "",
-                aadhaarNumber: driver.aadhaarNumber,
-                dlNumber: driver.dlNumber,
-                driver_license: driver.dlNumber,
-                driver_license_expiry: driver.dlExpiryDate,
-                pan_card: "",
-                aadhar_card: driver.aadhaarNumber,
-                is_aadhaar_verified: false,
-                is_pan_verified: false,
-                is_driver_license_verified: false,
-                verification_status: driver.verificationStatus,
-              };
-            }
-          })
-        );
-
-        setDrivers(enrichedDrivers);
-        setTotalPages(driversData.totalPages);
-        setTotalItems(driversData.totalElements);
-      } catch (error) {
-        console.error("Error fetching drivers:", error);
-        toast.error("Failed to fetch drivers", {
-          theme: "dark",
-          transition: Bounce,
-        });
-        setDrivers([]);
-        setTotalPages(1);
-        setTotalItems(0);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
-    // This effect now depends on the debounced term and page
-  }, [currentPage, debouncedSearchTerm, filterType]);
+  }, [fetchData]);
 
   return (
     <div className="p-6 flex flex-col min-h-[500px] pb-10 bg-[#151212] text-white rounded-3xl">
@@ -197,7 +154,7 @@ const ManageDrivers = () => {
       ) : drivers.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {drivers.map((driver) => (
-            <ManageCard key={driver.id} driver={driver} onClick={openDriver} />
+            <ManageCard key={driver.userId} driver={driver} onClick={openDriver} />
           ))}
         </div>
       ) : (
