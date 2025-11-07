@@ -12,7 +12,7 @@ import {
   AlertCircle,
 } from "lucide-react"; // Removed unused 'Divide' import
 
-const Live = () => {
+const LiveBooking = () => {
   const [bookings, setBookings] = useState([]);
   const [vehicles, setVehicles] = useState([]); 
   const [loading, setLoading] = useState(false);
@@ -35,11 +35,12 @@ const Live = () => {
       try {
         console.log('🚗 Fetching driver vehicles...');
         const vehicleData = await vehicleService.getMyVehicles();
+        console.log('✅ Vehicles fetched:', vehicleData);
         
         console.log(`✅ Found ${vehicleData.length} vehicles`);
         setVehicles(vehicleData);
 
-        const approvedVehicle = vehicleData.find(v => v.verificationStatus === 'APPROVED');
+        const approvedVehicle = vehicleData.find(v => v.pucVerified && v.rcVerified && v.insuranceVerified);
         if (approvedVehicle && !selectedVehicle) {
           setSelectedVehicle(approvedVehicle.id);
           console.log('✅ Auto-selected vehicle:', approvedVehicle.id);
@@ -100,6 +101,8 @@ const fetchAvailableBookings = async () => {
       
       playNotificationSound();
     }
+
+    console.log(`✅ Updating bookings state with: `, data);
     
     setBookings(data);
     setPreviousCount(data.length);
@@ -153,7 +156,7 @@ const fetchAvailableBookings = async () => {
     // 3. Start a new interval ONLY if polling is active AND no ride is active
     if (isPollingActive && !isActive) {
       console.log('✅ Polling started...');
-      intervalRef.current = setInterval(fetchData, 3000); // Use 3000ms from your original code
+      intervalRef.current = setInterval(fetchData, 5000); // Use 5000ms from your original code
     } else if (isActive) {
       // If a ride is active, stop polling and set UI to 'Paused'
       console.log('🔴 Active ride detected. Polling stopped.');
@@ -232,7 +235,7 @@ const fetchAvailableBookings = async () => {
     const parts = [];
     if (vehicle.manufacturer) parts.push(vehicle.manufacturer);
     if (vehicle.model) parts.push(vehicle.model);
-    parts.push(vehicle.registrationNumber);
+    parts.push(vehicle.rcNumber);
     return parts.join(' - ');
   };
 
@@ -266,7 +269,7 @@ const fetchAvailableBookings = async () => {
               <>
                 <option value="">Select Vehicle</option>
                 {vehicles
-                  .filter(v => v.verificationStatus === 'APPROVED')
+                  .filter(v => v.pucVerified && v.rcVerified && v.insuranceVerified)
                   .map((vehicle) => (
                     <option key={vehicle.id} value={vehicle.id}>
                       {getVehicleDisplay(vehicle)}
@@ -436,13 +439,13 @@ const fetchAvailableBookings = async () => {
                   <div>
                     <p className="text-xs text-gray-500 mb-1">Distance</p>
                     <p className="text-sm font-semibold">
-                      {booking.tripDistanceKm} km
+                      {booking.tripDistanceKm.toFixed(2)} km
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-1">Duration</p>
                     <p className="text-sm font-semibold">
-                      {booking.tripDurationMinutes} min
+                      {booking.tripDurationMinutes.toFixed(2)} min
                     </p>
                   </div>
                 </div>
@@ -452,7 +455,7 @@ const fetchAvailableBookings = async () => {
                   <span className="text-gray-400 text-sm">Estimated Fare</span>
                   <span className="text-green-400 font-bold text-2xl flex items-center gap-1">
                     <IndianRupee className="w-5 h-5" />
-                    {booking.fareAmount}
+                    {booking.fareAmount.toFixed(2)}
                   </span>
                 </div>
 
@@ -483,4 +486,4 @@ const fetchAvailableBookings = async () => {
   );
 };
 
-export default Live;
+export default LiveBooking;

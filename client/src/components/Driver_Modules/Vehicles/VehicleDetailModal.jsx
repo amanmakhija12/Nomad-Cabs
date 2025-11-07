@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 
 const VehicleDetailModal = ({ vehicle, onClose }) => {
   if (!vehicle) return null;
-  const Icon = getVehicleIcon(vehicle.vehicle_type);
+  const Icon = getVehicleIcon(vehicle.vehicleType);
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-[#141414] rounded-2xl shadow-2xl border border-white/10 w-full max-w-3xl max-h-[90vh] overflow-y-auto no-scrollbar relative">
@@ -17,10 +17,10 @@ const VehicleDetailModal = ({ vehicle, onClose }) => {
               </div>
               <div>
                 <h2 className="text-xl font-semibold capitalize tracking-wide text-white/90">
-                  {vehicle.vehicle_type} Details
+                  {vehicle.vehicleType} Details
                 </h2>
                 <p className="text-xs text-white/50 font-mono mt-1">
-                  {vehicle.rc_number}
+                  {vehicle.rcNumber}
                 </p>
               </div>
             </div>
@@ -46,15 +46,15 @@ const VehicleDetailModal = ({ vehicle, onClose }) => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <VerifyCard
                 label="Registration Certificate"
-                ok={vehicle.is_rc_verified}
+                ok={vehicle.rcVerified}
               />
               <VerifyCard
                 label="Pollution Under Control"
-                ok={vehicle.is_puc_verified}
+                ok={vehicle.pucVerified}
               />
               <VerifyCard
                 label="Vehicle Insurance"
-                ok={vehicle.is_insurance_verified}
+                ok={vehicle.insuranceVerified}
               />
             </div>
           </div>
@@ -62,23 +62,23 @@ const VehicleDetailModal = ({ vehicle, onClose }) => {
           {/* Info Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <InfoPanel title="Vehicle Information">
-              <InfoRow label="Vehicle Type" value={vehicle.vehicle_type} cap />
-              <InfoRow mono label="RC Number" value={vehicle.rc_number} />
-              <InfoRow mono label="PUC Number" value={vehicle.puc_number} />
+              <InfoRow label="Vehicle Type" value={vehicle.vehicleType} cap />
+              <InfoRow mono label="RC Number" value={vehicle.rcNumber} />
+              <InfoRow mono label="PUC Number" value={vehicle.pucNumber} />
               <InfoRow
                 mono
                 label="Insurance Policy"
-                value={vehicle.insurance_policy_number}
+                value={vehicle.insurancePolicyNumber}
               />
             </InfoPanel>
             <InfoPanel title="Important Dates">
               <InfoRow
                 label="PUC Expiry"
-                value={formatDateSafe(vehicle.puc_expiry)}
+                value={formatDateSafe(vehicle.pucExpiry)}
               />
               <InfoRow
                 label="Insurance Expiry"
-                value={formatDateSafe(vehicle.insurance_expiry)}
+                value={formatDateSafe(vehicle.insuranceExpiry)}
               />
               <InfoRow
                 label="Created At"

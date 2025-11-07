@@ -144,38 +144,21 @@ export const vehicleService = {
   // Get driver's vehicles
   async getMyVehicles() {
     // Calls GET /api/v1/auth/driver/vehicles
-    const response = await api.get('/auth/driver/vehicles');
+    const response = await api.get('/driver/vehicles');
     return response.data;
   },
 
   // Get single vehicle (NEW ENDPOINT)
   async getVehicle(vehicleId) {
     // Calls GET /api/v1/auth/driver/vehicles/{id}
-    const response = await api.get(`/auth/driver/vehicles/${vehicleId}`);
+    const response = await api.get(`/driver/vehicles/${vehicleId}`);
     return response.data;
   },
 
   // Add new vehicle
   async addVehicle(vehicleData) {
-    // This payload maps your frontend snake_case to the backend camelCase
-    // TODO: create dto for the payload
-    const payload = {
-      vehicleType: vehicleData.vehicle_type.toUpperCase(),
-      rcNumber: vehicleData.rc_number,
-      pucNumber: vehicleData.puc_number,
-      pucExpiry: vehicleData.puc_expiry,
-      insurancePolicyNumber: vehicleData.insurance_policy_number,
-      insuranceExpiry: vehicleData.insurance_expiry,
-      // These fields are in your Vehicle entity
-      manufacturer: vehicleData.manufacturer || '',
-      model: vehicleData.model || '',
-      year: vehicleData.year ? parseInt(vehicleData.year) : null,
-      color: vehicleData.color || '',
-      registrationNumber: vehicleData.rc_number, // Your entity had this
-    };
-    
     // Calls POST /api/v1/auth/driver/vehicles
-    const response = await api.post('/auth/driver/vehicles', payload);
+    const response = await api.post('/driver/vehicles', vehicleData);
     return response.data;
   },
 
@@ -185,14 +168,14 @@ export const vehicleService = {
     const payload = { ...vehicleData }; // Simplified for now
     
     // Calls PUT /api/v1/auth/driver/vehicles/{id}
-    const response = await api.put(`/auth/driver/vehicles/${vehicleId}`, payload);
+    const response = await api.put(`/driver/vehicles/${vehicleId}`, payload);
     return response.data;
   },
 
   // Delete vehicle
   async deleteVehicle(vehicleId) {
     // Calls DELETE /api/v1/auth/driver/vehicles/{id}
-    const response = await api.delete(`/auth/driver/vehicles/${vehicleId}`);
+    const response = await api.delete(`/driver/vehicles/${vehicleId}`);
     return response.data;
   },
 };

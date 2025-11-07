@@ -7,44 +7,17 @@ import { PlusCircle } from 'lucide-react';
 import AddVehicleModal from "./AddVehicleModal";
 import { vehicleService } from "../../../services/bookingService"; // ✅ Import from your service
 
-const VehicleCards = ({ ownerId }) => {
+const VehicleCards = () => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  // ✅ Fetch vehicles from real backend
   const fetchVehicles = useCallback(async () => {
-    if (!ownerId) return;
-    
     setLoading(true);
     try {
-      // ✅ Use your existing service
       const data = await vehicleService.getMyVehicles();
-
-      // ✅ Transform backend data to frontend format
-      const transformedVehicles = Array.isArray(data) ? data.map(v => ({
-        id: v.id,
-        driver_id: v.driverId,
-        vehicle_type: v.vehicleType?.toLowerCase(),
-        rc_number: v.registrationNumber,
-        puc_number: v.pucNumber,
-        insurance_policy_number: v.insuranceNumber,
-        puc_expiry: v.pucExpiryDate,
-        insurance_expiry: v.insuranceExpiryDate,
-        is_rc_verified: v.verificationStatus === 'APPROVED',
-        is_puc_verified: v.verificationStatus === 'APPROVED',
-        is_insurance_verified: v.verificationStatus === 'APPROVED',
-        createdAt: v.createdAt,
-        updatedAt: v.updatedAt,
-        manufacturer: v.manufacturer,
-        model: v.model,
-        year: v.year,
-        color: v.color,
-      })) : [];
-
-      setVehicles(transformedVehicles);
-      
+      setVehicles(data);
     } catch (error) {
       console.error('❌ Error fetching vehicles:', error);
       toast.error(error.message || "Failed to fetch vehicles", {
@@ -56,21 +29,19 @@ const VehicleCards = ({ ownerId }) => {
     } finally {
       setLoading(false);
     }
-  }, [ownerId]);
+  }, []);
 
   // ✅ Add vehicle using your service
   const addVehicle = async (vehicleData) => {
     try {
       // ✅ Use your existing service
-      await vehicleService.addVehicle(vehicleData);
-      
+      const response = await vehicleService.addVehicle(vehicleData);
       toast.success("Vehicle added successfully!", {
         theme: "dark",
         transition: Bounce,
       });
-      
+      setVehicles(response);
       setShowCreateModal(false);
-      fetchVehicles();
     } catch (error) {
       console.error("❌ Error adding vehicle:", error);
       toast.error(error.message || "Failed to add vehicle", {
@@ -115,84 +86,85 @@ const VehicleCards = ({ ownerId }) => {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 relative">
-          {vehicles.map((vehicle) => {
-            const Icon = getVehicleIcon(vehicle?.vehicle_type);
-            return (
-              <div
-                key={vehicle.id}
-                className="group bg-[#141414] rounded-2xl p-6 border border-white/10 hover:border-white/20 hover:bg-[#181818] transition cursor-pointer relative overflow-hidden"
-                onClick={() => setSelectedVehicle(vehicle)}
-              >
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition pointer-events-none bg-gradient-to-br from-white/5 to-transparent" />
-                <div className="flex items-start justify-between mb-5 relative">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-[#1d1d1d] border border-white/10 flex items-center justify-center">
-                      {Icon && <Icon size={26} className="text-white" />}
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 relative">
+            {vehicles.map((vehicle) => {
+              const Icon = getVehicleIcon(vehicle.vehicleType);
+              return (
+                <div
+                  key={vehicle.id}
+                  className="group bg-[#141414] rounded-2xl p-6 border border-white/10 hover:border-white/20 hover:bg-[#181818] transition cursor-pointer relative overflow-hidden shadow-lg hover:shadow-xls"
+                  onClick={() => setSelectedVehicle(vehicle)}
+                >
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition pointer-events-none bg-gradient-to-br from-white/5 to-transparent" />
+                  <div className="flex items-start justify-between mb-5 relative">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-xl bg-[#1d1d1d] border border-white/10 flex items-center justify-center">
+                        {Icon && <Icon size={26} className="text-white" />}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-white capitalize tracking-wide">
+                          {vehicle.vehicleType}
+                        </h3>
+                        <p className="text-xs text-gray-400 font-mono mt-1">
+                          {vehicle.rcNumber}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-white capitalize tracking-wide">
-                        {vehicle.vehicle_type}
-                      </h3>
-                      <p className="text-xs text-gray-400 font-mono mt-1">
-                        {vehicle.rc_number}
-                      </p>
+                    <div className="flex flex-col items-end gap-1 min-h-[82px]">
+                      {vehicle.rcVerified && (
+                        <Pill label="RC" color="emerald" />
+                      )}
+                      {vehicle.pucVerified && (
+                        <Pill label="PUC" color="blue" />
+                      )}
+                      {vehicle.insuranceVerified && (
+                        <Pill label="INS" color="purple" />
+                      )}
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1">
-                    {vehicle.is_rc_verified && (
-                      <Pill label="RC" color="emerald" />
-                    )}
-                    {vehicle.is_puc_verified && (
-                      <Pill label="PUC" color="blue" />
-                    )}
-                    {vehicle.is_insurance_verified && (
-                      <Pill label="INS" color="purple" />
-                    )}
-                  </div>
-                </div>
 
-                <div className="space-y-3 text-xs">
-                  <Row
-                    label="PUC Expires"
-                    value={formatDateSafe(vehicle.puc_expiry)}
-                  />
-                  <Row
-                    label="Insurance Expires"
-                    value={formatDateSafe(vehicle.insurance_expiry)}
-                  />
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-500 uppercase tracking-wide text-[11px]">
-                      Verification
-                    </span>
-                    <div className="flex gap-1">
-                      <Dot ok={vehicle.is_rc_verified} />
-                      <Dot ok={vehicle.is_puc_verified} />
-                      <Dot ok={vehicle.is_insurance_verified} />
+                  <div className="space-y-3 text-xs">
+                    <Row
+                      label="PUC Expires"
+                      value={formatDateSafe(vehicle.pucExpiry)}
+                    />
+                    <Row
+                      label="Insurance Expires"
+                      value={formatDateSafe(vehicle.insuranceExpiry)}
+                    />
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-500 uppercase tracking-wide text-[11px]">
+                        Verification
+                      </span>
+                      <div className="flex gap-1">
+                        <Dot ok={vehicle.rcVerified} />
+                        <Dot ok={vehicle.pucVerified} />
+                        <Dot ok={vehicle.insuranceVerified} />
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="pt-5 mt-5 border-t border-white/10">
-                  <button className="w-full flex items-center justify-center gap-2 text-xs font-medium text-white/70 group-hover:text-white transition">
-                    <span>View Full Details</span>
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
+                  <div className="pt-5 mt-5 border-t border-white/10">
+                    <button className="w-full flex items-center justify-center gap-2 text-xs font-medium text-white/70 group-hover:text-white transition">
+                      <span>View Full Details</span>
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-          
+              );
+            })}
+          </div>
           {/* Add Vehicle Button */}
           <div className="absolute bottom-8 right-8">
             <button
@@ -208,17 +180,13 @@ const VehicleCards = ({ ownerId }) => {
               <span>Add Vehicle</span>
             </button>
           </div>
-        </div>
+        </>
       )}
 
       {showCreateModal && (
         <AddVehicleModal
-          onClose={() => {
-            setShowCreateModal(false);
-            fetchVehicles();
-          }}
+          onClose={() => setShowCreateModal(false)}
           onSubmit={addVehicle}
-          ownerId={ownerId}
         />
       )}
 
