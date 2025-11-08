@@ -6,8 +6,9 @@ import {
   TriangleAlert,
   X,
 } from "lucide-react";
+import { getInitial } from "../../../utils/getInitial";
 
-const BookingCards = ({ booking, user, isRider, onClose }) => {
+const BookingCards = ({ booking, isRider, onClose }) => {
   return (
     booking && (
       <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
@@ -25,8 +26,7 @@ const BookingCards = ({ booking, user, isRider, onClose }) => {
             <div className="text-center mb-8">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-white text-black rounded-full mb-4">
                 <span className="text-lg font-bold">
-                  {(user?.firstName?.[0] || "").toUpperCase()}
-                  {(user?.lastName?.[0] || "").toUpperCase()}
+                  {getInitial(isRider ? booking.driverName : booking.riderName)}
                 </span>
               </div>
               <p className="text-gray-300">
@@ -70,7 +70,7 @@ const BookingCards = ({ booking, user, isRider, onClose }) => {
                   {isRider ? "Driver Mobile Number" : "Rider Mobile Number"}
                 </label>
                 <div className="text-white/90 font-medium">
-                  {booking.driver?.phoneNumber || "—"}
+                  {booking.driverPhone || "—"}
                 </div>
               </div>
             </div>

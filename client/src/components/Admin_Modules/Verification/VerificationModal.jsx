@@ -36,12 +36,18 @@ const VerificationRow = ({ label, value, isVerified, onApprove, onReject, loadin
       <td className="px-5 py-4 align-top">
         {!isVerified && (
           <div className="flex gap-2">
-            <button onClick={onApprove} disabled={loading.approve} title="Approve" className="h-9 w-9 flex items-center justify-center rounded-lg bg-green-500/20 text-green-300 hover:bg-green-500/30 disabled:opacity-50">
-              {loading.approve ? <Spinner /> : <Check size={16} />}
-            </button>
-            <button onClick={onReject} disabled={loading.reject} title="Reject" className="h-9 w-9 flex items-center justify-center rounded-lg bg-red-500/20 text-red-300 hover:bg-red-500/30 disabled:opacity-50">
-              {loading.reject ? <Spinner /> : <X size={16} />}
-            </button>
+            {value ? (
+              <>
+                <button onClick={onApprove} disabled={loading.approve} title="Approve" className="h-9 w-9 flex items-center justify-center rounded-lg bg-green-500/20 text-green-300 hover:bg-green-500/30 disabled:opacity-50">
+                  {loading.approve ? <Spinner /> : <Check size={16} />}
+                </button>
+                <button onClick={onReject} disabled={loading.reject} title="Reject" className="h-9 w-9 flex items-center justify-center rounded-lg bg-red-500/20 text-red-300 hover:bg-red-500/30 disabled:opacity-50">
+                  {loading.reject ? <Spinner /> : <X size={16} />}
+                </button>
+              </>
+            ) : (
+              <span className="text-white/40 text-xs">Documents not provided yet</span>
+            )}
           </div>
         )}
       </td>
@@ -79,6 +85,10 @@ export const VerificationModal = ({ driver, onClose, onRefresh }) => {
   }, [fetchVehicles]);
 
   const handleDriverVerify = async (docType, isApproved) => {
+    if((docType === "AADHAAR" && !driver.aadharNumber) || (docType === "LICENSE" && !driver.licenseNumber)) {
+      toast.error(`Cannot ${isApproved ? 'approve' : 'reject'} unsubmitted document`);
+      return;
+    }
     const savingKey = `${driver.id}-${docType}-${isApproved ? 'approve' : 'reject'}`;
     setSaving(savingKey);
     try {
@@ -138,26 +148,26 @@ export const VerificationModal = ({ driver, onClose, onRefresh }) => {
               </thead>
               <tbody>
                 <VerificationRow
-                    label="Aadhaar"
-                    value={driver.aadharNumber}
-                    isVerified={driver.aadhaarVerified}
-                    onApprove={() => handleDriverVerify("AADHAAR", true)}
-                    onReject={() => handleDriverVerify("AADHAAR", false)}
-                    loading={{
-                        approve: saving === `${driver.id}-AADHAAR-approve`,
-                        reject: saving === `${driver.id}-AADHAAR-reject`,
-                    }}
+                  label="Aadhaar"
+                  value={driver.aadharNumber}
+                  isVerified={driver.aadhaarVerified}
+                  onApprove={() => handleDriverVerify("AADHAAR", true)}
+                  onReject={() => handleDriverVerify("AADHAAR", false)}
+                  loading={{
+                    approve: saving === `${driver.id}-AADHAAR-approve`,
+                    reject: saving === `${driver.id}-AADHAAR-reject`,
+                  }}
                 />
                 <VerificationRow
-                    label="License"
-                    value={driver.licenseNumber}
-                    isVerified={driver.driverLicenseVerified}
-                    onApprove={() => handleDriverVerify("LICENSE", true)}
-                    onReject={() => handleDriverVerify("LICENSE", false)}
-                    loading={{
-                        approve: saving === `${driver.id}-LICENSE-approve`,
-                        reject: saving === `${driver.id}-LICENSE-reject`,
-                    }}
+                  label="License"
+                  value={driver.licenseNumber}
+                  isVerified={driver.driverLicenseVerified}
+                  onApprove={() => handleDriverVerify("LICENSE", true)}
+                  onReject={() => handleDriverVerify("LICENSE", false)}
+                  loading={{
+                    approve: saving === `${driver.id}-LICENSE-approve`,
+                    reject: saving === `${driver.id}-LICENSE-reject`,
+                  }}
                 />
               </tbody>
             </table>
@@ -179,37 +189,37 @@ export const VerificationModal = ({ driver, onClose, onRefresh }) => {
                   <table className="w-full text-sm">
                     <tbody>
                       <VerificationRow
-                          label="RC"
-                          value={vehicle.rcNumber}
-                          isVerified={vehicle.rcVerified}
-                          onApprove={() => handleVehicleVerify(vehicle.id, "RC", true)}
-                          onReject={() => handleVehicleVerify(vehicle.id, "RC", false)}
-                          loading={{
-                            approve: saving === `${vehicle.id}-RC-approve`,
-                            reject: saving === `${vehicle.id}-RC-reject`,
-                          }}
+                        label="RC"
+                        value={vehicle.rcNumber}
+                        isVerified={vehicle.rcVerified}
+                        onApprove={() => handleVehicleVerify(vehicle.id, "RC", true)}
+                        onReject={() => handleVehicleVerify(vehicle.id, "RC", false)}
+                        loading={{
+                          approve: saving === `${vehicle.id}-RC-approve`,
+                          reject: saving === `${vehicle.id}-RC-reject`,
+                        }}
                       />
                       <VerificationRow
-                          label="PUC"
-                          value={vehicle.pucNumber}
-                          isVerified={vehicle.pucVerified}
-                          onApprove={() => handleVehicleVerify(vehicle.id, "PUC", true)}
-                          onReject={() => handleVehicleVerify(vehicle.id, "PUC", false)}
-                          loading={{
-                            approve: saving === `${vehicle.id}-PUC-approve`,
-                            reject: saving === `${vehicle.id}-PUC-reject`,
-                          }}
+                        label="PUC"
+                        value={vehicle.pucNumber}
+                        isVerified={vehicle.pucVerified}
+                        onApprove={() => handleVehicleVerify(vehicle.id, "PUC", true)}
+                        onReject={() => handleVehicleVerify(vehicle.id, "PUC", false)}
+                        loading={{
+                          approve: saving === `${vehicle.id}-PUC-approve`,
+                          reject: saving === `${vehicle.id}-PUC-reject`,
+                        }}
                       />
                       <VerificationRow
-                          label="Insurance"
-                          value={vehicle.insurancePolicyNumber}
-                          isVerified={vehicle.insuranceVerified}
-                          onApprove={() => handleVehicleVerify(vehicle.id, "INSURANCE", true)}
-                          onReject={() => handleVehicleVerify(vehicle.id, "INSURANCE", false)}
-                          loading={{
-                            approve: saving === `${vehicle.id}-INSURANCE-approve`,
-                            reject: saving === `${vehicle.id}-INSURANCE-reject`,
-                          }}
+                        label="Insurance"
+                        value={vehicle.insurancePolicyNumber}
+                        isVerified={vehicle.insuranceVerified}
+                        onApprove={() => handleVehicleVerify(vehicle.id, "INSURANCE", true)}
+                        onReject={() => handleVehicleVerify(vehicle.id, "INSURANCE", false)}
+                        loading={{
+                          approve: saving === `${vehicle.id}-INSURANCE-approve`,
+                          reject: saving === `${vehicle.id}-INSURANCE-reject`,
+                        }}
                       />
                     </tbody>
                   </table>

@@ -19,13 +19,13 @@ const DriverDetailsView = ({
   ).toUpperCase()}`;
   const panelBase = "bg-[#1b1b1b] border border-white/10 rounded-xl p-5";
 
-  const editableFields = [
+  const staticFieldsLeft = [
     { label: "Phone Number", name: "phoneNumber" },
     { label: "City", name: "city" },
     { label: "State", name: "state" },
   ];
 
-  const staticFields = [
+  const staticFieldsRight = [
     { label: "Email", value: Driver?.email || "—", isBadge: false },
     { label: "Created At", value: formatDateSafe(Driver?.createdAt) || "—", isBadge: false },
     { label: "Updated At", value: formatDateSafe(Driver?.updatedAt) || "—", isBadge: false },
@@ -78,6 +78,9 @@ const DriverDetailsView = ({
                   }`}
                 >
                   Email {Driver?.isEmailVerified ? "Verified" : "Unverified"}
+                </span>
+                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold bg-white text-black border border-white">
+                  driver
                 </span>
               </div>
             </div>
@@ -163,59 +166,25 @@ const DriverDetailsView = ({
               </span>
             )}
           </div>
-
-          {/* Verification panels (mapped) */}
-          <div className={panelBase}>
-            <p className="text-[11px] uppercase tracking-wider text-white/40">
-              Email Verified
-            </p>
-            <span
-              className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border ${
-                Driver?.isEmailVerified
-                  ? "bg-emerald-900/40 text-emerald-300 border-emerald-700"
-                  : "bg-red-900/40 text-red-300 border-red-700"
-              }`}
-            >
-              {Driver?.isEmailVerified ? "VERIFIED" : "NOT VERIFIED"}
-            </span>
-          </div>
-
-          <div className={panelBase}>
-            <p className="text-[11px] uppercase tracking-wider text-white/40">
-              Role
-            </p>
-            <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold bg-white text-black border border-white">
-              driver
-            </span>
-          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
           <div className="space-y-6">
-            {editableFields.map((f) => (
+            {staticFieldsLeft.map((f) => (
               <div className={panelBase} key={f.name}>
                 <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2">
                   {f.label}
                 </p>
-                {isEditing ? (
-                  <input
-                    name={f.name}
-                    value={Driver[f.name]}
-                    onChange={onChange}
-                    className="h-11 w-full rounded-lg bg-[#242424] text-white text-sm px-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/15"
-                  />
-                ) : (
-                  <div className="text-white/90 text-sm font-medium break-words">
-                    {Driver[f.name] || "—"}
-                  </div>
-                )}
+                <div className="text-white/90 text-sm font-medium break-words">
+                  {Driver[f.name] || "—"}
+                </div>
               </div>
             ))}
           </div>
 
       
           <div className="space-y-6">
-            {staticFields.map((f) => (
+            {staticFieldsRight.map((f) => (
               <div className={panelBase} key={f.label}>
                 <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2">
                   {f.label}

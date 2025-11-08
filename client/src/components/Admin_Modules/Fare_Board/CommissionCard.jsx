@@ -149,7 +149,7 @@ const CommissionCard = ({ commissionStructure, setCommissionStructure, commissio
                       onChange={(e) =>
                         setEditingCommission((prev) => ({
                           ...prev,
-                          min_value: e.target.value,
+                          minValue: e.target.value,
                         }))
                       }
                       className={inputBase}
@@ -168,7 +168,7 @@ const CommissionCard = ({ commissionStructure, setCommissionStructure, commissio
                       onChange={(e) =>
                         setEditingCommission((prev) => ({
                           ...prev,
-                          max_value: e.target.value,
+                          maxValue: e.target.value,
                         }))
                       }
                       className={inputBase}
@@ -188,7 +188,7 @@ const CommissionCard = ({ commissionStructure, setCommissionStructure, commissio
                       onChange={(e) =>
                         setEditingCommission((prev) => ({
                           ...prev,
-                          commission_percentage: e.target.value,
+                          commissionPercentage: e.target.value,
                         }))
                       }
                       className={inputBase}

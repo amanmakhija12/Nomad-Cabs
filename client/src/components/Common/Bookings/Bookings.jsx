@@ -88,7 +88,7 @@ const Bookings = ({ isRider = false }) => {
     <div className="min-h-screen bg-[#151212] text-white">
       <div className="mb-8">
         <h1 className="text-4xl font-semibold text-white mb-3">
-          {`Good Morning${user?.firstName ? ", " + user.firstName : ""}!`}
+          {`Good Morning ${user?.firstName ? ", " + user.firstName : ""}!`}
         </h1>
         <p className="text-gray-300">Manage your ride bookings efficiently</p>
       </div>
@@ -122,14 +122,12 @@ const Bookings = ({ isRider = false }) => {
         totalPages={bookingsData.totalPages || 1}
         onPageChange={(page) => setCurrentPage(page - 1)} // Convert to 0-based
         position="relative"
-        showLabels={true}
         variant="dark"
       />
 
       {selectedBooking && (
         <BookingCards
           booking={selectedBooking}
-          user={user}
           isRider={isRider}
           onClose={closeBooking}
         />

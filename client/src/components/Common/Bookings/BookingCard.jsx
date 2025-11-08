@@ -7,6 +7,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { formatDateSafe } from "../../../utils/DateUtil";
+import { getInitial } from "../../../utils/getInitial";
 
 const BookingCard = ({ booking, isRider, onBookingClick }) => {
   return (
@@ -20,11 +21,7 @@ const BookingCard = ({ booking, isRider, onBookingClick }) => {
         <div className="flex items-start space-x-3 sm:space-x-4 flex-grow">
           <div className="flex-shrink-0">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white text-black rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
-              {isRider ? (
-                <span className="text-xs sm:text-sm font-bold">R</span>
-              ) : (
-                <span className="text-xs sm:text-sm font-bold">D</span>
-              )}
+              <span className="text-xs sm:text-sm font-bold">{getInitial(isRider ? booking.driverName : booking.riderName)}</span>
             </div>
           </div>
 

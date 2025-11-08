@@ -8,55 +8,19 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState({
-    phoneNumber: "",
-    city: "",
-    state: "",
-    status: "active",
-    createdAt: "",
-    updatedAt: "",
-    is_email_verified: false,
+    status: rider?.status.toLowerCase() || "active",
   });
 
-  useEffect(() => {
-    if (rider) {
-      setFormData({
-        phoneNumber: rider.phoneNumber || "",
-        city: rider.city || "",
-        state: rider.state || "",
-        status: rider.status || "active",
-        createdAt: rider.createdAt || "",
-        updatedAt: rider.updatedAt || "",
-        is_email_verified: rider.is_email_verified || false,
-      });
-    }
-  }, [rider]);
+  console.log("RiderCards render:", rider);
 
   if (!rider) return null;
 
   const stop = (e) => e.stopPropagation();
-  
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((p) => ({ ...p, [name]: value }));
-  };
 
   const handleUpdate = async () => {
     try {
-      // Transform to backend format
-      const payload = {
-        firstName: rider.firstName,
-        lastName: rider.lastName,
-        email: rider.email,
-        phoneNumber: formData.phoneNumber,
-        city: formData.city,
-        state: formData.state,
-        role: rider.role.toUpperCase(),
-      };
-
-      await riderService.updateRider(rider.id, payload);
-      
       // Update status separately if changed
-      if (formData.status !== rider.status) {
+      if (formData.status) {
         await userService.updateUserStatus(rider.id, formData.status.toUpperCase());
       }
 
@@ -147,7 +111,7 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
       ? "bg-amber-900/40 text-amber-300 border-amber-700"
       : "bg-red-900/40 text-red-300 border-red-700";
 
-  const editableFields = [
+  const staticFieldsLeft = [
     {
       label: "Phone Number",
       name: "phoneNumber",
@@ -165,7 +129,7 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
     },
   ];
 
-  const staticFields = [
+  const staticFieldsRight = [
     {
       label: "Email",
       value: rider.email,
@@ -179,7 +143,7 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
     },
     {
       label: "Created At",
-      value: formatDateSafe(formData.createdAt, {
+      value: formatDateSafe(rider.createdAt, {
         locale: "en-IN",
         timeZone: "Asia/Kolkata",
         variant: "datetime",
@@ -189,7 +153,7 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
     },
     {
       label: "Updated At",
-      value: formatDateSafe(formData.updatedAt, {
+      value: formatDateSafe(rider.updatedAt, {
         locale: "en-IN",
         timeZone: "Asia/Kolkata",
         variant: "datetime",
@@ -230,8 +194,8 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
                   {rider.firstName} {rider.lastName}
                 </h2>
                 <div className="mt-2 flex flex-wrap gap-3 text-[11px]">
-                  <span className={badgeClass(formData.is_email_verified)}>
-                    Email {formData.is_email_verified ? "Verified" : "Unverified"}
+                  <span className={badgeClass(rider.is_email_verified)}>
+                    Email {rider.is_email_verified ? "Verified" : "Unverified"}
                   </span>
                   <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold bg-white text-black border border-white">
                     {rider.role}
@@ -301,7 +265,7 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
                 </select>
               ) : (
                 <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border ${statusTheme}`}>
-                  {formData.status.toUpperCase()}
+                  {rider.status.toUpperCase()}
                 </span>
               )}
             </div>
@@ -310,8 +274,8 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
               <p className="text-[11px] uppercase tracking-wider text-white/40 flex items-center gap-2">
                 <UserCheck className="w-3.5 h-3.5" /> Email Verified
               </p>
-              <span className={badgeClass(formData.is_email_verified)}>
-                {formData.is_email_verified ? "VERIFIED" : "NOT VERIFIED"}
+              <span className={badgeClass(rider.is_email_verified)}>
+                {rider.is_email_verified ? "VERIFIED" : "NOT VERIFIED"}
               </span>
             </div>
           </div>
@@ -319,30 +283,21 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
           {/* Editable / Static sections */}
           <div className="grid md:grid-cols-2 gap-8">
             <div className="space-y-6">
-              {editableFields.map((f) => (
+              {staticFieldsLeft.map((f) => (
                 <div key={f.name} className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5">
                   <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2 flex items-center gap-2">
                     {f.icon}
                     {f.label}
                   </p>
-                  {isEditing ? (
-                    <input
-                      name={f.name}
-                      value={formData[f.name]}
-                      onChange={handleInputChange}
-                      className="h-11 w-full rounded-lg bg-[#242424] text-white text-sm px-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/15"
-                    />
-                  ) : (
-                    <div className="text-white/90 text-sm font-medium break-words">
-                      {formData[f.name] || "—"}
-                    </div>
-                  )}
+                  <div className="text-white/90 text-sm font-medium break-words">
+                    {rider[f.name] || "—"}
+                  </div>
                 </div>
               ))}
             </div>
 
             <div className="space-y-6">
-              {staticFields.map((f, idx) => (
+              {staticFieldsRight.map((f, idx) => (
                 <div key={idx} className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5">
                   <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2 flex items-center gap-2">
                     {f.icon}

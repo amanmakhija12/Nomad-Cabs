@@ -6,12 +6,12 @@ import BookCab from "../components/Rider_Modules/BookACab/BookCab";
 import PlaceHolder from "../components/Common/PlaceHolder";
 
 const riderNavItems = [
-  { id: "myBooking", label: "My Bookings" },
   { id: "bookCab", label: "Book a Cab" },
+  { id: "myBooking", label: "My Bookings" },
   { id: "account", label: "Manage Account" },
 ];
 const RiderPage = () => {
-  const [activeSection, setActiveSection] = useState("myBooking");
+  const [activeSection, setActiveSection] = useState("bookCab");
   return (
     <Sidebar
       activeSection={activeSection}

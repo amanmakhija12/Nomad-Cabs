@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import DriverCards from "./Driver_Cards/DriverCards";
 import ManageCard from "./Manage_Driver_Card/ManageCard";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search } from "lucide-react";
 import { driverService } from "../../../services/adminService";
 import { toast, Bounce } from "react-toastify";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { useAuthStore } from "../../../store/authStore";
+import Pagination from "../../Common/Pagination";
 
 const filterOptions = [
   { label: "Aadhaar", value: "aadhaarNumber" },
@@ -13,19 +14,18 @@ const filterOptions = [
 ];
 
 const ManageDrivers = () => {
+  const [drivers, setDrivers] = useState([]);
   const [selectedDriver, setSelectedDriver] = useState(null);
   const openDriver = (driver) => setSelectedDriver(driver);
   const closeDriver = () => setSelectedDriver(null);
 
-  const [drivers, setDrivers] = useState([]);
-
   const [filterType, setFilterType] = useState(filterOptions[0].value);
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
-
+  
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const user = useAuthStore((s) => s.user);
@@ -57,6 +57,7 @@ const ManageDrivers = () => {
       setDrivers(driversData.content);
       setTotalPages(driversData.totalPages);
       setTotalItems(driversData.totalElements);
+      setCurrentPage(driversData.number + 1);
     } catch (error) {
       console.error("Error fetching drivers:", error);
       toast.error(error.message || "Failed to fetch drivers", {
@@ -164,61 +165,13 @@ const ManageDrivers = () => {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="mt-10 flex justify-center">
-          <div className="flex items-center gap-2 bg-[#141414] border border-white/10 rounded-full px-3 py-2 shadow-lg">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="h-9 w-9 flex items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter((n) => {
-                if (totalPages <= 7) return true;
-                if (n === 1 || n === totalPages) return true;
-                if (Math.abs(n - currentPage) <= 1) return true;
-                if (currentPage <= 3 && n <= 5) return true;
-                if (currentPage >= totalPages - 2 && n >= totalPages - 4)
-                  return true;
-                return false;
-              })
-              .map((n, idx, arr) => {
-                const prev = arr[idx - 1];
-                const showDots = prev && n - prev > 1;
-                return (
-                  <div key={n} className="flex">
-                    {showDots && (
-                      <span className="h-9 w-9 flex items-center justify-center text-white/30">
-                        …
-                      </span>
-                    )}
-                    <button
-                      onClick={() => setCurrentPage(n)}
-                      className={`h-9 w-9 rounded-full text-sm font-medium transition ${
-                        currentPage === n
-                          ? "bg-white text-black shadow"
-                          : "text-white/60 hover:text-white hover:bg-white/10"
-                      }`}
-                    >
-                      {n}
-                    </button>
-                  </div>
-                );
-              })}
-
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="h-9 w-9 flex items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages || 1}
+        onPageChange={setCurrentPage}
+        position="relative"
+        variant="dark"
+      />
 
       {selectedDriver && (
         <DriverCards

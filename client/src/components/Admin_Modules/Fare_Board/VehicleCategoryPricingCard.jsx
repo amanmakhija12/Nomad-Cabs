@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast, Bounce } from "react-toastify";
-import { Plus, Save, X, Edit, Trash2 } from "lucide-react";
+import { Save, X, Edit } from "lucide-react";
 
 
 const VehicleCategoryPricingCard = ({ fareConfigs, setFareConfigs, fareConfigService }) => {
@@ -9,13 +9,18 @@ const VehicleCategoryPricingCard = ({ fareConfigs, setFareConfigs, fareConfigSer
   const inputBase =
     "h-11 w-full rounded-lg bg-[#1b1b1b] border border-white/10 text-sm px-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-white/15";
 
-  const handleFareConfigEdit = (location) => {
-    setEditingFareConfig({ ...location });
+  const handleFareConfigEdit = (fare) => {
+    setEditingFareConfig({ ...fare });
   };
 
   const handleFareConfigSave = async () => {
     try {
-      await fareConfigService.updateFare(editingFareConfig);
+      const updatedData = await fareConfigService.updateFare(editingFareConfig.id, editingFareConfig);
+      setFareConfigs((prev) =>
+        prev.map((fare) =>
+          fare.id === updatedData.id ? updatedData : fare
+        )
+      );
       setEditingFareConfig(null);
       toast.success("Fare details updated", {
         theme: "dark",
@@ -59,7 +64,7 @@ const VehicleCategoryPricingCard = ({ fareConfigs, setFareConfigs, fareConfigSer
               >
                 <td className="px-5 py-3 align-middle">
                   <span className="capitalize text-white/85 font-medium">
-                    {fareConfig.vehicleCategory}
+                    {fareConfig.vehicleCategory.toLowerCase()}
                   </span>
                 </td>
                 <td className="px-5 py-3 align-middle">
@@ -70,14 +75,14 @@ const VehicleCategoryPricingCard = ({ fareConfigs, setFareConfigs, fareConfigSer
                       onChange={(e) =>
                         setEditingFareConfig((prev) => ({
                           ...prev,
-                          state: e.target.value,
+                          baseFare: parseFloat(e.target.value) || 0,
                         }))
                       }
                       className={inputBase}
                     />
                   ) : (
                     <span className="capitalize text-white/85 font-medium">
-                      {fareConfig.baseFare}
+                      ₹{fareConfig.baseFare.toFixed(2)}
                     </span>
                   )}
                 </td>
@@ -90,7 +95,7 @@ const VehicleCategoryPricingCard = ({ fareConfigs, setFareConfigs, fareConfigSer
                       onChange={(e) =>
                         setEditingFareConfig((prev) => ({
                           ...prev,
-                          price_per_km: parseFloat(e.target.value),
+                          pricePerKm: parseFloat(e.target.value) || 0,
                         }))
                       }
                       className={inputBase}
@@ -110,7 +115,7 @@ const VehicleCategoryPricingCard = ({ fareConfigs, setFareConfigs, fareConfigSer
                       onChange={(e) =>
                         setEditingFareConfig((prev) => ({
                           ...prev,
-                          price_per_km: parseFloat(e.target.value),
+                          pricePerMinute: parseFloat(e.target.value) || 0,
                         }))
                       }
                       className={inputBase}

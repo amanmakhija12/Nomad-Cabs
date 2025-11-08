@@ -37,11 +37,13 @@ const LoginForm = () => {
       }
       localStorage.setItem("token", loginData.token);
 
-      const userData = api.get("/auth/profile/me").then(({data}) => {
+      api.get("/auth/profile/me").then(({data}) => {
         const user = {
           userId: data.id,
           role: data.role,
           email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
         };
 
         setAuth(user, loginData.token);

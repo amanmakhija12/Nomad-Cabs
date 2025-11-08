@@ -1,272 +1,226 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
-import { Upload, CheckCircle, XCircle, Clock, AlertCircle } from "lucide-react";
+import { CheckCircle, Clock, PlusCircle } from "lucide-react";
 import { useAuthStore } from "../../../store/authStore";
+import { driverService } from "../../../services/driverService"; // <-- Use your new service
+import AddVehicleModal from "../Vehicles/AddVehicleModal"; // <-- Import the Add modal
+import { VehicleEditorCard } from "./VehicleEditorCard"; // <-- Import the new Card
 
-const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:8080/api/v1';
-
-const Verification = () => {
+const ManageVerification = () => {
   const user = useAuthStore((s) => s.user);
-  const token = useAuthStore((s) => s.token);
   
-  const [loading, setLoading] = useState(false);
   const [driverData, setDriverData] = useState(null);
+  const [vehicles, setVehicles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+
   const [formData, setFormData] = useState({
     aadhaarNumber: "",
     dlNumber: "",
     dlExpiryDate: "",
   });
 
-  // Fetch driver verification status
-  useEffect(() => {
-    const fetchDriverData = async () => {
-      try {
-        const response = await fetch(`${BASE_URL}/drivers/me`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-
-        if (response.status === 404) {
-          // Driver profile doesn't exist
-          setDriverData(null);
-          return;
-        }
-
-        if (!response.ok) throw new Error('Failed to fetch driver data');
-        
-        const data = await response.json();
-        setDriverData(data);
-        
-        setFormData({
-          aadhaarNumber: data.aadhaarNumber || "",
-          dlNumber: data.dlNumber || "",
-          dlExpiryDate: data.dlExpiryDate || "",
-        });
-      } catch (error) {
-        console.error('Error fetching driver data:', error);
-      }
-    };
-
-    if (user) {
-      fetchDriverData();
-    }
-  }, [user, token]);
-
-  const handleChange = (e) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Fetches ALL data for this page
+  const fetchData = useCallback(async () => {
+    if (!user) return;
     setLoading(true);
-
     try {
-      const payload = {
-        aadhaarNumber: formData.aadhaarNumber,
-        dlNumber: formData.dlNumber,
-        dlExpiryDate: formData.dlExpiryDate,
-      };
+      // Fetch in parallel
+      const [profile, vehicles] = await Promise.all([
+        driverService.getDriverProfile(),
+        driverService.getMyVehicles(),
+      ]);
 
-      const url = driverData 
-        ? `${BASE_URL}/drivers/me`  // Update existing
-        : `${BASE_URL}/drivers/me`;  // Create new
-
-      const method = driverData ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
+      setDriverData(profile);
+      setVehicles(vehicles || []);
+      
+      setFormData({
+        aadhaarNumber: profile.aadharNumber || "",
+        dlNumber: profile.licenseNumber || "",
+        dlExpiryDate: profile.driverLicenseExpiry || "",
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to submit verification');
-      }
-
-      const data = await response.json();
-      setDriverData(data);
-
-      toast.success('Verification documents submitted! Awaiting admin approval.', {
-        theme: 'dark',
-      });
     } catch (error) {
-      console.error('Verification error:', error);
-      toast.error(error.message || 'Failed to submit verification', {
-        theme: 'dark',
-      });
+      console.error('Error fetching driver data:', error);
+      if (error.response?.status !== 404) {
+        toast.error(error.message || 'Failed to fetch data', { theme: "dark" });
+      }
     } finally {
       setLoading(false);
     }
+  }, [user]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleChange = (e) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const getStatusBadge = () => {
-    if (!driverData) return null;
+  // Handles *only* the driver document (Aadhaar/DL) form
+  const handleSubmitDriverDocs = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const response = await driverService.updateDriverProfile(formData);
+      setDriverData(response); // Update state with fresh data
+      toast.success("Driver details submitted!", { theme: 'dark' });
+    } catch (error) {
+      console.error('Verification error:', error);
+      toast.error(error.message || 'Failed to submit details', { theme: 'dark' });
+    } finally {
+      setSaving(false);
+    }
+  };
 
-    const statusMap = {
-      PENDING: { icon: Clock, color: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30', label: 'Pending Verification' },
-      UNDER_REVIEW: { icon: Clock, color: 'bg-blue-500/20 text-blue-300 border-blue-500/30', label: 'Under Review' },
-      APPROVED: { icon: CheckCircle, color: 'bg-green-500/20 text-green-300 border-green-500/30', label: 'Verified' },
-      REJECTED: { icon: XCircle, color: 'bg-red-500/20 text-red-300 border-red-500/30', label: 'Rejected' },
-    };
+  // Callback for when a new vehicle is added
+  const onVehicleAdded = () => {
+    setShowAddModal(false);
+    fetchData(); // Refresh the whole page
+  };
 
-    const status = statusMap[driverData.verificationStatus] || statusMap.PENDING;
-    const Icon = status.icon;
-
+  const getStatusBadge = (status) => {
+    // ... (Your getStatusBadge function is fine, but it needs to check
+    // driverData.isAadhaarVerified and driverData.isDriverLicenseVerified
+    // to show a "Partial" or "Full" status. I'll simplify for now.)
+    const isVerified = driverData?.aadhaarVerified && driverData?.driverLicenseVerified;
+    const Icon = isVerified ? CheckCircle : Clock;
+    const color = isVerified 
+      ? 'bg-green-500/20 text-green-300 border-green-500/30' 
+      : 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
+    
     return (
-      <div className={`flex items-center gap-2 px-4 py-2 rounded-full border ${status.color}`}>
+      <div className={`flex items-center gap-2 px-4 py-2 rounded-full border ${color}`}>
         <Icon className="w-4 h-4" />
-        <span className="text-sm font-medium">{status.label}</span>
+        <span className="text-sm font-medium">{isVerified ? "Verified" : "Pending"}</span>
       </div>
     );
   };
+  
+  if (loading && !driverData) {
+    return <div className="p-6 text-white/60">Loading your profile...</div>;
+  }
 
   return (
-    <div className="min-h-screen bg-[#151212] text-white p-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-semibold mb-2">Driver Verification</h1>
-            <p className="text-gray-400">Submit your documents for verification</p>
-          </div>
-          {getStatusBadge()}
-        </div>
-
-        {/* Warning if rejected */}
-        {driverData?.verificationStatus === 'REJECTED' && (
-          <div className="mb-8 bg-red-500/20 border-2 border-red-500/50 rounded-2xl p-6">
-            <div className="flex items-start gap-3">
-              <XCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-1" />
-              <div>
-                <h3 className="text-lg font-semibold text-red-300 mb-2">Verification Rejected</h3>
-                <p className="text-red-200/80 mb-3">
-                  {driverData.rejectionReason || 'Your documents were rejected. Please update and resubmit.'}
-                </p>
-                <p className="text-sm text-red-200/60">
-                  Update your information below and submit again for review.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Info box if already verified */}
-        {driverData?.verificationStatus === 'APPROVED' && (
-          <div className="mb-8 bg-green-500/20 border-2 border-green-500/50 rounded-2xl p-6">
-            <div className="flex items-start gap-3">
-              <CheckCircle className="w-6 h-6 text-green-400 flex-shrink-0 mt-1" />
-              <div>
-                <h3 className="text-lg font-semibold text-green-300 mb-2">Verification Approved!</h3>
-                <p className="text-green-200/80">
-                  Your documents have been verified. You can now accept ride requests.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Form */}
-        <div className="bg-[#141414] rounded-2xl border border-white/10 p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Aadhaar Number */}
+    <>
+      <div className="min-h-screen bg-[#151212] text-white p-6">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="mb-8 flex items-center justify-between">
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">
-                Aadhaar Number <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
+              <h1 className="text-4xl font-semibold mb-2">Driver Verification</h1>
+              <p className="text-gray-400">Submit your documents for verification</p>
+            </div>
+            {driverData && getStatusBadge(driverData.verificationStatus)}
+          </div>
+
+          {/* Form 1: Driver Documents */}
+          <div className="bg-[#141414] rounded-2xl border border-white/10 p-8 mb-10">
+            <h3 className="text-lg font-semibold text-white mb-6">Your Documents (Aadhaar & License)</h3>
+            <form onSubmit={handleSubmitDriverDocs} className="space-y-6">
+              {/* Aadhaar Number */}
+              <InputField
+                label="Aadhaar Number"
                 name="aadhaarNumber"
                 value={formData.aadhaarNumber}
                 onChange={handleChange}
                 placeholder="1234 5678 9012"
                 maxLength="12"
                 required
-                disabled={driverData?.verificationStatus === 'APPROVED'}
-                className="w-full h-12 px-4 rounded-xl bg-[#1a1a1a] border border-white/10 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:opacity-50"
+                disabled={driverData?.isAadhaarVerified || saving}
               />
-            </div>
-
-            {/* DL Number */}
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">
-                Driving License Number <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
+              
+              {/* DL Number */}
+              <InputField
+                label="Driving License Number"
                 name="dlNumber"
                 value={formData.dlNumber}
                 onChange={handleChange}
                 placeholder="MH01 20230012345"
                 required
-                disabled={driverData?.verificationStatus === 'APPROVED'}
-                className="w-full h-12 px-4 rounded-xl bg-[#1a1a1a] border border-white/10 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:opacity-50"
+                disabled={driverData?.isDriverLicenseVerified || saving}
               />
-            </div>
 
-            {/* DL Expiry */}
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">
-                License Expiry Date <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
+              {/* DL Expiry */}
+              <InputField
+                label="License Expiry Date"
                 name="dlExpiryDate"
+                type="date"
                 value={formData.dlExpiryDate}
                 onChange={handleChange}
                 required
-                disabled={driverData?.verificationStatus === 'APPROVED'}
+                disabled={driverData?.isDriverLicenseVerified || saving}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full h-12 px-4 rounded-xl bg-[#1a1a1a] border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-white/20 disabled:opacity-50"
               />
-            </div>
 
-            {/* Info Note */}
-            <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="text-sm font-medium text-blue-300 mb-1">Note</h4>
-                  <p className="text-xs text-blue-200/80">
-                    Document upload feature coming soon. For now, please ensure your Aadhaar
-                    and Driving License are valid. Admin will verify your details.
-                  </p>
-                </div>
-              </div>
-            </div>
+              {driverData && !(driverData.isAadhaarVerified && driverData.isDriverLicenseVerified) && (
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="w-full h-12 bg-white text-black rounded-xl font-semibold hover:bg-gray-100 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {saving ? "Submitting..." : "Submit Driver Documents"}
+                </button>
+              )}
+            </form>
+          </div>
 
-            {/* Submit Button */}
-            {driverData?.verificationStatus !== 'APPROVED' && (
+          {/* Section 2: Vehicle Documents */}
+          <div className="bg-[#141414] rounded-2xl border border-white/10 p-8">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-semibold text-white">Your Vehicles</h3>
               <button
-                type="submit"
-                disabled={loading}
-                className="w-full h-12 bg-white text-black rounded-xl font-semibold hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                onClick={() => setShowAddModal(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-500 transition"
               >
-                {loading ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-5 h-5" />
-                    {driverData ? 'Update & Resubmit' : 'Submit for Verification'}
-                  </>
-                )}
+                <PlusCircle size={18} />
+                Add Vehicle
               </button>
-            )}
-          </form>
+            </div>
+            
+            <div className="space-y-6">
+              {loading && <p className="text-white/50">Loading vehicles...</p>}
+              {!loading && vehicles.length === 0 && (
+                <p className="text-center text-white/50 py-10">You have not added any vehicles yet.</p>
+              )}
+              {vehicles.map(vehicle => (
+                <VehicleEditorCard 
+                  key={vehicle.id} 
+                  vehicle={vehicle} 
+                  onRefresh={fetchData} 
+                />
+              ))}
+            </div>
+          </div>
+
         </div>
       </div>
-    </div>
+      
+      {/* Add Vehicle Modal */}
+      {showAddModal && (
+        <AddVehicleModal
+          onClose={() => setShowAddModal(false)}
+          onSubmit={onVehicleAdded}
+        />
+      )}
+    </>
   );
 };
 
-export default Verification;
+// Reusable Input Field
+const InputField = ({ label, ...props }) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-400 mb-2">
+      {label}
+      {props.required && <span className="text-red-500 ml-1">*</span>}
+    </label>
+    <input
+      {...props}
+      className="w-full h-12 px-4 rounded-xl bg-[#1a1a1a] border border-white/10 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:opacity-50"
+    />
+  </div>
+);
+
+export default ManageVerification;

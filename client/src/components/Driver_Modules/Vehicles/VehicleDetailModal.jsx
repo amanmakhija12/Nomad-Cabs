@@ -64,6 +64,11 @@ const VehicleDetailModal = ({ vehicle, onClose }) => {
             <InfoPanel title="Vehicle Information">
               <InfoRow label="Vehicle Type" value={vehicle.vehicleType} cap />
               <InfoRow mono label="RC Number" value={vehicle.rcNumber} />
+
+              <InfoRow label="Manufacturer" value={vehicle.manufacturer} cap />
+              <InfoRow label="Model" value={vehicle.model} cap />
+              <InfoRow label="Color" value={vehicle.color} cap />
+              
               <InfoRow mono label="PUC Number" value={vehicle.pucNumber} />
               <InfoRow
                 mono

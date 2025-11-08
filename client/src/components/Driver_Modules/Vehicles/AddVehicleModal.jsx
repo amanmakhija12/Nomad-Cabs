@@ -107,7 +107,9 @@ const AddVehicleModal = ({ onClose, onSubmit }) => {
               { label: "Insurance Policy Number", name: "insurancePolicyNumber", required: true },
               { label: "PUC Expiry", name: "pucExpiry", type: "date", required: true },
               { label: "Insurance Expiry", name: "insuranceExpiry", type: "date", required: true },
-              // { label: "RC Expiry", name: "rc_expiry", type: "date", required: false }, // Removed this
+              { label: "Manufacturer", name: "manufacturer", required: true },
+              { label: "Model", name: "model", required: true },
+              { label: "Color", name: "color", required: true },
             ].map(({ label, name, type = "text", required }) => (
               <div
                 key={name}
@@ -122,29 +124,6 @@ const AddVehicleModal = ({ onClose, onSubmit }) => {
                   value={formData[name]}
                   onChange={handleChange}
                   required={required}
-                  className={inputBase}
-                />
-              </div>
-            ))}
-
-            {/* Optional Fields */}
-            {[
-              { label: "Manufacturer (Optional)", name: "manufacturer" },
-              { label: "Model (Optional)", name: "model" },
-              { label: "Color (Optional)", name: "color" },
-            ].map(({ label, name, type = "text" }) => (
-              <div
-                key={name}
-                className="group bg-[#1b1b1b] p-4 rounded-xl border border-white/10 hover:shadow-md transition-all duration-200 hover:border-white/20"
-              >
-                <label className="block text-xs font-semibold text-white/50 uppercase tracking-wide mb-2 group-hover:text-white/70">
-                  {label}
-                </label>
-                <input
-                  type={type}
-                  name={name} // camelCase
-                  value={formData[name]}
-                  onChange={handleChange}
                   className={inputBase}
                 />
               </div>

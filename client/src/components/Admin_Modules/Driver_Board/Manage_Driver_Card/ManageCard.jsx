@@ -19,6 +19,11 @@ const ManageCard = ({ driver, onClick }) => (
             {driver.firstName} {driver.lastName}
           </h3>
           <VerificationStatus driver={driver} />
+          <span
+            className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-medium border tracking-wide ${driver.status === "ACTIVE" ? "bg-emerald-900/40 text-emerald-300 border-emerald-700" : "bg-amber-900/40 text-amber-300 border-amber-700"}`}
+          >
+            {driver.status}
+          </span>
         </div>
       </div>
 

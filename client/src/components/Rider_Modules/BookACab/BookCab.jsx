@@ -8,6 +8,7 @@ import {
 } from "./BookingSteps";
 import { bookingService } from "../../../services/bookingService";
 import { toast } from "react-toastify";
+import { useActiveRideCheck } from "../../../hooks/useActiveRideCheck";
 
 // --- MOCK GEOCODING ---
 // In a real app, you would replace this with an async call
@@ -82,14 +83,12 @@ const BookCab = () => {
       setStep(1);
       
       // Navigate to bookings page
-      setTimeout(() => {
-        navigate("/rider");
-      }, 2000);
+      navigate("/ride");
 
     } catch (error) {
       // 4. Handle errors from Axios
       console.error('Booking error:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to create booking';
+      const errorMessage = error.response?.data || error.message || 'Failed to create booking';
       toast.error(`${errorMessage}`, {
         theme: "dark",
         autoClose: 5000,
@@ -98,6 +97,8 @@ const BookCab = () => {
       setLoading(false);
     }
   };
+
+  useActiveRideCheck();
 
   return (
     <div className="min-h-screen bg-[#151212] text-white p-6">

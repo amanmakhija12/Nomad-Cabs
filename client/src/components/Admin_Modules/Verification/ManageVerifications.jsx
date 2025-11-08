@@ -2,13 +2,15 @@ import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import { ShieldAlert, ArrowRight } from "lucide-react";
 import { driverService } from "../../../services/adminService";
-import { VerificationModal } from "./VerificationModal"; // We will create this
+import { VerificationModal } from "./VerificationModal";
+import Pagination from "../../Common/Pagination";
 
 const ManageVerifications = () => {
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pageData, setPageData] = useState({ number: 0, totalPages: 0 });
   const [selectedDriver, setSelectedDriver] = useState(null);
+  const [pageData, setPageData] = useState({ number: 0, totalPages: 0 });
+  const [currentPage, setCurrentPage] = useState(0);
 
   const fetchVerificationQueue = useCallback(async (page = 0) => {
     try {
@@ -35,7 +37,7 @@ const ManageVerifications = () => {
   }, []);
 
   useEffect(() => {
-    fetchVerificationQueue();
+    fetchVerificationQueue(currentPage);
   }, [fetchVerificationQueue]);
 
   const handleRefresh = async () => {
@@ -71,7 +73,7 @@ const ManageVerifications = () => {
       {/* Driver List */}
       <div className="bg-[#141414] rounded-2xl border border-white/10 p-8 shadow-lg">
         <h2 className="text-2xl font-semibold tracking-tight text-white mb-8">
-          Pending Verification Queue ({drivers.length})
+          Pending Verification Queue ( {drivers.length} )
         </h2>
         <div className="space-y-4">
           {drivers.length === 0 ? (
@@ -88,12 +90,13 @@ const ManageVerifications = () => {
         </div>
       </div>
       
-      {/* <Pagination
-        currentPage={pageData.number + 1} // 1-based for UI
-        totalPages={pageData.totalPages}
-        onPageChange={(page) => fetchVerificationQueue(page - 1)} // 0-based for API
-        // ... (your other pagination props)
-      /> */}
+      <Pagination
+        currentPage={pageData.number + 1}
+        totalPages={pageData.totalPages || 1}
+        onPageChange={(page) => setCurrentPage(page - 1)}
+        position="relative"
+        variant="dark"
+      />
 
       {/* The Modal */}
       {selectedDriver && (
@@ -111,9 +114,7 @@ const ManageVerifications = () => {
 const DriverRow = ({ driver, onClick }) => {
   // Check for any unverified doc
   const hasPendingDocs = !driver.isAadhaarVerified || 
-                         !driver.isDriverLicenseVerified || 
-                         !driver.isPanVerified;
-
+                         !driver.isDriverLicenseVerified;
   return (
     <div
       onClick={onClick}

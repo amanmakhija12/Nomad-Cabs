@@ -4,24 +4,22 @@ import { toast } from "react-toastify";
 import {
   Car,
   Users,
-  MessageSquare,
   ShieldCheck,
   HelpCircle,
   LogOut,
   IndianRupee,
   CreditCard,
+  Menu,
+  X
 } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
+import { getInitial } from "../../utils/getInitial";
 
 const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
   const [openSidebar, setOpenSidebar] = useState(false);
-  
-  const avatar = {
-    path: "/src/assets/testimonials/kickButtowski.avif",
-    name: "Kick Buttowski",
-  };
+  const { user, clearUser } = useAuthStore();
+
   const navigate = useNavigate();
-  const clearUser = useAuthStore((s) => s.clearUser);
   const handleLogout = () => {
     clearUser();
     toast.success("Logged out");
@@ -63,24 +61,22 @@ const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
         {/* Top Section */}
         <div className="p-6 flex items-center justify-between">
           <div className="flex items-center space-x-3 overflow-hidden">
-            <img
-              src={avatar.path}
-              className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-              alt="user"
-            />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white text-black rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
+              <span className="text-xs sm:text-sm font-bold">{getInitial(user.firstName+" "+user.lastName)}</span>
+            </div>
             <div
               className={`text-white font-medium text-sm transition-opacity duration-200 ${
                 openSidebar ? "opacity-100" : "opacity-0 md:opacity-100"
               }`}
             >
-              {avatar.name}
+              {user ? `${user.firstName} ${user.lastName}` : "Guest User"}
             </div>
           </div>
           <button
             onClick={() => setOpenSidebar(!openSidebar)}
             className="md:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors duration-200"
           >
-            {openSidebar ? "" : "☰"}
+            {openSidebar ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
 

@@ -2,12 +2,12 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { toast, Bounce } from "react-toastify";
 import { formatDateSafe } from "../../../utils/DateUtil";
 import TransactionCards from "./TransactionCards";
-import {ChevronLeft,ChevronRight} from 'lucide-react'
 import { transactionService } from "../../../services/adminService";
 import { useDebounce } from "../../../hooks/useDebounce";
+import Pagination from "../../Common/Pagination";
 
 const ManageTransactions = () => {
-  const [transactionsData, setTransactionsData] = useState({ content: [], totalPages: 0, totalElements: 0 });
+  const [transactionsData, setTransactionsData] = useState({ content: [], totalPages: 0, totalElements: 0, number: 0 });
   const [loading, setLoading] = useState(true);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
 
@@ -17,9 +17,6 @@ const ManageTransactions = () => {
   const [fareFilter, setFareFilter] = useState("all");
   const [fareValue, setFareValue] = useState("");
   const [dateFilter, setDateFilter] = useState("");
-
-  // pagination
-  const [currentPage, setCurrentPage] = useState(1);
   
   // --- 2. DEBOUNCE inputs to prevent API spam ---
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -34,7 +31,7 @@ const ManageTransactions = () => {
 
       // 1. Build filters object
       const filters = {
-        page: currentPage - 1,
+        page: transactionsData.number - 1,
         size: 10,
         searchTerm: debouncedSearchTerm || null,
         status: statusFilter === "all" ? null : statusFilter,
@@ -48,7 +45,6 @@ const ManageTransactions = () => {
       const data = await transactionService.fetchTransactions(filters);
       
       setTransactionsData(data);
-
     } catch (e) {
       console.error("Error fetching transactions:", e);
       if (!silent && !hasShownErrorRef.current) {
@@ -59,7 +55,7 @@ const ManageTransactions = () => {
       setLoading(false);
     }
     // 5. Update dependency array
-  }, [currentPage, debouncedSearchTerm, statusFilter, fareFilter, debouncedFareValue, dateFilter]);
+  }, [debouncedSearchTerm, statusFilter, fareFilter, debouncedFareValue, dateFilter]);
 
   // This useEffect now triggers on any filter change
   useEffect(() => {
@@ -178,7 +174,6 @@ const ManageTransactions = () => {
                 setFareFilter("all");
                 setFareValue("");
                 setDateFilter("");
-                setCurrentPage(1);
               }}
               className="h-11 w-full rounded-lg bg-white/10 text-white text-sm font-medium border border-white/15 hover:bg-white/15 transition"
             >
@@ -251,63 +246,13 @@ const ManageTransactions = () => {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="mt-10 flex justify-center">
-          <div className="flex items-center gap-2 bg-[#141414] border border-white/10 rounded-full px-3 py-2 shadow-lg">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="h-9 w-9 flex items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter((n) => {
-                if (totalPages <= 7) return true;
-                if (n === 1 || n === totalPages) return true;
-                if (Math.abs(n - currentPage) <= 1) return true;
-                if (currentPage <= 3 && n <= 5) return true;
-                if (currentPage >= totalPages - 2 && n >= totalPages - 4)
-                  return true;
-                return false;
-              })
-              .map((n, idx, arr) => {
-                const prev = arr[idx - 1];
-                const showDots = prev && n - prev > 1;
-                return (
-                  <div key={n} className="flex">
-                    {showDots && (
-                      <span className="h-9 w-9 flex items-center justify-center text-white/30">
-                        …
-                      </span>
-                    )}
-                    <button
-                      onClick={() => setCurrentPage(n)}
-                      className={`h-9 w-9 rounded-full text-sm font-medium transition ${
-                        currentPage === n
-                          ? "bg-white text-black shadow"
-                          : "text-white/60 hover:text-white hover:bg-white/10"
-                      }`}
-                    >
-                      {n}
-                    </button>
-                  </div>
-                );
-              })}
-
-            <button
-              onClick={() =>
-                setCurrentPage((p) => Math.min(totalPages, p + 1))
-              }
-              disabled={currentPage === totalPages}
-              className="h-9 w-9 flex items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
+      <Pagination
+        currentPage={transactionsData.number + 1}
+        totalPages={transactionsData.totalPages || 1}
+        onPageChange={(page) => setTransactionsData({ ...transactionsData, number: page - 1 })}
+        position="relative"
+        variant="dark"
+      />
 
       {selectedTransaction && (
         <TransactionCards transaction={selectedTransaction} onClose={closeTransaction} onRefresh={handleRefresh} />

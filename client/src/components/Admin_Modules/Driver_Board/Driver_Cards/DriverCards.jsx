@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast, Bounce } from "react-toastify";
 import DriverDetailsView from "./DriverDetailsView";
 import VehicleView from "./VehicleView";
@@ -11,12 +11,7 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const [formData, setFormData] = useState({
-    phoneNumber: "",
-    city: "",
-    state: "",
-    status: "active",
-    createdAt: "",
-    updatedAt: "",
+    status: Driver?.status.toLowerCase() || "active",
   });
 
   const handleInputChange = (e) => {
@@ -25,23 +20,11 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
   };
 
   const handleUpdate = async () => {
-    if (!user || !Driver?.userId) return;
+    if (!Driver?.userId) return;
     try {
-      // Transform to backend format
-      const payload = {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phoneNumber: formData.phoneNumber,
-        city: formData.city,
-        state: formData.state,
-        role: user.role,
-      };
-
-      await userService.updateUser(Driver.userId, payload);
       
       // Update status if changed
-      if (formData.status !== user.status?.toLowerCase()) {
+      if (formData.status) {
         await userService.updateUserStatus(Driver.userId, formData.status.toUpperCase());
       }
 

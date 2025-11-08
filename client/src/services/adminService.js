@@ -150,21 +150,15 @@ export const userService = {
 export const fareConfigService = {
   async getAllFares() {
     // GET /api/v1/admin/finance/fares
-    const response = await api.get("/admin/finance/fares");
+    const response = await api.get("/booking/admin/finance/fares");
     return response.data; // Axios returns data in .data
   },
 
   async updateFare(id, fareData) {
     // PUT /api/v1/admin/finance/fares/{id}
-    const response = await api.put(`/admin/finance/fares/${id}`, fareData);
+    const response = await api.put(`/booking/admin/finance/fares/${id}`, fareData);
     return response.data;
-  },
-
-  async deleteFare(id) {
-    // DELETE /api/v1/admin/finance/fares/{id}
-    await api.delete(`/admin/finance/fares/${id}`);
-    return null; // Delete usually returns no content
-  },
+  }
 };
 
 // ============================================
@@ -174,25 +168,25 @@ export const commissionService = {
   
   async getAllCommission() {
     // GET /api/v1/admin/finance/commission
-    const response = await api.get("/admin/finance/commission");
+    const response = await api.get("/booking/admin/finance/commission");
     return response.data;
   },
 
   async addCommission(commissionData) {
     // POST /api/v1/admin/finance/commission
-    const response = await api.post("/admin/finance/commission", commissionData);
+    const response = await api.post("/booking/admin/finance/commission", commissionData);
     return response.data;
   },
 
   async updateCommission(id, commissionData) {
     // PUT /api/v1/admin/finance/commission/{id}
-    const response = await api.put(`/admin/finance/commission/${id}`, commissionData);
+    const response = await api.put(`/booking/admin/finance/commission/${id}`, commissionData);
     return response.data;
   },
   
   async deleteCommission(id) {
     // DELETE /api/v1/admin/finance/commission/{id}
-    await api.delete(`/admin/finance/commission/${id}`);
+    await api.delete(`/booking/admin/finance/commission/${id}`);
     return null;
   }
 };
@@ -212,29 +206,5 @@ export const transactionService = {
 
     const response = await api.get(`/wallet/admin/transactions?${params.toString()}`);
     return response.data;
-  },
-  
-  async getAllCommission() {
-    // GET /api/v1/admin/finance/commission
-    const response = await api.get("/admin/finance/commission");
-    return response.data;
-  },
-
-  async addCommission(commissionData) {
-    // POST /api/v1/admin/finance/commission
-    const response = await api.post("/admin/finance/commission", commissionData);
-    return response.data;
-  },
-
-  async updateCommission(id, commissionData) {
-    // PUT /api/v1/admin/finance/commission/{id}
-    const response = await api.put(`/admin/finance/commission/${id}`, commissionData);
-    return response.data;
-  },
-  
-  async deleteCommission(id) {
-    // DELETE /api/v1/admin/finance/commission/{id}
-    await api.delete(`/admin/finance/commission/${id}`);
-    return null;
   }
 };

@@ -40,16 +40,6 @@ export const bookingService = {
     return response.data;
   },
 
-  // Rate driver (NEW ENDPOINT)
-  async rateDriver(bookingId, rating, feedback) {
-    // Calls POST /api/v1/booking/rate/driver/{bookingId}
-    const response = await api.post(`/booking/rate/driver/${bookingId}`, {
-      driverRating: rating,
-      driverFeedback: feedback,
-    });
-    return response.data;
-  },
-
   async calculateEstimatedFare(bookingData) {
     const response = await api.post("/booking/estimate", bookingData);
     return response.data;
@@ -57,6 +47,22 @@ export const bookingService = {
 
   async getVehicleTypesWithCounts() {
     const response = await api.get("/booking/vehicle-types");
+    return response.data;
+  },
+
+  async getActiveRideForRider() {
+    const response = await api.get("/booking/active-ride/rider");
+    return response.data;
+  },
+
+  async cancelRide(bookingId, reason) {
+    const payload = { reason };
+    const response = await api.put(`/booking/cancel/${bookingId}`, payload);
+    return response.data;
+  },
+
+  async rateRide(bookingId, payload) {
+    const response = await api.post(`/booking/rate/${bookingId}`, payload);
     return response.data;
   }
 };
@@ -69,7 +75,7 @@ export const driverBookingService = {
     if (vehicleType) params.append('vehicleType', vehicleType);
     
     // Calls GET /api/v1/booking/available
-    const response = await api.get(`/booking/available?${params.toString()}`);
+    const response = await api.get(`/booking/available?${params}`);
     return response.data;
   },
 
@@ -84,20 +90,16 @@ export const driverBookingService = {
     const response = await api.get(`/booking/history/driver?${params}`);
     return response.data;
   },
-
-  // Get active booking (NEW ENDPOINT)
-  async getActiveBooking() {
-    // Calls GET /api/v1/booking/active/driver
-    const response = await api.get('/booking/active/driver');
-    return response.data; // Will be null or the booking
+    
+  async getActiveRideForDriver() {
+    const response = await api.get("/booking/active-ride/driver");
+    return response.data;
   },
 
   // Accept booking
   async acceptBooking(bookingId, vehicleId) {
     // Calls POST /api/v1/booking/accept/{bookingId}
-    const response = await api.post(`/booking/accept/${bookingId}`, { 
-      vehicleId: vehicleId 
-    });
+    const response = await api.post(`/booking/accept/${bookingId}/${vehicleId}`);
     return response.data;
   },
 
@@ -108,19 +110,15 @@ export const driverBookingService = {
     return response.data;
   },
 
+  async changeStatusForRating(bookingId) {
+    const response = await api.post(`/booking/status/${bookingId}/rating`);
+    return response.data;
+  },
+
   // Complete ride
   async completeRide(bookingId) {
     // Calls POST /api/v1/booking/complete/{bookingId}
     const response = await api.post(`/booking/complete/${bookingId}`);
-    return response.data;
-  },
-
-  // Cancel booking
-  async cancelBooking(bookingId, reason) {
-    // Calls POST /api/v1/booking/cancel/{bookingId}
-    const response = await api.post(`/booking/cancel/${bookingId}`, { 
-      cancellationReason: reason 
-    });
     return response.data;
   },
 

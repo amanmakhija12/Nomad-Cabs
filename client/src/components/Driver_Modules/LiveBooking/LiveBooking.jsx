@@ -11,20 +11,31 @@ import {
   RefreshCw,
   AlertCircle,
 } from "lucide-react"; // Removed unused 'Divide' import
+import { useActiveRideCheck } from "../../../hooks/useActiveRideCheck";
+import api from "../../../utils/api";
+import { useNavigate } from "react-router-dom";
 
 const LiveBooking = () => {
+  const navigate = useNavigate();
+
   const [bookings, setBookings] = useState([]);
   const [vehicles, setVehicles] = useState([]); 
   const [loading, setLoading] = useState(false);
   const [vehiclesLoading, setVehiclesLoading] = useState(false); 
   const [previousCount, setPreviousCount] = useState(0);
   const [lastFetchTime, setLastFetchTime] = useState(null);
-  const [selectedVehicle, setSelectedVehicle] = useState("");
+  const [selectedVehicle, setSelectedVehicle] = useState({
+    id: "",
+    type: "",
+  });
   const [isPollingActive, setIsPollingActive] = useState(true);
   const [isActive, setIsActive] = useState(false); // This will track if a ride is active
+  const [isVerified, setIsVerified] = useState(false);
   
   const user = useAuthStore((s) => s.user);
   const intervalRef = useRef(null);
+
+  useActiveRideCheck();
 
   // Fetch driver's vehicles on mount
   useEffect(() => {
@@ -35,19 +46,35 @@ const LiveBooking = () => {
       try {
         console.log('🚗 Fetching driver vehicles...');
         const vehicleData = await vehicleService.getMyVehicles();
+        const { data: currentDriver } = await api.get('/driver/profile/me');
+        console.log(currentDriver);
         console.log('✅ Vehicles fetched:', vehicleData);
         
         console.log(`✅ Found ${vehicleData.length} vehicles`);
         setVehicles(vehicleData);
 
         const approvedVehicle = vehicleData.find(v => v.pucVerified && v.rcVerified && v.insuranceVerified);
-        if (approvedVehicle && !selectedVehicle) {
-          setSelectedVehicle(approvedVehicle.id);
+        setIsVerified(currentDriver.aadhaarVerified && currentDriver.driverLicenseVerified);
+        if (approvedVehicle && !selectedVehicle.id && currentDriver.aadhaarVerified && currentDriver.driverLicenseVerified) {
+          setSelectedVehicle({
+            id: approvedVehicle.id,
+            type: approvedVehicle.vehicleType
+          });
           console.log('✅ Auto-selected vehicle:', approvedVehicle.id);
         }
 
-        if (!approvedVehicle) {
-          toast.warning('No approved vehicles found. Please add and verify a vehicle first.', {
+        if(!currentDriver.aadhaarVerified || !currentDriver.driverLicenseVerified) {
+          toast.info('Please complete your driver verification to accept bookings.', {
+            theme: 'dark',
+            autoClose: 5000,
+          });
+        } else if(vehicleData.length === 0) {
+          toast.info('No vehicles found. Please add a vehicle to accept bookings.', {
+            theme: 'dark',
+            autoClose: 5000,
+          });
+        } else if (!approvedVehicle) {
+          toast.warning('No verified vehicles found. Please wait for a vehicle to verify first.', {
             theme: 'dark',
             autoClose: 5000,
           });
@@ -63,13 +90,10 @@ const LiveBooking = () => {
     loadVehicles();
   }, [user]);
 
-  // Fetch available bookings
- // Add this at the top of fetchAvailableBookings function
-
 const fetchAvailableBookings = async () => {
   try {
     console.log('🔄 Fetching available bookings...');
-    const data = await driverBookingService.getAvailableBookings();
+    const data = await driverBookingService.getAvailableBookings(selectedVehicle.type);
     
     // ✅ Check if response has error message (409 conflict)
     if (data && data.message && data.message.includes('active booking')) {
@@ -194,14 +218,14 @@ const fetchAvailableBookings = async () => {
 
   // Accept booking with error handling
   const handleAccept = async (bookingId) => {
-    if (!selectedVehicle) {
+    if (selectedVehicle.id === "") {
       toast.error('Please select a vehicle first', { theme: 'dark' });
       return;
     }
 
     try {
-      console.log(`🚗 Accepting booking ${bookingId} with vehicle ${selectedVehicle}`);
-      await driverBookingService.acceptBooking(bookingId, selectedVehicle);
+      console.log(`🚗 Accepting booking ${bookingId} with vehicle ${selectedVehicle.id}`);
+      await driverBookingService.acceptBooking(bookingId, selectedVehicle.id);
       
       toast.success('✅ Booking accepted successfully!', { 
         theme: 'dark',
@@ -211,6 +235,7 @@ const fetchAvailableBookings = async () => {
       // After accepting, we will have an active ride.
       // fetchAvailableBookings() will now detect it and set isActive=true
       fetchAvailableBookings();
+      navigate('/ride'); // Redirect to the common ride page
     } catch (error) {
       console.error('❌ Error accepting booking:', error);
       toast.error(error.message || 'Failed to accept booking', { 
@@ -239,7 +264,6 @@ const fetchAvailableBookings = async () => {
     return parts.join(' - ');
   };
 
-
   return (
     <div className="min-h-screen bg-[#151212] text-white p-6">
       {/* Header */}
@@ -256,7 +280,7 @@ const fetchAvailableBookings = async () => {
           <div className="flex items-center gap-4 flex-wrap">
             {/* Vehicle Selection with real data */}
             <select
-              value={selectedVehicle}
+              value={selectedVehicle.id}
               onChange={(e) => setSelectedVehicle(e.target.value)}
               disabled={vehiclesLoading || vehicles.length === 0}
               className="px-4 py-2 rounded-xl bg-[#1a1a1a] border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 text-sm disabled:opacity-50 disabled:cursor-not-allowed min-w-[250px]"
@@ -268,7 +292,7 @@ const fetchAvailableBookings = async () => {
             ) : (
               <>
                 <option value="">Select Vehicle</option>
-                {vehicles
+                {isVerified && vehicles
                   .filter(v => v.pucVerified && v.rcVerified && v.insuranceVerified)
                   .map((vehicle) => (
                     <option key={vehicle.id} value={vehicle.id}>
@@ -355,7 +379,7 @@ const fetchAvailableBookings = async () => {
               <p className="text-sm font-medium">
                 {isActive 
                   ? 'Active Ride' 
-                  : (selectedVehicle ? 'Ready to Accept' : 'Select Vehicle')
+                  : (selectedVehicle.id !== "" ? 'Ready to Accept' : 'Select Vehicle')
                 }
               </p>
             </div>
@@ -472,10 +496,10 @@ const fetchAvailableBookings = async () => {
                 {/* Accept Button */}
                 <button
                   onClick={() => handleAccept(booking.id)}
-                  disabled={!selectedVehicle}
+                  disabled={selectedVehicle.id === ""}
                   className="w-full bg-white text-black py-3 rounded-xl font-medium hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed group-hover:shadow-lg"
                 >
-                  {selectedVehicle ? 'Accept Ride' : 'Select Vehicle First'}
+                  {selectedVehicle.id !== "" ? 'Accept Ride' : 'Select Vehicle First'}
                 </button>
               </div>
             ))}
