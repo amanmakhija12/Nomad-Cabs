@@ -97,7 +97,7 @@ const Navigator = ({ onSelect }) => {
             </div>
           </div>
           <div className="mt-14 text-white/30 text-xs tracking-wide">
-            <p className="uppercase">DriveSure Admin Dashboard</p>
+            <p className="uppercase">NomadCabs Admin Dashboard</p>
             <p className="mt-1">Unified Management Interface</p>
           </div>
         </div>
