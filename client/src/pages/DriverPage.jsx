@@ -4,20 +4,20 @@ import Bookings from "../components/Common/Bookings/Bookings";
 import ManageAccount from "../components/Common/ManageAccount/ManageAccount";
 import VehicleCards from "../components/Driver_Modules/Vehicles/VehicleCards";
 import Verification from "../components/Driver_Modules/Verification/Verification";
-import { useAuthStore } from "../store/authStore";
 import LiveBooking from "../components/Driver_Modules/LiveBooking/LiveBooking";
+import Wallet from "../components/Common/Wallet/Wallet";
 
 const driverNavItems = [
   { id: "liveBookings", label: "Live Bookings" },
   { id: "bookings", label: "My Bookings" },
   { id: "vehicles", label: "Manage Vehicles" },
   { id: "verification", label: "Verification" },
+  { id: "wallet", label: "Wallet" },
   { id: "account", label: "Manage Account" },
 ];
 
 const DriverPage = () => {
   const [activeSection, setActiveSection] = useState("liveBookings");
-  const user = useAuthStore((s) => s.user);
 
   return (
     <Sidebar
@@ -26,9 +26,10 @@ const DriverPage = () => {
       navItems={driverNavItems}
     >
       {activeSection === "liveBookings" && <LiveBooking />}
-      {activeSection === "bookings" && <Bookings userRole="driver" />}
+      {activeSection === "bookings" && <Bookings />}
       {activeSection === "vehicles" && <VehicleCards />}
       {activeSection === "verification" && <Verification />}
+      {activeSection === "wallet" && <Wallet />}
       {activeSection === "account" && <ManageAccount />}
     </Sidebar>
   );

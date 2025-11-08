@@ -8,7 +8,7 @@ import { bookingService, driverBookingService } from "../../../services/bookingS
 import { toast } from "react-toastify";
 import { useDebounce } from "../../../hooks/useDebounce";
 
-const Bookings = ({ isRider = false }) => {
+const Bookings = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [filterType, setFilterType] = useState("pickupAddress");
@@ -21,6 +21,7 @@ const Bookings = ({ isRider = false }) => {
   });
 
   const user = useAuthStore((s) => s.user);
+  const isRider = user.role === "RIDER";
 
   const openBooking = (booking) => setSelectedBooking(booking);
   const closeBooking = () => setSelectedBooking(null);
@@ -43,7 +44,7 @@ const Bookings = ({ isRider = false }) => {
         };
 
         let data;
-        if (isRider || user?.role === "RIDER") {
+        if (user?.role === "RIDER") {
           data = await bookingService.getMyBookings(filters);
         } else if (user?.role === "DRIVER") {
           data = await driverBookingService.getMyBookings(filters);
@@ -62,7 +63,7 @@ const Bookings = ({ isRider = false }) => {
       fetchBookings();
     }
     
-  }, [user, isRider, filterType, debouncedSearchTerm, currentPage]);
+  }, [user, filterType, debouncedSearchTerm, currentPage]);
 
   useEffect(() => {
     if (selectedBooking) {
