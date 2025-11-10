@@ -21,8 +21,15 @@ const FareRow = ({ label, value, isTotal = false }) => (
   </div>
 );
 
-const TransactionDetailModal = ({ transaction, onClose }) => {
+const TransactionDetailModal = ({ transaction, onClose, userRole }) => {
   if (!transaction) return null;
+
+  const isRider = userRole.toUpperCase() === 'RIDER';
+
+  const rideFareSubtotal = (transaction.baseFare || 0) + 
+                         (transaction.distanceFare || 0) + 
+                         (transaction.durationFare || 0) + 
+                         (transaction.surchargeFees || 0);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
@@ -45,13 +52,32 @@ const TransactionDetailModal = ({ transaction, onClose }) => {
         <div className="p-6 space-y-6 overflow-y-auto">
           {/* Fare Breakdown */}
           <div className="bg-[#1f1f1f] rounded-xl border border-white/10 p-5">
-            <h3 className="text-md font-semibold text-white mb-3">Fare Breakdown</h3>
+            <h3 className="text-md font-semibold text-white mb-3">{isRider ? "Your Bill" : "Your Payout"}</h3>
             <div className="space-y-1">
               <FareRow label="Base Fare" value={transaction.baseFare} />
-              <FareRow label="Surcharge" value={transaction.surchargeFees} />
-              <FareRow label="Taxes (GST)" value={transaction.taxes} />
-              <FareRow label="Discount" value={-transaction.discount} />
-              <FareRow label="Total Fare" value={transaction.totalFare} isTotal />
+              <FareRow label="Distance Fare" value={transaction.distanceFare} />
+              <FareRow label="Surge" value={transaction.surchargeFees} />
+
+              {isRider ? (
+                <>
+                  <FareRow label="Platform Fee" value={transaction.platformFee} />
+                  <FareRow label="Taxes & Fees (GST)" value={transaction.taxes} />
+                  {transaction.discount > 0 && (
+                    <FareRow label="Discount" value={-transaction.discount} />
+                  )}
+                  <FareRow label="Total Paid" value={transaction.totalFare} isTotal />
+                </>
+              ) : (
+                <>
+                  <FareRow label="Ride Fare Subtotal" value={rideFareSubtotal} isTotal />
+                  <FareRow label="Platform Commission" value={-transaction.commissionFee} />
+                  <FareRow 
+                    label="Your Payout" 
+                    value={rideFareSubtotal - transaction.commissionFee} 
+                    isTotal 
+                  />
+                </>
+              )}
             </div>
           </div>
 

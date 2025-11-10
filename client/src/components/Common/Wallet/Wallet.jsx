@@ -4,6 +4,7 @@ import { walletService } from '../../../services/walletService';
 import { toast } from 'react-toastify';
 import { Wallet as WalletIcon, ArrowUpCircle, ArrowDownCircle, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import TransactionDetailModal from './TransactionDetailModal';
+import { formatDateSafe } from '../../../utils/DateUtil';
 
 const Wallet = () => {
   const [wallet, setWallet] = useState(null);
@@ -17,13 +18,13 @@ const Wallet = () => {
   const [txTotalPages, setTxTotalPages] = useState(0);
   const [selectedTx, setSelectedTx] = useState(null);
 
-  const user = useAuthStore((state) => state.user);
+  const user = useAuthStore((s) => s.user);
   const isRider = user.role.toUpperCase() === 'RIDER';
 
   const fetchTransactions = useCallback(async (page) => {
     setTxLoading(true);
     try {
-      const data = await walletService.getMyTransactions(page, 5); // 5 per page
+      const data = await walletService.getMyTransactions(page);
       setTransactions(data.content || []);
       setTxPage(data.number);
       setTxTotalPages(data.totalPages);
@@ -51,10 +52,13 @@ const Wallet = () => {
 
   useEffect(() => {
     fetchWallet();
-    fetchTransactions(0);
+    fetchTransactions();
   }, [fetchWallet]);
 
-  // --- Action Handlers ---
+  useEffect(() => {
+    !isProcessing && fetchTransactions();
+  }, [isProcessing]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const amt = parseFloat(amount);
@@ -68,16 +72,14 @@ const Wallet = () => {
     try {
       let updatedWallet;
       if (isRider) {
-        // ADD FUNDS
         updatedWallet = await walletService.addFunds(amt);
         toast.success(`₹${amt} added to your wallet!`);
       } else {
-        // WITHDRAW FUNDS
         updatedWallet = await walletService.withdrawFunds(amt);
         toast.success(`₹${amt} withdrawn from your wallet.`);
       }
-      setWallet(updatedWallet); // Update balance in UI
-      setAmount(''); // Clear input
+      setWallet(updatedWallet);
+      setAmount('');
     } catch (error) {
       console.error("Transaction error:", error);
       toast.error(error.response?.data || error.message || "Transaction failed.");
@@ -156,7 +158,7 @@ const Wallet = () => {
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder={isRider ? "e.g., 500" : "e.g., 1000"}
-                    step="10"
+                    step="0.01"
                     min="0"
                     required
                     className={inputBase}
@@ -197,7 +199,7 @@ const Wallet = () => {
                   <TransactionRow 
                     key={tx.id} 
                     tx={tx} 
-                    userId={user.id} 
+                    userId={user.userId} 
                     onClick={() => setSelectedTx(tx)}
                   />
                 ))}
@@ -236,6 +238,7 @@ const Wallet = () => {
           <TransactionDetailModal
             transaction={selectedTx}
             onClose={() => setSelectedTx(null)}
+            userRole={user.role}
           />
         )}
     </>
@@ -243,12 +246,45 @@ const Wallet = () => {
 };
 
 const TransactionRow = ({ tx, userId, onClick }) => {
-  // Check if this was a credit (money in) or debit (money out)
-  const isCredit = tx.driverId === userId;
-  const amount = isCredit ? `+₹${tx.totalFare.toFixed(2)}` : `-₹${tx.totalFare.toFixed(2)}`;
-  const color = isCredit ? "text-emerald-400" : "text-red-400";
-  const name = isCredit ? tx.riderName : tx.driverName;
-  const label = isCredit ? "Ride payment from" : "Ride payment to";
+  let isCredit = false;
+  let amount = `₹${tx.totalFare.toFixed(2)}`;
+  let color = "text-white/90";
+  let label = "Transaction";
+  let name = "";
+  let Icon = ArrowUpCircle;
+
+  if (tx.transactionType === 'TOP_UP') {
+    isCredit = true;
+    label = "Wallet Top-up";
+    name = "From your bank";
+  } else if (tx.transactionType === 'WITHDRAWAL') {
+    isCredit = false;
+    label = "Withdrawal";
+    name = "To your bank";
+  } else {
+    isCredit = tx.driverId === userId;
+    const rideFareSubtotal = (tx.baseFare || 0) + 
+                         (tx.distanceFare || 0) + 
+                         (tx.surchargeFees || 0) -
+                         (tx.commissionFee || 0);
+    if (isCredit) {
+      label = "Ride Payout from";
+      name = tx.riderName;
+      amount = `+₹${rideFareSubtotal.toFixed(2)}`;
+    } else {
+      label = "Ride Payment to";
+      name = tx.driverName;
+      amount = `-₹${tx.totalFare.toFixed(2)}`;
+    }
+  }
+
+  if (isCredit) {
+    color = "text-emerald-400";
+    Icon = ArrowUpCircle;
+  } else {
+    color = "text-red-400";
+    Icon = ArrowDownCircle;
+  }
 
   return (
     <button 
@@ -256,12 +292,14 @@ const TransactionRow = ({ tx, userId, onClick }) => {
       className="w-full p-4 rounded-lg bg-[#1f1f1f] border border-white/10 hover:bg-white/5 transition flex items-center justify-between"
     >
       <div className="flex items-center gap-4">
-        <div className={`flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center ${isCredit ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
-          {isCredit ? <ArrowUpCircle size={20} className="text-emerald-400" /> : <ArrowDownCircle size={20} className="text-red-400" />}
+        <div className={`flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center ${
+          isCredit ? 'bg-emerald-500/20' : 'bg-red-500/20'
+        }`}>
+          <Icon size={20} className={color} />
         </div>
         <div className="text-left">
           <p className="text-sm font-medium text-white/90">{label} {name}</p>
-          <p className="text-xs text-white/50">{tx.bookingId.split('-')[0]}</p>
+          <p className="text-xs text-white/50">{formatDateSafe(tx.createdAt, {variant: "datetime"})}</p>
         </div>
       </div>
       <div className={`text-lg font-semibold ${color}`}>
