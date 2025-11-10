@@ -208,3 +208,34 @@ export const transactionService = {
     return response.data;
   }
 };
+
+// ============================================
+// DASHBOARD
+// ============================================
+export const adminStatsService = {
+  async getUserStats() {
+    const response = await api.get('/admin/stats/users');
+    return response.data;
+  },
+
+  async getRecentTransactions() {
+    const params = { page: 0, size: 10, sort: 'createdAt,desc', type: 'ride_payment' };
+    const response = await api.get('/wallet/admin/transactions', { params });
+    return response.data;
+  },
+  
+  async getRevenueChartData(duration = 'lifetime') {
+    const response = await api.get('/wallet/admin/stats/revenue-chart', { params: { duration } });
+    return response.data;
+  },
+
+  async getRevenueStats(duration = 'lifetime') {
+    const response = await api.get('/wallet/admin/stats/revenue', { params: { duration } });
+    return response.data;
+  },
+
+  async getPlatformStats() {
+    const response = await api.get('/admin/stats/users');
+    return response.data;
+  },
+};

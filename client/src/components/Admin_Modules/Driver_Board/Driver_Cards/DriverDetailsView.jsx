@@ -33,11 +33,11 @@ const DriverDetailsView = ({
 
   const docs = [
     { label: "PAN", value: Driver.panCard },
-    { label: "Aadhaar", value: Driver.aadharCard },
+    { label: "Aadhaar", value: Driver.aadharNumber },
     {
       label: "DL No. (Expiry)",
-      value: `${Driver.driverLicense || "—"}${
-        Driver.driverLicenseExpiry ? ` (${Driver.driverLicenseExpiry})` : ""
+      value: `${Driver.licenseNumber || "—"} ${
+        Driver.driverLicenseExpiry ? `(${formatDateSafe(Driver.driverLicenseExpiry)})` : ""
       }`,
     },
   ];

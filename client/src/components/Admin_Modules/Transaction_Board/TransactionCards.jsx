@@ -1,99 +1,102 @@
+import { X } from "lucide-react";
 import { formatDateSafe } from "../../../utils/DateUtil";
-import { useState, useEffect } from "react";
+
+const VerifyCard = ({ label, ok }) => (
+  <div
+    className={`p-4 rounded-xl border text-center space-y-3 transition relative overflow-hidden ${
+      ok
+        ? "border-emerald-400/30 bg-emerald-500/10"
+        : "border-red-400/30 bg-red-500/10"
+    }`}
+  >
+    <div
+      className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center text-white text-sm font-semibold ${
+        ok ? "bg-emerald-500" : "bg-red-500"
+      }`}
+    >
+      {ok ? "✓" : "✕"}
+    </div>
+    <h4 className="text-[11px] font-medium tracking-wide text-white/70 uppercase leading-snug px-1">
+      {label}
+    </h4>
+    <p
+      className={`text-[11px] font-semibold tracking-wide ${
+        ok ? "text-emerald-300" : "text-red-300"
+      }`}
+    >
+      {ok ? "Verified" : "Not Verified"}
+    </p>
+  </div>
+);
+
+const InfoPanel = ({ title, children }) => (
+  <div className="bg-[#181818] rounded-xl p-5 border border-white/10">
+    <h3 className="text-xs font-semibold tracking-wide text-white/60 uppercase mb-4 flex items-center gap-2">
+      <span className="w-1.5 h-1.5 rounded-full bg-white/30" /> {title}
+    </h3>
+    <div className="space-y-3">{children}</div>
+  </div>
+);
+
+const InfoRow = ({ label, value, mono, cap }) => (
+  <div className="flex justify-between items-center pb-2 border-b border-white/5 last:border-none last:pb-0">
+    <span className="text-[11px] tracking-wide text-white/40 uppercase">
+      {label}
+    </span>
+    <span
+      className={`text-[12px] font-medium text-white/90 ${
+        mono ? "font-mono" : ""
+      } ${cap ? "capitalize" : ""}`}
+    >
+      {value}
+    </span>
+  </div>
+);
 
 const TransactionCards = ({ transaction, onClose }) => {
-  const [riderEmail, setRiderEmail] = useState("Loading...");
-  const [driverEmail, setDriverEmail] = useState("Loading...");
-
-  useEffect(() => {
-    if (transaction) {
-      fetchUserEmails();
-    }
-  }, [transaction]);
-
-  const fetchUserEmails = async () => {
-    try {
-      // Fetch rider email from users
-      const riderResponse = await fetch(
-        `http://localhost:4001/users/${transaction.rider_id}`
-      );
-      if (riderResponse.ok) {
-        const riderData = await riderResponse.json();
-        setRiderEmail(riderData.email || "No email found");
-      } else {
-        setRiderEmail("Email not found");
-      }
-
-      // Fetch driver data to get user_id, then fetch user email
-      const driverResponse = await fetch(
-        `http://localhost:4001/drivers/${transaction.driver_id}`
-      );
-      if (driverResponse.ok) {
-        const driverData = await driverResponse.json();
-        // Now fetch the user email using the driver's user_id
-        const driverUserResponse = await fetch(
-          `http://localhost:4001/users/${driverData.user_id}`
-        );
-        if (driverUserResponse.ok) {
-          const driverUserData = await driverUserResponse.json();
-          setDriverEmail(driverUserData.email || "No email found");
-        } else {
-          setDriverEmail("Email not found");
-        }
-      } else {
-        setDriverEmail("Driver not found");
-      }
-    } catch (error) {
-      console.error("Error fetching user emails:", error);
-      setRiderEmail("Error loading email");
-      setDriverEmail("Error loading email");
-    }
-  };
-
   if (!transaction) return null;
+  const stop = (e) => e.stopPropagation();
 
-	const stop = (e) => e.stopPropagation();
-
+  // Your badge functions are perfect, I'm just adapting the colors
   const getStatusBadge = (status) => {
     const statusClasses = {
-      completed: "bg-green-100 text-green-800",
-      cancelled: "bg-red-100 text-red-800",
-      ongoing: "bg-blue-100 text-blue-800",
-      pending: "bg-yellow-100 text-yellow-800",
+      COMPLETED: "bg-emerald-900/40 text-emerald-300 border-emerald-700",
+      CANCELLED: "bg-red-900/40 text-red-300 border-red-700",
+      IN_PROGRESS: "bg-blue-900/40 text-blue-300 border-blue-700",
+      RATING: "bg-yellow-900/40 text-yellow-300 border-yellow-700",
+      REQUESTED: "bg-gray-700 text-gray-300 border-gray-600",
     };
-    return statusClasses[status] || "bg-gray-100 text-gray-800";
+    return statusClasses[status] || "bg-gray-700 text-gray-300 border-gray-600";
   };
 
   const getPaymentBadge = (status) => {
     const statusClasses = {
-      paid: "bg-green-100 text-green-800",
-      cancelled: "bg-red-100 text-red-800",
-      pending: "bg-yellow-100 text-yellow-800",
-      failed: "bg-red-100 text-red-800",
+      SUCCESSFUL: "bg-emerald-900/40 text-emerald-300 border-emerald-700",
+      CANCELLED: "bg-red-900/40 text-red-300 border-red-700",
+      PENDING: "bg-yellow-900/40 text-yellow-300 border-yellow-700",
+      FAILED: "bg-red-900/40 text-red-300 border-red-700",
     };
-    return statusClasses[status] || "bg-gray-100 text-gray-800";
+    return statusClasses[status] || "bg-gray-700 text-gray-300 border-gray-600";
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-lg border border-stone-200 w-full max-w-3xl max-h-[90vh] overflow-y-auto no-scrollbar relative"
+        className="bg-[#141414] rounded-2xl shadow-2xl border border-white/10 w-full max-w-3xl max-h-[90vh] overflow-y-auto no-scrollbar relative"
         onClick={stop}
       >
-        <div className="p-8 bg-stone-50">
+        <div className="p-8 bg-gradient-to-r from-[#181818] via-[#151515] to-[#141414] rounded-t-2xl border-b border-white/10 relative">
           {/* Close Button */}
           <button
             type="button"
             aria-label="Close"
             onClick={onClose}
-            className="absolute top-4 right-4 z-50 h-10 w-10 rounded-full bg-white shadow-sm border border-stone-200 
-                     text-stone-600 hover:text-red-600 hover:bg-red-50 hover:border-red-200 
-                     transition-all duration-200 flex items-center justify-center"
+            className="absolute top-5 right-5 h-11 w-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center border border-white/15 transition"
           >
-            <span className="text-lg">✕</span>
+            <X className="w-5 h-5" />
           </button>
 
           {/* Header */}
@@ -101,15 +104,15 @@ const TransactionCards = ({ transaction, onClose }) => {
             <div className="w-20 h-20 bg-gradient-to-r from-red-600 to-red-700 rounded-full mb-4 mx-auto shadow-sm flex items-center justify-center">
               <span className="text-3xl text-white font-bold">📄</span>
             </div>
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
               Transaction Details
             </h2>
-            <p className="text-stone-600 mt-2 text-lg">
-              Booking ID: {transaction.id}
+            <p className="text-white/60 mt-2 text-lg font-mono">
+              {transaction.bookingId}
             </p>
-            <div className="mt-2">
+            <div className="mt-4">
               <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadge(
+                className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadge(
                   transaction.bookingStatus
                 )}`}
               >
@@ -117,170 +120,76 @@ const TransactionCards = ({ transaction, onClose }) => {
               </span>
             </div>
           </div>
+        </div>
 
-          {/* Main Content */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {/* Trip Information */}
-            <div className="bg-white p-4 rounded-xl border border-stone-200">
-              <label className="block text-xs font-semibold text-stone-600 uppercase tracking-wide mb-2">
-                Pickup Location
-              </label>
-              <div className="text-stone-900 font-medium">
-                {transaction.pickupAddress}
-              </div>
-              <div className="text-xs text-stone-500 mt-1">
-                📍 {transaction.pickupLat}, {transaction.pickupLng}
-              </div>
-            </div>
+        {/* Body */}
+        <div className="p-6 space-y-10">
 
-            <div className="bg-white p-4 rounded-xl border border-stone-200">
-              <label className="block text-xs font-semibold text-stone-600 uppercase tracking-wide mb-2">
-                Drop Location
-              </label>
-              <div className="text-stone-900 font-medium">
-                {transaction.dropoffAddress}
-              </div>
-              <div className="text-xs text-stone-500 mt-1">
-                📍 {transaction.dropoffLat}, {transaction.dropoffLng}
-              </div>
-            </div>
+          {/* Main Info Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Column 1 */}
+            <InfoPanel title="User Details">
+              <InfoRow label="Rider" value={transaction.riderName} />
+              <InfoRow label="Rider Phone" value={transaction.riderPhone} mono />
+              <InfoRow label="Driver" value={transaction.driverName} />
+              <InfoRow label="Driver Phone" value={transaction.driverPhone} mono />
+            </InfoPanel>
+            
+            {/* Column 2 */}
+            <InfoPanel title="Trip Details">
+              <InfoRow label="Pickup" value={transaction.pickupAddress} />
+              <InfoRow label="Dropoff" value={transaction.dropoffAddress} />
+              <InfoRow label="Created At" value={formatDateSafe(transaction.createdAt, { variant: "datetime" })} />
+              <InfoRow label="Updated At" value={formatDateSafe(transaction.updatedAt, { variant: "datetime" })} />
+            </InfoPanel>
+          </div>
 
-            <div className="bg-white p-4 rounded-xl border border-stone-200">
-              <label className="block text-xs font-semibold text-stone-600 uppercase tracking-wide mb-2">
-                Distance
-              </label>
-              <div className="text-stone-900 font-medium">
-                🚗 {transaction.distanceKm} km
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded-xl border border-stone-200">
-              <label className="block text-xs font-semibold text-stone-600 uppercase tracking-wide mb-2">
-                Duration
-              </label>
-              <div className="text-stone-900 font-medium">
-                ⏱️ {transaction.estimatedDurationMin} min
-              </div>
-            </div>
-
-            {/* Payment Information */}
-            <div className="bg-white p-4 rounded-xl border border-stone-200">
-              <label className="block text-xs font-semibold text-stone-600 uppercase tracking-wide mb-2">
-                Payment Status
-              </label>
-              <div className="text-stone-900 font-medium">
-                <span
-                  className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold ${getPaymentBadge(
-                    transaction.paymentStatus
-                  )}`}
-                >
-                  {transaction.paymentStatus === "paid" && "✅ "}
-                  {transaction.paymentStatus === "cancelled" && "❌ "}
-                  {transaction.paymentStatus === "pending" && "⏳ "}
-                  {transaction.paymentStatus === "failed" && "❌ "}
-                  {`${transaction.paymentStatus
-                    .charAt(0)
-                    .toUpperCase()}${transaction.paymentStatus.slice(1)}`}
-                </span>
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded-xl border border-stone-200">
-              <label className="block text-xs font-semibold text-stone-600 uppercase tracking-wide mb-2">
-                Rate per KM
-              </label>
-              <div className="text-stone-900 font-medium">
-                💰 ₹
-                {transaction.distance_km > 0
-                  ? (transaction.totalFare / transaction.distanceKm).toFixed(2)
-                  : "0.00"}
-                /km
-              </div>
-            </div>
-
-            {/* Rider Information */}
-            <div className="bg-white p-4 rounded-xl border border-stone-200">
-              <label className="block text-xs font-semibold text-stone-600 uppercase tracking-wide mb-2">
-                Rider Name
-              </label>
-              <div className="text-stone-900 font-medium">
-                👤 {transaction.riderName}
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded-xl border border-stone-200">
-              <label className="block text-xs font-semibold text-stone-600 uppercase tracking-wide mb-2">
-                Rider Email
-              </label>
-              <div className="text-stone-900 font-medium">📧 {riderEmail}</div>
-            </div>
-
-            {/* Driver Information */}
-            <div className="bg-white p-4 rounded-xl border border-stone-200">
-              <label className="block text-xs font-semibold text-stone-600 uppercase tracking-wide mb-2">
-                Driver Name
-              </label>
-              <div className="text-stone-900 font-medium">
-                🚗 {transaction.driverName}
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded-xl border border-stone-200">
-              <label className="block text-xs font-semibold text-stone-600 uppercase tracking-wide mb-2">
-                Driver Email
-              </label>
-              <div className="text-stone-900 font-medium">📧 {driverEmail}</div>
-            </div>
-
-            {/* Timeline Information */}
-            <div className="bg-white p-4 rounded-xl border border-stone-200">
-              <label className="block text-xs font-semibold text-stone-600 uppercase tracking-wide mb-2">
-                Created At
-              </label>
-              <div className="text-stone-900 font-medium">
-                🗓️{" "}
-                {formatDateSafe(transaction.createdAt, {
-                  locale: "en-IN",
-                  timeZone: "Asia/Kolkata",
-                  variant: "datetime",
-                  fallback: "—",
-                  assumeUTCForMySQL: true,
-                })}
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded-xl border border-stone-200">
-              <label className="block text-xs font-semibold text-stone-600 uppercase tracking-wide mb-2">
-                Updated At
-              </label>
-              <div className="text-stone-900 font-medium">
-                🔄{" "}
-                {formatDateSafe(transaction.updatedAt, {
-                  locale: "en-IN",
-                  timeZone: "Asia/Kolkata",
-                  variant: "datetime",
-                  fallback: "—",
-                  assumeUTCForMySQL: true,
-                })}
-              </div>
+          {/* Fare Breakdown */}
+          <div className="bg-[#1f1f1f] rounded-xl border border-white/10 p-6">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Fare Breakdown
+            </h3>
+            <div className="space-y-2">
+              <FareRow label="Base Fare" value={transaction.baseFare} />
+              <FareRow label="Distance Fare" value={transaction.distanceFare} />
+              <FareRow label="Duration Fare" value={transaction.durationFare} />
+              <FareRow label="Surge" value={transaction.surchargeFees} />
+              <FareRow label="Platform Fee" value={transaction.platformFee} />
+              <FareRow label="Taxes & Fees (GST)" value={transaction.taxes} />
+              {transaction.discount > 0 && (
+                <FareRow label="Discount" value={-transaction.discount} />
+              )}
+              <FareRow label="Total Fare" value={transaction.totalFare} isTotal />
             </div>
           </div>
 
-          {/* Fare Amount - Full Width */}
-          <div className="bg-white p-6 rounded-xl border border-stone-200 mb-8">
-            <label className="block text-xs font-semibold text-stone-600 uppercase tracking-wide mb-3 text-center">
-              Total Fare Amount
-            </label>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-emerald-600">
-                ₹{transaction.totalFare}
-              </div>
-            </div>
+          {/* Payment Status */}
+          <div className="text-center">
+            <span
+              className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border ${getPaymentBadge(
+                transaction.paymentStatus
+              )}`}
+            >
+              {transaction.paymentStatus}
+            </span>
           </div>
+
         </div>
       </div>
     </div>
   );
 };
+
+// Re-styled helper component for fare rows
+const FareRow = ({ label, value, isTotal = false }) => (
+  <div className={`flex justify-between items-center py-2 ${
+    isTotal ? 'text-lg font-bold border-t border-white/10 pt-3 mt-2' : 'text-sm'
+  }`}>
+    <span className={isTotal ? 'text-white' : 'text-white/60'}>{label}</span>
+    <span className={isTotal ? 'text-white' : 'text-white/90'}>
+      {value < 0 ? '-' : ''}₹{Math.abs(value || 0).toFixed(2)}
+    </span>
+  </div>
+);
 
 export default TransactionCards;

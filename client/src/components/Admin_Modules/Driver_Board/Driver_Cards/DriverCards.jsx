@@ -10,6 +10,8 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
   const [showVehicles, setShowVehicles] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  console.log(Driver);
+
   const [formData, setFormData] = useState({
     status: Driver?.status.toLowerCase() || "active",
   });
