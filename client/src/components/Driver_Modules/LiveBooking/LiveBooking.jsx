@@ -345,7 +345,7 @@ const LiveBooking = () => {
             <button
               onClick={() => {
                 setLoading(true);
-                fetchAvailableBookings().finally(() => setLoading(false));
+                fetchAvailableBookings(selectedVehicle.type).finally(() => setLoading(false));
               }}
               disabled={loading}
               className="p-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 transition disabled:opacity-50"

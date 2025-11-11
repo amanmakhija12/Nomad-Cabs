@@ -199,7 +199,7 @@ const Wallet = () => {
                   <TransactionRow 
                     key={tx.id} 
                     tx={tx} 
-                    userId={user.userId} 
+                    userId={user.id} 
                     onClick={() => setSelectedTx(tx)}
                   />
                 ))}

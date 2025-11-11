@@ -23,7 +23,7 @@ const AdminPage = () => {
 
         <Sidebar activeSection={activeSection} navItems={NAV_ITEMS} setActiveSection={setActiveSection}>
         <main className="bg-[#151212] flex-1 p-4 min-[940px]:p-6 overflow-y-auto">
-          {activeSection === "dashboard" && <Dashboard />}
+          {activeSection === "dashboard" && <Dashboard setActiveSection={setActiveSection} />}
           {activeSection === "riderBoard" && <ManageRiders />}
           {activeSection === "driverBoard" && <ManageDrivers />}
           {activeSection === "fare" && <ManageFare />}

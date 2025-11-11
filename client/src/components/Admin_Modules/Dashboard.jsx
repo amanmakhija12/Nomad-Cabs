@@ -3,7 +3,6 @@ import { toast } from "react-toastify";
 import { DollarSign, Percent, Users, Car, CreditCard, ShieldCheck, IndianRupee } from "lucide-react";
 import { adminStatsService } from "../../services/adminService";
 import { formatDateSafe } from "../../utils/DateUtil";
-import { Link } from "react-router-dom";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 // Helper component for the stat cards
@@ -45,29 +44,29 @@ const DateFilterButtons = ({ activeFilter, setFilter }) => {
   );
 };
 
-const QuickActions = () => (
+const QuickActions = ({ setActiveSection }) => (
   <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-    <Link to="/admin/verifications" className="text-center bg-[#141414] p-6 rounded-2xl border border-white/10 hover:bg-white/5 transition">
+    <p onClick={() => setActiveSection("verification")} className="cursor-pointer text-center bg-[#141414] p-6 rounded-2xl border border-white/10 hover:bg-white/5 transition">
       <ShieldCheck className="w-8 h-8 text-yellow-300 mx-auto" />
       <p className="mt-3 text-sm font-medium text-white">Manage Verifications</p>
-    </Link>
-    <Link to="/admin/fares" className="text-center bg-[#141414] p-6 rounded-2xl border border-white/10 hover:bg-white/5 transition">
+    </p>
+    <p onClick={() => setActiveSection("fareBoard")} className="cursor-pointer text-center bg-[#141414] p-6 rounded-2xl border border-white/10 hover:bg-white/5 transition">
       <IndianRupee className="w-8 h-8 text-emerald-300 mx-auto" />
       <p className="mt-3 text-sm font-medium text-white">Manage Fares</p>
-    </Link>
-    <Link to="/admin/drivers" className="text-center bg-[#141414] p-6 rounded-2xl border border-white/10 hover:bg-white/5 transition">
+    </p>
+    <p onClick={() => setActiveSection("driverBoard")} className="cursor-pointer text-center bg-[#141414] p-6 rounded-2xl border border-white/10 hover:bg-white/5 transition">
       <Car className="w-8 h-8 text-blue-300 mx-auto" />
       <p className="mt-3 text-sm font-medium text-white">View All Drivers</p>
-    </Link>
-    <Link to="/admin/riders" className="text-center bg-[#141414] p-6 rounded-2xl border border-white/10 hover:bg-white/5 transition">
+    </p>
+    <p onClick={() => setActiveSection("riderBoard")} className="cursor-pointer text-center bg-[#141414] p-6 rounded-2xl border border-white/10 hover:bg-white/5 transition">
       <Users className="w-8 h-8 text-indigo-300 mx-auto" />
       <p className="mt-3 text-sm font-medium text-white">View All Riders</p>
-    </Link>
+    </p>
   </div>
 );
 
 // Main Dashboard Component
-const Dashboard = () => {
+const Dashboard = ({ setActiveSection }) => {
   const [revenueStats, setRevenueStats] = useState(null);
   const [platformStats, setPlatformStats] = useState(null);
   const [chartData, setChartData] = useState([]);
@@ -86,7 +85,6 @@ const Dashboard = () => {
         adminStatsService.getRecentTransactions(),
       ]);
       
-      console.log(revenueRes);
       setRevenueStats(revenueRes);
       setPlatformStats(platformRes);
       setChartData(chartRes);
@@ -211,7 +209,7 @@ const Dashboard = () => {
       </div>
       
       {/* Quick Actions */}
-      <QuickActions />
+      <QuickActions setActiveSection={setActiveSection} />
 
       {/* Recent Transactions List */}
       <div className="bg-[#141414] rounded-2xl border border-white/10 p-8 shadow-lg">
