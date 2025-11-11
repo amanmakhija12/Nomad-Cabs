@@ -32,7 +32,7 @@ const SignupForm = ({ onSuccess }) => {
       toast.error("Phone number required", { theme: "dark" });
       return false;
     }
-    if (formData.phoneNumber.length<10) {
+    if (formData.phoneNumber.length < 10) {
       toast.error("Invalid phone number", { theme: "dark" });
       return false;
     }
@@ -58,9 +58,9 @@ const SignupForm = ({ onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    
+
     setLoading(true);
-    
+
     const payload = {
       firstName: formData.firstName,
       lastName: formData.lastName,
@@ -71,13 +71,13 @@ const SignupForm = ({ onSuccess }) => {
     };
 
     try {
-      await api.post("/auth/register", payload);
-      
+      await api.post("/users/register", payload);
+
       toast.success("Account created! Please login.", { theme: "dark" });
       onSuccess?.();
-      
     } catch (err) {
-      const errorMessage = err.response?.data?.message || err.response?.data || "Signup failed";
+      const errorMessage =
+        err.response?.data?.message || err.response?.data || "Signup failed";
       toast.error(errorMessage, { theme: "dark" });
     } finally {
       setLoading(false);
