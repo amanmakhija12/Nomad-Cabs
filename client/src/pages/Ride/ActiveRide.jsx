@@ -5,7 +5,7 @@ import { RideStatusHeader } from "./RideStatusHeader";
 import { RideInfoPanel } from "./RideInfoPanel";
 import { RideActionFooter } from "./RideActionFooter";
 import { MapPlaceholder } from "./MapPlaceholder";
-import { Loader } from "lucide-react"; // For loading
+import { Loader } from "lucide-react";
 import { bookingService, driverBookingService } from "../../services/bookingService";
 import { useAuthStore } from "../../store/authStore";
 import { RideRating } from "./RideRating";
@@ -133,9 +133,11 @@ const ActiveRide = () => {
         role={user.role} 
         driverName={booking.driverName} 
         riderName={booking.riderName} 
-        // We'll need to add these to the backend DTOs!
         driverPhone={booking.driverPhone}
         riderPhone={booking.riderPhone}
+        driverRating={booking.driverRating}
+        driverTotalRatings={booking.driverTotalRatings}
+        driverMemberSince={booking.driverMemberSince}
       />
       
       {/* 4. Action Footer (Buttons) */}

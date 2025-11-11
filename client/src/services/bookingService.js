@@ -1,16 +1,11 @@
 import api from '../utils/api';
 
-// Rider APIs
 export const bookingService = {
-  // Create booking
   async createBooking(bookingData) {
-    // This now sends 'bookingData' as the JSON body directly
-    // It calls POST /api/v1/booking/request
     const response = await api.post('/booking/request', bookingData);
     return response.data;
   },
 
-  // Get my bookings (with filters)
   async getMyBookings(filters = {}) {
     const params = new URLSearchParams();
     if (filters.filterType) params.append('filterType', filters.filterType);
@@ -19,21 +14,16 @@ export const bookingService = {
     params.append('page', filters.page || 0);
     params.append('size', filters.size || 10);
     
-    // This was already correct and calls GET /api/v1/booking/history/rider
     const response = await api.get(`/booking/history/rider?${params}`);
-    return response.data; // Returns the Page object { content: [], ... }
+    return response.data;
   },
 
-  // Get booking details (NEW ENDPOINT)
   async getBookingDetails(bookingId) {
-    // Calls GET /api/v1/booking/{bookingId}
     const response = await api.get(`/booking/${bookingId}`);
     return response.data;
   },
 
-  // Cancel booking (NEW ENDPOINT)
   async cancelBooking(bookingId, reason) {
-    // Calls POST /api/v1/booking/cancel/{bookingId}
     const response = await api.post(`/booking/cancel/${bookingId}`, { 
       cancellationReason: reason 
     });
@@ -67,26 +57,19 @@ export const bookingService = {
   }
 };
 
-// Driver APIs
 export const driverBookingService = {
-  // Get available bookings (NEW ENDPOINT)
-  async getAvailableBookings(vehicleType = null) {
-    const params = new URLSearchParams();
-    if (vehicleType) params.append('vehicleType', vehicleType);
-    
-    // Calls GET /api/v1/booking/available
-    const response = await api.get(`/booking/available?${params}`);
+  async getAvailableBookings(vehicleType) {
+    const params = { category: vehicleType.toUpperCase() };
+    const response = await api.get('/booking/available', { params });
     return response.data;
   },
 
-  // Get my bookings
   async getMyBookings(filters = {}) {
     const params = new URLSearchParams();
     if (filters.status) params.append('status', filters.status);
     params.append('page', filters.page || 0);
     params.append('size', filters.size || 10);
     
-    // This calls GET /api/v1/booking/history/driver
     const response = await api.get(`/booking/history/driver?${params}`);
     return response.data;
   },
@@ -96,16 +79,12 @@ export const driverBookingService = {
     return response.data;
   },
 
-  // Accept booking
   async acceptBooking(bookingId, vehicleId) {
-    // Calls POST /api/v1/booking/accept/{bookingId}
     const response = await api.post(`/booking/accept/${bookingId}/${vehicleId}`);
     return response.data;
   },
 
-  // Start ride
   async startRide(bookingId) {
-    // Calls POST /api/v1/booking/start/{bookingId}
     const response = await api.post(`/booking/start/${bookingId}`);
     return response.data;
   },
@@ -115,16 +94,12 @@ export const driverBookingService = {
     return response.data;
   },
 
-  // Complete ride
   async completeRide(bookingId) {
-    // Calls POST /api/v1/booking/complete/{bookingId}
     const response = await api.post(`/booking/complete/${bookingId}`);
     return response.data;
   },
 
-  // Rate rider (NEW ENDPOINT)
   async rateRider(bookingId, rating, feedback) {
-    // Calls POST /api/v1/booking/rate/rider/{bookingId}
     const response = await api.post(`/booking/rate/rider/${bookingId}`, {
       riderRating: rating,
       riderFeedback: feedback,
@@ -132,8 +107,6 @@ export const driverBookingService = {
     return response.data;
   },
 };
-
-// Add this to your existing bookingService.js file (at the end)
 
 // ============================================
 // VEHICLE SERVICE

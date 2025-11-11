@@ -90,61 +90,67 @@ const LiveBooking = () => {
     loadVehicles();
   }, [user]);
 
-const fetchAvailableBookings = async () => {
-  try {
-    console.log('🔄 Fetching available bookings...');
-    const data = await driverBookingService.getAvailableBookings(selectedVehicle.type);
-    
-    // ✅ Check if response has error message (409 conflict)
-    if (data && data.message && data.message.includes('active booking')) {
-      console.log('⚠️ Active booking detected');
-      setIsActive(true);
+  const fetchAvailableBookings = async (vehicleType) => {
+    if (!vehicleType) {
       setBookings([]);
       setPreviousCount(0);
-      setIsPollingActive(false); // Stop polling
-      
-      toast.warning('You have an active ride. Complete it before accepting new ones.', {
-        theme: 'dark',
-        autoClose: 5000,
-      });
-      return;
-    }
-    
-    // ✅ Normal flow - no active booking
-    setIsActive(false);
-    
-    console.log(`✅ Found ${data.length} available bookings`);
-    
-    if (previousCount > 0 && data.length > previousCount) {
-      const newCount = data.length - previousCount;
-      toast.info(`🚗 ${newCount} new ride${newCount > 1 ? 's' : ''} available!`, {
-        theme: 'dark',
-        autoClose: 5000,
-        position: 'top-right',
-      });
-      
-      playNotificationSound();
+      return; 
     }
 
-    console.log(`✅ Updating bookings state with: `, data);
-    
-    setBookings(data);
-    setPreviousCount(data.length);
-    setLastFetchTime(new Date());
-  } catch (error) {
-    console.error('❌ Error fetching available bookings:', error);
-    
-    // Check if error message indicates active booking
-    if (error.message && error.message.includes('active booking')) {
-      setIsActive(true);
-      setBookings([]);
-      setIsPollingActive(false);
+    try {
+      console.log('🔄 Fetching available bookings...');
+      const data = await driverBookingService.getAvailableBookings(vehicleType);
+      
+      // ✅ Check if response has error message (409 conflict)
+      if (data && data.message && data.message.includes('active booking')) {
+        console.log('⚠️ Active booking detected');
+        setIsActive(true);
+        setBookings([]);
+        setPreviousCount(0);
+        setIsPollingActive(false); // Stop polling
+        
+        toast.warning('You have an active ride. Complete it before accepting new ones.', {
+          theme: 'dark',
+          autoClose: 5000,
+        });
+        return;
+      }
+      
+      // ✅ Normal flow - no active booking
+      setIsActive(false);
+      
+      console.log(`✅ Found ${data.length} available bookings`);
+      
+      if (previousCount > 0 && data.length > previousCount) {
+        const newCount = data.length - previousCount;
+        toast.info(`🚗 ${newCount} new ride${newCount > 1 ? 's' : ''} available!`, {
+          theme: 'dark',
+          autoClose: 5000,
+          position: 'top-right',
+        });
+        
+        playNotificationSound();
+      }
+
+      console.log(`✅ Updating bookings state with: `, data);
+      
+      setBookings(data);
+      setPreviousCount(data.length);
+      setLastFetchTime(new Date());
+    } catch (error) {
+      console.error('❌ Error fetching available bookings:', error);
+      
+      // Check if error message indicates active booking
+      if (error.message && error.message.includes('active booking')) {
+        setIsActive(true);
+        setBookings([]);
+        setIsPollingActive(false);
+      }
+      
+      if (bookings.length === 0 && !loading) {
+        toast.error(error.message || 'Failed to fetch available rides', { theme: 'dark' });
+      }
     }
-    
-    if (bookings.length === 0 && !loading) {
-      toast.error(error.message || 'Failed to fetch available rides', { theme: 'dark' });
-    }
-  }
 };
 
   // Play notification sound
@@ -172,10 +178,10 @@ const fetchAvailableBookings = async () => {
     // We wrap fetch in a function to use it in setTimeout
     const fetchData = () => {
       setLoading(true);
-      fetchAvailableBookings().finally(() => setLoading(false));
+      fetchAvailableBookings(selectedVehicle.type).finally(() => setLoading(false));
     };
     
-    fetchData(); // Run immediately
+    fetchData();
 
     // 3. Start a new interval ONLY if polling is active AND no ride is active
     if (isPollingActive && !isActive) {
@@ -197,7 +203,7 @@ const fetchAvailableBookings = async () => {
         intervalRef.current = null;
       }
     };
-  }, [isPollingActive, user, isActive]); // ✅ ADDED `isActive` to dependencies
+  }, [isPollingActive, user, isActive, selectedVehicle.type]); // ✅ ADDED `isActive` to dependencies
 
   // Pause polling when tab is hidden
   useEffect(() => {
@@ -264,6 +270,22 @@ const fetchAvailableBookings = async () => {
     return parts.join(' - ');
   };
 
+  const handleVehicleSelect = (e) => {
+    const vehicleId = e.target.value;
+    const vehicle = vehicles.find(v => v.id === vehicleId);
+
+    console.log(vehicleId);
+    
+    if (vehicle) {
+      setSelectedVehicle({
+        id: vehicle.id,
+        type: vehicle.vehicleType
+      });
+    } else {
+      setSelectedVehicle({ id: "", type: "" });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#151212] text-white p-6">
       {/* Header */}
@@ -281,7 +303,7 @@ const fetchAvailableBookings = async () => {
             {/* Vehicle Selection with real data */}
             <select
               value={selectedVehicle.id}
-              onChange={(e) => setSelectedVehicle(e.target.value)}
+              onChange={handleVehicleSelect}
               disabled={vehiclesLoading || vehicles.length === 0}
               className="px-4 py-2 rounded-xl bg-[#1a1a1a] border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 text-sm disabled:opacity-50 disabled:cursor-not-allowed min-w-[250px]"
             >
@@ -394,7 +416,11 @@ const fetchAvailableBookings = async () => {
           <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
             <Car className="w-8 h-8 text-gray-500" />
           </div>
-          <p className="text-gray-400 text-lg mb-2">No available rides at the moment</p>
+          <p className="text-gray-400 text-lg mb-2">
+            {selectedVehicle.type 
+              ? "No available rides at the moment" 
+              : "Please select a verified vehicle to see rides"}
+          </p>
           <p className="text-gray-500 text-sm">
             {isPollingActive 
               ? "We'll notify you when new rides appear" 

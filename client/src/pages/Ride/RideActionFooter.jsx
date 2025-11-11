@@ -33,7 +33,7 @@ export const RideActionFooter = ({
     }
     
     if (role === "RIDER") {
-      if (status === "ACCEPTED") {
+      if (status === "ACCEPTED" || status === "REQUESTED") {
         return (
           <ActionButton onClick={onCancelRide} disabled={isUpdating} variant="danger" fullWidth>
             {isUpdating ? <Spinner /> : "Cancel Ride"}
