@@ -9,8 +9,8 @@ import {
   LogOut,
   IndianRupee,
   CreditCard,
-  Menu,
-  X
+  X,
+  Menu
 } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
 import { getInitial } from "../../utils/getInitial";
@@ -72,12 +72,6 @@ const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
               {user ? `${user.firstName} ${user.lastName}` : "Guest User"}
             </div>
           </div>
-          <button
-            onClick={() => setOpenSidebar(!openSidebar)}
-            className="md:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors duration-200"
-          >
-            {openSidebar ? <X size={20} /> : <Menu size={20} />}
-          </button>
         </div>
 
         {/* Nav */}
@@ -142,9 +136,9 @@ const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
           <h1 className="text-xl font-semibold text-white">Nomad Cabs</h1>
           <button
             onClick={() => setOpenSidebar((prev) => !prev)}
-            className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors duration-200"
+            className="md:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors duration-200"
           >
-            {openSidebar ? "X" : "☰"}
+            {openSidebar ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
         {children}
