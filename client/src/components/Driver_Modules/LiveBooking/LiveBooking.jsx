@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  driverBookingService,
-  vehicleService,
-} from "../../../services/bookingService";
+import { driverBookingService } from "../../../services/bookingService";
+import { vehicleService } from "../../../services/vehicleService";
 import { useAuthStore } from "../../../store/authStore";
 import { toast } from "react-toastify";
 import {

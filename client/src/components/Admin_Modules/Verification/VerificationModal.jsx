@@ -107,8 +107,8 @@ export const VerificationModal = ({ driver, onClose, onRefresh }) => {
     const savingKey = `${vehicleId}-${docType}-${isApproved ? 'approve' : 'reject'}`;
     setSaving(savingKey);
     try {
-      await vehicleService.verifyVehicleDoc(vehicleId, docType, isApproved);
-      toast.success(`Vehicle ${docType} ${isApproved ? 'approved' : 'rejected'}`);
+      await vehicleService.verifyVehicle(vehicleId);
+      toast.success(`Vehicle ${isApproved ? 'approved' : 'rejected'}`);
       // 5. Instead of onRefresh, we just refetch the vehicles for this modal
       fetchVehicles(); 
     } catch (error) {
