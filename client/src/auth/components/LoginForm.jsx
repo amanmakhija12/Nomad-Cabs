@@ -24,20 +24,20 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    
+
     try {
       setLoading(true);
-      
+
       const response = await api.post("/auth/login", formData);
-      
+
       const loginData = response.data;
 
-      if (!loginData.token) {
+      if (!loginData.accessToken) {
         throw new Error("Login failed: No token received from server.");
       }
-      localStorage.setItem("token", loginData.token);
+      localStorage.setItem("accessToken", loginData.accessToken);
 
-      api.get("/auth/profile/me").then(({data}) => {
+      api.get("/users/me").then(({ data }) => {
         const user = {
           userId: data.id,
           role: data.role,
@@ -46,14 +46,15 @@ const LoginForm = () => {
           lastName: data.lastName,
         };
 
-        setAuth(user, loginData.token);
+        setAuth(user, loginData.accessToken);
       });
 
       toast.success("Login successful", { theme: "dark" });
     } catch (err) {
       console.error("Login error:", err);
       // This will show the "Invalid credentials" message from your Spring backend
-      const errorMessage = err.response?.data || "Login failed. Please check your credentials.";
+      const errorMessage =
+        err.response?.data || "Login failed. Please check your credentials.";
       toast.error(errorMessage, { theme: "dark" });
     } finally {
       setLoading(false);
