@@ -5,7 +5,7 @@ import VehicleDetailModal from "./VehicleDetailModal";
 import { getVehicleIcon } from "./Vehicles";
 import { PlusCircle } from 'lucide-react';
 import AddVehicleModal from "./AddVehicleModal";
-import { vehicleService } from "../../../services/bookingService"; // ✅ Import from your service
+import { vehicleService } from "../../../services/vehicleService"; // ✅ Import from your service
 
 const VehicleCards = () => {
   const [vehicles, setVehicles] = useState([]);

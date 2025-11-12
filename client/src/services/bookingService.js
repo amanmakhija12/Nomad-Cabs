@@ -2,7 +2,7 @@ import api from "../utils/api";
 
 export const bookingService = {
   async createBooking(bookingData) {
-    const response = await api.post("/booking/request", bookingData);
+    const response = await api.post("/bookings/request", bookingData);
     return response.data;
   },
   async getMyBookings(filters = {}) {
@@ -28,8 +28,8 @@ export const bookingService = {
     const response = await api.post("/booking/estimate", bookingData);
     return response.data;
   },
-  async getVehicleTypesWithCounts() {
-    const response = await api.get("/booking/vehicle-types");
+  async getVehicleTypesWithCounts(city) {
+    const response = await api.get(`/bookings/vehicle-types/${city}`);
     return response.data;
   },
   async getActiveRideForRider() {

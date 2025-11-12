@@ -12,10 +12,6 @@ export const riderService = {
     const response = await api.get("/users/admin/riders", { params });
     return response.data;
   },
-  async getRiderById(riderId) {
-    const response = await api.get(`/users/admin/${riderId}`);
-    return response.data;
-  },
   async updateRider(riderId, data) {
     const response = await api.put(`/users/admin/${riderId}`, data);
     return response.data;
@@ -49,7 +45,7 @@ export const driverService = {
     return response.data;
   },
   async verifyDriverDoc(driverId, docType, approved) {
-    // docType must be "PAN", "AADHAAR", or "LICENSE"
+    // docType must be "AADHAAR", or "LICENSE"
     if (approved) {
       const response = await api.post(
         `/drivers/admin/approve/${driverId}/${docType.toUpperCase()}`
@@ -66,22 +62,12 @@ export const driverService = {
 // ============================================
 export const vehicleService = {
   async getVehiclesByDriver(driverId) {
-    const response = await api.get(`/admin/vehicles?driverId=${driverId}`);
+    const response = await api.get(`/admin/drivers/me/vehicles/${driverId}`);
     return response.data;
   },
-  async getVehiclesByStatus(status) {
-    const response = await api.get(
-      `/admin/vehicles?status=${status.toUpperCase()}`
-    );
+  async verifyVehicle(vehicleId) {
+    const response = await api.post(`/admin/vehicles/${vehicleId}/approve`);
     return response.data;
-  },
-  async verifyVehicle(vehicleId, action) {
-    // We will use our new, fixed endpoint
-    if (action.toUpperCase() === "APPROVE") {
-      const response = await api.post(`/admin/vehicles/${vehicleId}/approve`);
-      return response.data;
-    }
-    return null;
   },
 };
 
@@ -153,7 +139,7 @@ export const commissionService = {
 export const transactionService = {
   async fetchTransactions(filters = {}) {
     const params = new URLSearchParams(filters);
-    const response = await api.get(`/admin/transactions?${params.toString()}`);
+    const response = await api.get(`/admin/wallets/transactions?${params.toString()}`);
     return response.data;
   },
 };

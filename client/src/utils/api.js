@@ -4,7 +4,7 @@ import axios from "axios";
 const api = axios.create({
   // This is the *only* place you need to define your main URL
   // It points to our API Gateway
-  baseURL: "http://localhost:8080/api/v1",
+  baseURL: "http://localhost:3030/api/v1",
   headers: {
     "Content-Type": "application/json",
   },

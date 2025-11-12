@@ -108,10 +108,13 @@ export const driverService = {
    * Gets the driver's paginated booking history.
    * Calls: GET /driver/bookings/me/history
    */
-  async getBookingHistory(page = 0, size = 10) {
-    const response = await api.get(
-      `/driver/bookings/me/history?page=${page}&size=${size}`
-    );
+  async getBookingHistory(filters = {}) {
+    const params = new URLSearchParams();
+    if(filters.filterType) params.append("filterType", filterType);
+    if(filters.searchTerm) params.append("searchTerm", searchTerm);
+    params.append("page", filters.page || 0);
+    params.append("size", filters.size || 10);
+    const response = await api.get(`/driver/bookings/me/history?${params}`);
     return response.data;
   },
 
