@@ -17,7 +17,6 @@ const ActiveRide = ({ onRideEnd }) => {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const user = useAuthStore((state) => state.user);
-  const navigate = useNavigate();
 
   // --- Core Data Fetching ---
   const fetchActiveRide = useCallback(async () => {
@@ -36,7 +35,7 @@ const ActiveRide = ({ onRideEnd }) => {
       if (error.response?.status === 404) {
         // This is an expected "error": no active ride.
         toast.info("No active ride found. Redirecting...");
-        navigate(user.role === "RIDER" ? "/rider" : "/driver");
+        onRideEnd();
       } else {
         console.error("Error fetching active ride:", error);
         toast.error(error.message || "Failed to fetch ride data");
@@ -44,7 +43,7 @@ const ActiveRide = ({ onRideEnd }) => {
     } finally {
       setLoading(false);
     }
-  }, [user, navigate]);
+  }, [user]);
 
   // --- Initial Load ---
   useEffect(() => {
@@ -73,7 +72,7 @@ const ActiveRide = ({ onRideEnd }) => {
       setBooking(response); // Update state immediately
       toast.success(successMsg);
       if (redirectOnSuccess) {
-        navigate(user.role === "RIDER" ? "/rider" : "/driver");
+        onRideEnd();
       }
     } catch (error) {
       toast.error(error.message || "Action failed");
@@ -146,6 +145,7 @@ const ActiveRide = ({ onRideEnd }) => {
     return (
       <RideRating
         booking={booking}
+        onRideEnd={onRideEnd}
       />
     );
   }

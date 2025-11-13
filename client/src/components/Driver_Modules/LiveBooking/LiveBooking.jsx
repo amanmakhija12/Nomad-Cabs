@@ -14,7 +14,7 @@ import {
 import api from "../../../utils/api";
 import { driverService } from "../../../services/driverService";
 
-const LiveBooking = () => {
+const LiveBooking = ({ onBookingAccepted }) => {
   const [bookings, setBookings] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -205,9 +205,14 @@ const LiveBooking = () => {
   }, []);
 
   // Accept booking with error handling
-  const handleAccept = async (bookingId) => {
+  const handleAccept = async (bookingId, vehicleCategory) => {
     if (selectedVehicle.id === "") {
       toast.error("Please select a vehicle first", { theme: "dark" });
+      return;
+    }
+
+    if(selectedVehicle.type !== vehicleCategory) {
+      toast.error(`Please select a ${vehicleCategory} type vehicle`, { theme: "dark" });
       return;
     }
 
@@ -225,7 +230,7 @@ const LiveBooking = () => {
       console.log("Fetching the newly active ride...");
       const activeRide = await driverBookingService.getActiveRideForDriver();
 
-      onBookingAccepted(activeRide.data);
+      onBookingAccepted(activeRide);
 
     } catch (error) {
       console.error("❌ Error accepting booking:", error);
@@ -491,7 +496,7 @@ const LiveBooking = () => {
 
               {/* Accept Button */}
               <button
-                onClick={() => handleAccept(booking.offerId)}
+                onClick={() => handleAccept(booking.offerId, booking.vehicleCategory)}
                 disabled={selectedVehicle.id === ""}
                 className="w-full bg-white text-black py-3 rounded-xl font-medium hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed group-hover:shadow-lg"
               >

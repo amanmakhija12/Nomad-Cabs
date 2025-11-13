@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Star, User } from "lucide-react";
-import { bookingService, driverBookingService } from "../../../services/bookingService";
+import { bookingService } from "../../../services/bookingService";
 
 // A simple star rating component
 const StarRating = ({ rating, setRating }) => {
@@ -23,11 +22,10 @@ const StarRating = ({ rating, setRating }) => {
   );
 };
 
-export const RideRating = ({ booking }) => {
+export const RideRating = ({ booking, onRideEnd }) => {
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,7 +34,7 @@ export const RideRating = ({ booking }) => {
     try {
       await bookingService.rateRide(booking.id, { rating, feedback });
       toast.success("Thank you for your feedback!");
-      navigate("/rider");
+      onRideEnd();
     } catch (error) {
       toast.error(error.message || "Failed to submit rating");
     } finally {
@@ -47,7 +45,7 @@ export const RideRating = ({ booking }) => {
   const handleSkip = async () => {
     await bookingService.rateRide(booking.id);
     toast.success("Ride Completed!");
-    navigate("/rider");
+    onRideEnd();
   };
 
   return (
