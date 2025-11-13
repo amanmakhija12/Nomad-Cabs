@@ -47,7 +47,7 @@ const LiveBooking = () => {
       setVehiclesLoading(true);
       try {
         console.log("🚗 Fetching driver vehicles...");
-        const vehicleData = await vehicleService.getMyVehicles();
+        const vehicleData = await driverService.getMyVehicles();
         const { data: currentDriver } = await api.get("/drivers/me");
         console.log(currentDriver);
         console.log("✅ Vehicles fetched:", vehicleData);
@@ -304,15 +304,13 @@ const LiveBooking = () => {
     const parts = [];
     if (vehicle.manufacturer) parts.push(vehicle.manufacturer);
     if (vehicle.model) parts.push(vehicle.model);
-    parts.push(vehicle.rcNumber);
+    parts.push(vehicle.registrationNumber);
     return parts.join(" - ");
   };
 
   const handleVehicleSelect = (e) => {
     const vehicleId = e.target.value;
     const vehicle = vehicles.find((v) => v.id === vehicleId);
-
-    console.log(vehicleId);
 
     if (vehicle) {
       setSelectedVehicle({
@@ -521,7 +519,7 @@ const LiveBooking = () => {
                   <div>
                     <p className="text-xs text-gray-500">Pickup</p>
                     <p className="text-sm text-white font-medium line-clamp-2">
-                      {booking.pickupAddress}
+                      {booking.pickupLocationName}
                     </p>
                   </div>
                 </div>
@@ -531,7 +529,7 @@ const LiveBooking = () => {
                   <div>
                     <p className="text-xs text-gray-500">Dropoff</p>
                     <p className="text-sm text-white font-medium line-clamp-2">
-                      {booking.dropoffAddress}
+                      {booking.dropoffLocationName}
                     </p>
                   </div>
                 </div>
@@ -542,15 +540,15 @@ const LiveBooking = () => {
                 <div>
                   <p className="text-xs text-gray-500 mb-1">Distance</p>
                   <p className="text-sm font-semibold">
-                    {booking.tripDistanceKm.toFixed(2)} km
+                    {booking.estimatedDistanceKm.toFixed(2)} km
                   </p>
                 </div>
-                <div>
+                {/* <div>
                   <p className="text-xs text-gray-500 mb-1">Duration</p>
                   <p className="text-sm font-semibold">
                     {booking.tripDurationMinutes.toFixed(2)} min
                   </p>
-                </div>
+                </div> */}
               </div>
 
               {/* Fare */}
@@ -558,14 +556,14 @@ const LiveBooking = () => {
                 <span className="text-gray-400 text-sm">Estimated Fare</span>
                 <span className="text-green-400 font-bold text-2xl flex items-center gap-1">
                   <IndianRupee className="w-5 h-5" />
-                  {booking.fareAmount.toFixed(2)}
+                  {booking.fare.toFixed(2)}
                 </span>
               </div>
 
               {/* Vehicle Type */}
               <div className="mb-4">
                 <span className="inline-block px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-xs font-medium">
-                  {booking.vehicleType?.toUpperCase()}
+                  {booking.vehicleCategory}
                 </span>
                 <span className="ml-2 text-xs text-gray-500">
                   {getTimeAgo(booking.createdAt)}
@@ -574,7 +572,7 @@ const LiveBooking = () => {
 
               {/* Accept Button */}
               <button
-                onClick={() => handleAccept(booking.id)}
+                onClick={() => handleAccept(booking.offerId)}
                 disabled={selectedVehicle.id === ""}
                 className="w-full bg-white text-black py-3 rounded-xl font-medium hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed group-hover:shadow-lg"
               >

@@ -1,52 +1,60 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { X, Check, ShieldCheck, ShieldAlert } from "lucide-react";
+import { X, Check, ShieldCheck, ShieldAlert, CheckCircle2 } from "lucide-react";
 // Make sure this path is correct for your project structure
 import { driverService, vehicleService } from "../../../services/adminService";
 
 // Reusable spinner
 const Spinner = () => <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />;
 
-// Reusable verification row
-const VerificationRow = ({ label, value, isVerified, onApprove, onReject, loading }) => {
-  const getStatus = () => {
-    if (isVerified) {
-      return (
-        <div className="flex items-center gap-2 text-green-300">
-          <ShieldCheck className="w-4 h-4" />
-          <span className="text-xs font-medium">Verified</span>
-        </div>
-      );
-    }
+// Gets a simple status icon and text
+const getStatusDisplay = (isVerified) => {
+  if (isVerified) {
     return (
-      <div className="flex items-center gap-2 text-yellow-300">
-        <ShieldAlert className="w-4 h-4" />
-        <span className="text-xs font-medium">Pending</span>
+      <div className="flex items-center gap-2 text-green-300">
+        <ShieldCheck className="w-4 h-4" />
+        <span className="text-xs font-medium">Verified</span>
       </div>
     );
-  };
+  }
+  return (
+    <div className="flex items-center gap-2 text-yellow-300">
+      <ShieldAlert className="w-4 h-4" />
+      <span className="text-xs font-medium">Pending</span>
+    </div>
+  );
+};
 
+// 1. SIMPLIFIED ROW (for Driver docs)
+// This component now only handles a single approval action
+const VerificationRow = ({ label, value, isVerified, onApprove, loading }) => {
   return (
     <tr className="border-t border-white/5">
+      {/* Document Info */}
       <td className="px-5 py-4 align-top">
         <div className="text-white/85 font-medium">{label}</div>
         <div className="text-white/40 text-[11px] mt-1 truncate max-w-xs">{value || "Not Submitted"}</div>
       </td>
-      <td className="px-5 py-4 align-top">{getStatus()}</td>
+      
+      {/* Status */}
+      <td className="px-5 py-4 align-top">{getStatusDisplay(isVerified)}</td>
+      
+      {/* Actions */}
       <td className="px-5 py-4 align-top">
         {!isVerified && (
           <div className="flex gap-2">
             {value ? (
-              <>
-                <button onClick={onApprove} disabled={loading.approve} title="Approve" className="h-9 w-9 flex items-center justify-center rounded-lg bg-green-500/20 text-green-300 hover:bg-green-500/30 disabled:opacity-50">
-                  {loading.approve ? <Spinner /> : <Check size={16} />}
-                </button>
-                <button onClick={onReject} disabled={loading.reject} title="Reject" className="h-9 w-9 flex items-center justify-center rounded-lg bg-red-500/20 text-red-300 hover:bg-red-500/30 disabled:opacity-50">
-                  {loading.reject ? <Spinner /> : <X size={16} />}
-                </button>
-              </>
+              <button 
+                onClick={onApprove} 
+                disabled={loading} 
+                title="Approve" 
+                className="h-9 px-4 flex items-center justify-center rounded-lg bg-green-500/20 text-green-300 hover:bg-green-500/30 disabled:opacity-50 gap-2"
+              >
+                {loading ? <Spinner /> : <Check size={16} />}
+                <span className="text-sm">Approve</span>
+              </button>
             ) : (
-              <span className="text-white/40 text-xs">Documents not provided yet</span>
+              <span className="text-white/40 text-xs">Documents not provided</span>
             )}
           </div>
         )}
@@ -55,47 +63,110 @@ const VerificationRow = ({ label, value, isVerified, onApprove, onReject, loadin
   );
 };
 
-// The Main Modal
-export const VerificationModal = ({ driver, onClose, onRefresh }) => {
-  const [saving, setSaving] = useState(null); // Tracks "id-docType-action"
+
+// 2. NEW VEHICLE CARD
+// This component displays vehicle info and has ONE approve button
+const VehicleVerificationCard = ({ vehicle, onApprove, loading }) => {
   
-  // 3. Renamed 'loading' to 'vehicleLoading' to avoid conflicts
-  const [vehicles, setVehicles] = useState(null); // Start as null to show loader
+  const StatusBadge = ({ label, isVerified, value }) => (
+    <div className="flex flex-col gap-1">
+      <span className="text-xs text-white/50">{label} : {value}</span>
+      {value ? getStatusDisplay(isVerified) : (
+        <span className="text-xs text-white/40">Not Submitted</span>
+      )}
+    </div>
+  );
+
+  const canApprove = 
+    (vehicle.registrationNumber && 
+    vehicle.pucNumber && 
+    vehicle.insurancePolicyNumber);
+
+    const isApproved = (!vehicle.rcVerified && !vehicle.pucVerified && !vehicle.insuranceVerified);
+
+  return (
+    <div className="bg-[#1f1f1f] rounded-xl border border-white/10 overflow-hidden">
+      {/* Header */}
+      <h4 className="text-md font-semibold text-white p-4 bg-black/20">
+        {vehicle.registrationNumber} ({vehicle.vehicleType})
+      </h4>
+      
+      {/* Document Statuses */}
+      <div className="p-4 grid grid-cols-3 gap-4 border-b border-white/10">
+        <StatusBadge label="RC" isVerified={vehicle.rcVerified} value={vehicle.registrationNumber} />
+        <StatusBadge label="PUC" isVerified={vehicle.pucVerified} value={vehicle.pucNumber} />
+        <StatusBadge label="Insurance" isVerified={vehicle.insuranceVerified} value={vehicle.insurancePolicyNumber} />
+      </div>
+
+      {/* Action Footer */}
+      <div className="p-4 bg-black/10">
+        {vehicle.isVerified ? (
+          <div className="flex items-center gap-2 text-green-300">
+            <CheckCircle2 className="w-5 h-5" />
+            <span className="text-sm font-medium">Vehicle is Approved</span>
+          </div>
+        ) : (
+          <div>
+            {canApprove && isApproved ? (
+              <button
+                onClick={onApprove}
+                disabled={loading}
+                className="h-9 px-4 flex items-center justify-center rounded-lg bg-green-500/20 text-green-300 hover:bg-green-500/30 disabled:opacity-50 gap-2"
+              >
+                {loading ? <Spinner /> : <Check size={16} />}
+                <span className="text-sm">Approve Vehicle</span>
+              </button>
+            ) : (
+              isApproved && (
+                <span className="text-sm text-yellow-300/80">
+                  Driver must submit all vehicle documents before approval.
+                </span>
+              )
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+// 3. MAIN MODAL
+// Updated to use the new components and simplified logic
+export const VerificationModal = ({ driver, onClose, onRefresh }) => {
+  const [saving, setSaving] = useState(null); // Tracks "type-id-action"
+  const [vehicles, setVehicles] = useState(null);
   const [vehicleLoading, setVehicleLoading] = useState(true);
 
-  // 4. Your fetchVehicles function is perfect.
   const fetchVehicles = useCallback(async () => {
     try {
       setVehicleLoading(true);
-      // We use driver.userId, which comes from the DTO
-      const response = await vehicleService.getVehiclesByDriver(driver.userId);
-      setVehicles(response || []); // Axios response is in .data
-      return response || []; 
+      const response = await vehicleService.getVehiclesByDriver(driver.driverId);
+      setVehicles(response || []);
     } catch (error) {
       console.error("Error fetching vehicles:", error);
       toast.error(error.message || "Failed to fetch vehicles");
-      return [];
     } finally {
       setVehicleLoading(false);
     }
-  }, [driver.userId]);
- 
+  }, [driver.driverId]);
+  
   useEffect(() => {
     fetchVehicles();
   }, [fetchVehicles]);
 
-  const handleDriverVerify = async (docType, isApproved) => {
+  // Simplified handler
+  const handleDriverVerify = async (docType) => {
     if((docType === "AADHAAR" && !driver.aadharNumber) || (docType === "LICENSE" && !driver.licenseNumber)) {
-      toast.error(`Cannot ${isApproved ? 'approve' : 'reject'} unsubmitted document`);
+      toast.error(`Cannot approve unsubmitted document`);
       return;
     }
-    const savingKey = `${driver.id}-${docType}-${isApproved ? 'approve' : 'reject'}`;
+    const savingKey = `driver-${docType}-approve`;
     setSaving(savingKey);
     try {
-      // We use driver.driverId, which is the Driver's primary key
-      await driverService.verifyDriverDoc(driver.driverId, docType, isApproved);
-      toast.success(`Driver ${docType} ${isApproved ? 'approved' : 'rejected'}`);
-      onRefresh(); // Refresh the list in the parent
+      await driverService.verifyDriverDoc(driver.driverId, docType, true); // Always true
+      toast.success(`Driver ${docType} approved`);
+      onRefresh(); 
     } catch (error) {
       toast.error(error.message || "Failed to update status");
     } finally {
@@ -103,14 +174,15 @@ export const VerificationModal = ({ driver, onClose, onRefresh }) => {
     }
   };
 
-  const handleVehicleVerify = async (vehicleId, docType, isApproved) => {
-    const savingKey = `${vehicleId}-${docType}-${isApproved ? 'approve' : 'reject'}`;
+  // Simplified handler
+  const handleVehicleVerify = async (vehicleId) => {
+    const savingKey = `vehicle-${vehicleId}-approve`;
     setSaving(savingKey);
     try {
-      await vehicleService.verifyVehicle(vehicleId);
-      toast.success(`Vehicle ${isApproved ? 'approved' : 'rejected'}`);
-      // 5. Instead of onRefresh, we just refetch the vehicles for this modal
-      fetchVehicles(); 
+      // This is the single API call you mentioned
+      await vehicleService.verifyVehicle(vehicleId); 
+      toast.success(`Vehicle approved`);
+      fetchVehicles(); // Refetch vehicles for this modal
     } catch (error) {
       toast.error(error.message || "Failed to update status");
     } finally {
@@ -125,7 +197,7 @@ export const VerificationModal = ({ driver, onClose, onRefresh }) => {
         <div className="flex justify-between items-center p-6 border-b border-white/10">
           <div>
             <h2 className="text-xl font-semibold text-white">Verification Details</h2>
-            <p className="text-sm text-white/50">Driver ID: {driver.userId}</p>
+            <p className="text-sm text-white/50">Driver ID: {driver.driverId}</p>
           </div>
           <button onClick={onClose} className="h-9 w-9 flex items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 transition">
             <X size={20} />
@@ -151,23 +223,15 @@ export const VerificationModal = ({ driver, onClose, onRefresh }) => {
                   label="Aadhaar"
                   value={driver.aadharNumber}
                   isVerified={driver.aadhaarVerified}
-                  onApprove={() => handleDriverVerify("AADHAAR", true)}
-                  onReject={() => handleDriverVerify("AADHAAR", false)}
-                  loading={{
-                    approve: saving === `${driver.id}-AADHAAR-approve`,
-                    reject: saving === `${driver.id}-AADHAAR-reject`,
-                  }}
+                  onApprove={() => handleDriverVerify("AADHAAR")}
+                  loading={saving === `driver-AADHAAR-approve`}
                 />
                 <VerificationRow
                   label="License"
                   value={driver.licenseNumber}
                   isVerified={driver.driverLicenseVerified}
-                  onApprove={() => handleDriverVerify("LICENSE", true)}
-                  onReject={() => handleDriverVerify("LICENSE", false)}
-                  loading={{
-                    approve: saving === `${driver.id}-LICENSE-approve`,
-                    reject: saving === `${driver.id}-LICENSE-reject`,
-                  }}
+                  onApprove={() => handleDriverVerify("LICENSE")}
+                  loading={saving === `driver-LICENSE-approve`}
                 />
               </tbody>
             </table>
@@ -181,50 +245,16 @@ export const VerificationModal = ({ driver, onClose, onRefresh }) => {
             ) : vehicles.length === 0 ? (
               <p className="text-sm text-white/40">This driver has not added any vehicles yet.</p>
             ) : (
-              vehicles.map(vehicle => (
-                <div key={vehicle.id} className="mb-6 bg-[#1f1f1f] rounded-xl border border-white/10 overflow-hidden">
-                  <h4 className="text-md font-semibold text-white p-4 bg-black/20">
-                    {vehicle.registrationNumber} ({vehicle.vehicleType})
-                  </h4>
-                  <table className="w-full text-sm">
-                    <tbody>
-                      <VerificationRow
-                        label="RC"
-                        value={vehicle.rcNumber}
-                        isVerified={vehicle.rcVerified}
-                        onApprove={() => handleVehicleVerify(vehicle.id, "RC", true)}
-                        onReject={() => handleVehicleVerify(vehicle.id, "RC", false)}
-                        loading={{
-                          approve: saving === `${vehicle.id}-RC-approve`,
-                          reject: saving === `${vehicle.id}-RC-reject`,
-                        }}
-                      />
-                      <VerificationRow
-                        label="PUC"
-                        value={vehicle.pucNumber}
-                        isVerified={vehicle.pucVerified}
-                        onApprove={() => handleVehicleVerify(vehicle.id, "PUC", true)}
-                        onReject={() => handleVehicleVerify(vehicle.id, "PUC", false)}
-                        loading={{
-                          approve: saving === `${vehicle.id}-PUC-approve`,
-                          reject: saving === `${vehicle.id}-PUC-reject`,
-                        }}
-                      />
-                      <VerificationRow
-                        label="Insurance"
-                        value={vehicle.insurancePolicyNumber}
-                        isVerified={vehicle.insuranceVerified}
-                        onApprove={() => handleVehicleVerify(vehicle.id, "INSURANCE", true)}
-                        onReject={() => handleVehicleVerify(vehicle.id, "INSURANCE", false)}
-                        loading={{
-                          approve: saving === `${vehicle.id}-INSURANCE-approve`,
-                          reject: saving === `${vehicle.id}-INSURANCE-reject`,
-                        }}
-                      />
-                    </tbody>
-                  </table>
-                </div>
-              ))
+              <div className="space-y-4">
+                {vehicles.map(vehicle => (
+                  <VehicleVerificationCard
+                    key={vehicle.id}
+                    vehicle={vehicle}
+                    onApprove={() => handleVehicleVerify(vehicle.id)}
+                    loading={saving === `vehicle-${vehicle.id}-approve`}
+                  />
+                ))}
+              </div>
             )}
           </div>
         </div>

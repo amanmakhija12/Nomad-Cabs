@@ -66,7 +66,7 @@ export const vehicleService = {
     return response.data;
   },
   async verifyVehicle(vehicleId) {
-    const response = await api.post(`/admin/vehicles/${vehicleId}/approve`);
+    const response = await api.post(`/drivers/admin/vehicles/${vehicleId}/approve`);
     return response.data;
   },
 };
@@ -112,7 +112,7 @@ export const userService = {
 };
 
 // ============================================
-// FARE & COMMISSION
+// FARE
 // ============================================
 export const fareConfigService = {
   async getAllFares() {
@@ -123,14 +123,14 @@ export const fareConfigService = {
     const response = await api.put(`/admin/fares/${id}`, fareData);
     return response.data;
   },
-};
-
-export const commissionService = {
-  async getAllCommission() {
-    const response = await api.get("/admin/commission");
+  async addFare(fareData) {
+    const response = await api.post(`/admin/fares`, fareData);
     return response.data;
   },
-  // ... (add, update, delete) ...
+  async deleteFare(id) {
+    const response = await api.delete(`/admin/fares/${id}`);
+    return response.data;
+  },
 };
 
 // ============================================
@@ -139,7 +139,7 @@ export const commissionService = {
 export const transactionService = {
   async fetchTransactions(filters = {}) {
     const params = new URLSearchParams(filters);
-    const response = await api.get(`/admin/wallets/transactions?${params.toString()}`);
+    const response = await api.get(`/admin/wallets/ride-transactions?${params.toString()}`);
     return response.data;
   },
 };

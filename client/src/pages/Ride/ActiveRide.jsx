@@ -9,6 +9,7 @@ import { Loader } from "lucide-react";
 import { bookingService, driverBookingService } from "../../services/bookingService";
 import { useAuthStore } from "../../store/authStore";
 import { RideRating } from "./RideRating";
+import { PaymentScreen } from "../../components/Common/PaymentScreen";
 
 const ActiveRide = () => {
   const [booking, setBooking] = useState(null);
@@ -85,16 +86,28 @@ const ActiveRide = () => {
     () => driverBookingService.startRide(booking.id),
     "Ride Started!"
   );
-
-  const onRateRide = () => handleAction(
-    () => driverBookingService.changeStatusForRating(booking.id),
-    user.role === "RIDER" ? "Please give the rating!" : "Ride Completed!",
-    user.role !== "RIDER"
-  );
   
   const onCancelRide = () => handleAction(
     () => bookingService.cancelRide(booking.id, "Cancelled by user"),
     "Ride Cancelled!",
+    true
+  );
+
+  const onCompleteRide = () => handleAction(
+    () => driverBookingService.completeRide(booking.id),
+    user.role === "RIDER" ? "Please complete the payment" : "Waiting for payment!",
+    false
+  );
+
+  const handlePay = () => handleAction(
+    () => bookingService.confirmPayment(booking.id),
+    "Payment completed successfully!",
+    false
+  );
+
+  const handleConfirm = () => handleAction(
+    () => driverBookingService.confirmCashPayment(booking.id),
+    "Ride completed!",
     true
   );
 
@@ -112,7 +125,18 @@ const ActiveRide = () => {
     return <div className="p-6 text-white/60">No active ride found...</div>;
   }
 
-  if (booking.bookingStatus === 'RATING') {
+  if (booking.status === 'AWAITING_PAYMENT') {
+    return (
+      <PaymentScreen
+        userRole={user.role}
+        booking={booking}
+        onPayWithWallet={handlePay}
+        onConfirmCash={handleConfirm}
+      />
+    );
+  }
+
+  if (booking.status === 'PAID') {
     return (
       <RideRating
         booking={booking}
@@ -123,7 +147,7 @@ const ActiveRide = () => {
   return (
     <div className="flex flex-col h-screen bg-[#0a0a0a] text-white">
       {/* 1. Status Header */}
-      <RideStatusHeader isRider={user.role === "RIDER"} status={booking.bookingStatus} />
+      <RideStatusHeader isRider={user.role === "RIDER"} status={booking.status} />
       
       {/* 2. (Mock) Map */}
       <MapPlaceholder />
@@ -133,20 +157,20 @@ const ActiveRide = () => {
         role={user.role} 
         driverName={booking.driverName} 
         riderName={booking.riderName} 
-        driverPhone={booking.driverPhone}
-        riderPhone={booking.riderPhone}
+        driverPhone={booking.driverPhoneNumber}
+        riderPhone={booking.riderPhoneNumber}
         driverRating={booking.driverRating}
-        driverTotalRatings={booking.driverTotalRatings}
-        driverMemberSince={booking.driverMemberSince}
+        driverTotalRatings={booking.totalTrips}
+        driverMemberSince={booking.driverCreatedAt}
       />
       
       {/* 4. Action Footer (Buttons) */}
       <RideActionFooter
         role={user.role}
-        status={booking.bookingStatus}
+        status={booking.status}
         isUpdating={isUpdating}
         onStartRide={onStartRide}
-        onCompleteRide={onRateRide}
+        onCompleteRide={onCompleteRide}
         onCancelRide={onCancelRide}
       />
     </div>

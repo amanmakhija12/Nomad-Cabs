@@ -1,12 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { toast, Bounce } from "react-toastify";
 import VehicleCategoryPricingCard from "./VehicleCategoryPricingCard";
-import CommissionCard from "./CommissionCard";
-import { fareConfigService, commissionService } from "../../../services/adminService";
+import { fareConfigService } from "../../../services/adminService";
 
 const ManageFare = () => {
   const [fareConfigs, setFareConfigs] = useState([]);
-  const [commissionStructure, setCommissionStructure] = useState([]);
   const [loading, setLoading] = useState(false);
   const hasShownErrorRef = useRef(false);
 
@@ -15,14 +13,10 @@ const ManageFare = () => {
       setLoading(true);
       
       // Use Promise.all to fetch both in parallel
-      const [fareResponse, commissionResponse] = await Promise.all([
-        fareConfigService.getAllFares(),
-        commissionService.getAllCommission()
-      ]);
+      const fareResponse = await fareConfigService.getAllFares();
       
       // Axios response is in .data
       setFareConfigs(fareResponse || []); 
-      setCommissionStructure(commissionResponse || []);
       
     } catch (error) {
       console.error("Error fetching fare data:", error);
@@ -68,12 +62,6 @@ const ManageFare = () => {
             Vehicle Category:{" "}
             <strong className="text-white/70">{fareConfigs.length}</strong>
           </span>
-          <span>
-            Commission Tiers:{" "}
-            <strong className="text-white/70">
-              {commissionStructure.length}
-            </strong>
-          </span>
         </div>
       </div>
 
@@ -81,12 +69,6 @@ const ManageFare = () => {
         fareConfigs={fareConfigs}
         setFareConfigs={setFareConfigs}
         fareConfigService={fareConfigService}
-      />
-
-      <CommissionCard
-        commissionStructure={commissionStructure}
-        setCommissionStructure={setCommissionStructure}
-        commissionService={commissionService}
       />
     </div>
   );

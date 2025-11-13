@@ -25,7 +25,7 @@ export const bookingService = {
     return response.data;
   },
   async calculateEstimatedFare(bookingData) {
-    const response = await api.post("/booking/estimate", bookingData);
+    const response = await api.post("/bookings/estimate-fare", bookingData);
     return response.data;
   },
   async getVehicleTypesWithCounts() {
@@ -37,9 +37,13 @@ export const bookingService = {
     return response.data;
   },
   async rateRide(bookingId, payload) {
-    const response = await api.post(`/booking/rate/${bookingId}`, payload);
+    const response = await api.post(`/bookings/${bookingId}/feedback`, payload);
     return response.data;
   },
+  async confirmPayment(bookingId) {
+    const response = await api.post(`/bookings/${bookingId}/pay`);
+    return response.data;
+  }
 };
 
 export const driverBookingService = {
@@ -66,15 +70,19 @@ export const driverBookingService = {
     return response.data;
   },
   async startRide(bookingId) {
-    const response = await api.post(`/booking/start/${bookingId}`);
+    const response = await api.post(`/bookings/${bookingId}/start`);
     return response.data;
   },
   async completeRide(bookingId) {
-    const response = await api.post(`/driver/bookings/${bookingId}/complete`);
+    const response = await api.post(`/bookings/${bookingId}/complete`);
     return response.data;
   },
   async rateRider(bookingId, rating, feedback) {
     const response = await api.post(`/bookings/${bookingId}/feedback`, { rating });
     return response.data;
   },
+  async confirmCashPayment(bookingId) {
+    const response = await api.post(`/driver/bookings/${bookingId}/confirm-cash`);
+    return response.data;
+  }
 };

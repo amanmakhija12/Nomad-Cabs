@@ -81,7 +81,7 @@ const ManageVerifications = () => {
           ) : (
             drivers.map(driver => (
               <DriverRow
-                key={driver.userId}
+                key={driver.id}
                 driver={driver}
                 onClick={() => setSelectedDriver(driver)}
               />
@@ -127,7 +127,7 @@ const DriverRow = ({ driver, onClick }) => {
           </div>
           <div>
             <h3 className="text-lg font-semibold text-white">
-              {driver.firstName || "Driver ID : "} {driver.lastName || driver.userId}
+              {driver.firstName || "Driver ID : "} {driver.lastName || driver.driverId}
             </h3>
             <div className="flex items-center gap-4 mt-2">
               {hasPendingDocs && (

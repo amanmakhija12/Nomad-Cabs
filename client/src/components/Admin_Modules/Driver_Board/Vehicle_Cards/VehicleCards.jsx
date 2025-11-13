@@ -101,7 +101,7 @@ const VehicleCards = ({ ownerId }) => {
                 {vehicle?.vehicleType}
               </h3>
               <p className="text-xs text-white/50 font-mono">
-                {vehicle?.rcNumber}
+                {vehicle?.registrationNumber}
               </p>
             </div>
           </div>
@@ -203,7 +203,7 @@ const VehicleCards = ({ ownerId }) => {
               RC Number
             </p>
             <p className="text-sm text-white/85 font-medium">
-              {vehicle?.rcNumber || "—"}
+              {vehicle?.registrationNumber || "—"}
             </p>
           </div>
           <div className="bg-[#1b1b1b] p-4 rounded-xl border border-white/10">
@@ -220,6 +220,14 @@ const VehicleCards = ({ ownerId }) => {
             </p>
             <p className="text-sm text-white/85 font-medium">
               {formatDateSafe(vehicle?.pucExpiry)}
+            </p>
+          </div>
+          <div className="bg-[#1b1b1b] p-4 rounded-xl border border-white/10">
+            <p className="text-[10px] font-semibold text-white/40 uppercase mb-2">
+              Insurance Policy Number
+            </p>
+            <p className="text-sm text-white/85 font-medium">
+              {vehicle?.insurancePolicyNumber || "—"}
             </p>
           </div>
           <div className="bg-[#1b1b1b] p-4 rounded-xl border border-white/10">

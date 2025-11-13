@@ -258,24 +258,18 @@ const TransactionRow = ({ tx, userId, onClick }) => {
     label = "Wallet Top-up";
     name = "From your bank";
   } else if (tx.type === 'WITHDRAWAL') {
-    isCredit = false;
     label = "Withdrawal";
     name = "To your bank";
-  } else {
-    isCredit = tx.driverId === userId;
-    const rideFareSubtotal = (tx.baseFare || 0) + 
-                         (tx.distanceFare || 0) + 
-                         (tx.surchargeFees || 0) -
-                         (tx.commissionFee || 0);
-    if (isCredit) {
-      label = "Ride Payout from";
-      name = tx.riderName;
-      amount = `+₹${rideFareSubtotal.toFixed(2)}`;
-    } else {
-      label = "Ride Payment to";
-      name = tx.driverName;
-      amount = `-₹${tx.amount.toFixed(2)}`;
-    }
+  } else if(tx.type === 'RIDE_CREDIT') {
+    isCredit = true;
+    label = "Ride Payout";
+    amount = `+₹${tx.amount.toFixed(2)}`;
+  } else if(tx.type === 'RIDE_DEBIT') {
+    label = "Ride Payment";
+    amount = `-₹${tx.amount.toFixed(2).replace("-", "")}`;
+  } else if(tx.type === "COMMISSION_FEE") {
+    label = "Commission Fee";
+    amount = `-₹${tx.amount.toFixed(2).replace("-", "")}`;
   }
 
   if (isCredit) {

@@ -99,8 +99,8 @@ export const driverService = {
    * Accepts a specific ride offer.
    * Calls: POST /drivers/me/offers/{offerId}/accept
    */
-  async acceptOffer(offerId) {
-    const response = await api.post(`/drivers/me/offers/${offerId}/accept`);
+  async acceptOffer(offerId, vehicleId) {
+    const response = await api.post(`/drivers/me/offers/${offerId}/accept`, { vehicleId });
     return response.data;
   },
 

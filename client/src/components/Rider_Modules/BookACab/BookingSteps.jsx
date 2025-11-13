@@ -281,10 +281,7 @@ export const StepPayment = ({ data, onChange, onBack, onSubmit, loading }) => {
           pickupLng: pickupCoords.lng,
           dropoffLat: dropoffCoords.lat,
           dropoffLng: dropoffCoords.lng,
-          vehicleCategory: data.vehicleCategory.toUpperCase(),
-          // Add addresses to payload
-          pickupAddress: data.pickupAddress,
-          dropoffAddress: data.dropoffAddress,
+          vehicleType: data.vehicleCategory.toUpperCase(),
         };
         
         const result = await bookingService.calculateEstimatedFare(payload);
@@ -332,8 +329,7 @@ export const StepPayment = ({ data, onChange, onBack, onSubmit, loading }) => {
         ) : (
           <div className="space-y-2 text-sm">
             <Row label="Base Fare" value={`₹${estimatedFare.baseFare.toFixed(2)}`} />
-            <Row label="Distance Fare" value={`₹${estimatedFare.distanceFare.toFixed(2)} (${estimatedFare.distanceKm.toFixed(1)} km)`} />
-            <Row label="Platform Fee" value={`₹${estimatedFare.platformFee.toFixed(2)}`} />
+            <Row label="Distance Fare" value={`₹${estimatedFare.distanceFare.toFixed(2)} (${estimatedFare.distanceInKm.toFixed(1)} km)`} />
             <div className="pt-2 mt-2 border-t border-white/10 flex justify-between text-lg font-semibold">
               <span>Estimated Total</span>
               <span className="text-green-400">₹{estimatedFare.totalFare.toFixed(2)}</span>

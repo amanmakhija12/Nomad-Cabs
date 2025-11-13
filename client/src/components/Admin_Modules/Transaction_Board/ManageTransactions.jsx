@@ -199,9 +199,8 @@ const ManageTransactions = () => {
                   <th className="px-5 py-4 text-left font-semibold min-w-[150px]">Driver</th>
                   <th className="px-5 py-4 text-left font-semibold min-w-[220px]">Route</th>
                   <th className="px-5 py-4 text-left font-semibold min-w-[100px]">Fare (₹)</th>
-                  <th className="px-5 py-4 text-left font-semibold min-w-[100px]">Status</th>
                   <th className="px-5 py-4 text-left font-semibold min-w-[100px]">Payment</th>
-                  <th className="px-5 py-4 text-left font-semibold min-w-[120px]">Updated</th>
+                  <th className="px-5 py-4 text-left font-semibold min-w-[120px]">Date</th>
                 </tr>
               </thead>
               <tbody>
@@ -224,15 +223,12 @@ const ManageTransactions = () => {
                       <div className="text-white/85 font-medium truncate max-w-56" title={t.pickupAddress}>From: {t.pickupAddress}</div>
                       <div className="text-white/40 text-[11px] truncate max-w-56 mt-1" title={t.dropoffAddress}>To: {t.dropoffAddress}</div>
                     </td>
-                    <td className="px-5 py-4 font-semibold text-white">₹{t.totalFare}</td>
+                    <td className="px-5 py-4 font-semibold text-white">₹{t.totalFare.toFixed(2)}</td>
                     <td className="px-5 py-4">
-                      <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold border ${statusBadge(t.bookingStatus)}`}>{t.bookingStatus}</span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold border ${paymentBadge(t.paymentStatus)}`}>{t.paymentStatus}</span>
+                      <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold border ${paymentBadge(t.paymentStatus)}`}>{t.paymentMode}</span>
                     </td>
                     <td className="px-5 py-4 text-white/70">
-                      {formatDateSafe(t.updatedAt, { locale: 'en-IN', timeZone: 'Asia/Kolkata', variant: 'date', fallback: '—', assumeUTCForMySQL: true })}
+                      {formatDateSafe(t.timestamp, { locale: 'en-IN', timeZone: 'Asia/Kolkata', variant: 'date', fallback: '—', assumeUTCForMySQL: true })}
                     </td>
                   </tr>
                 ))}

@@ -39,7 +39,7 @@ export const RideInfoPanel = ({ role,
             <p className="text-xs text-white/50 mb-1">Rating</p>
             <div className="flex items-center justify-center gap-1 text-white font-medium">
               <Star className="w-4 h-4 text-yellow-400" fill="#facc15" />
-              <span>{driverRating ? driverRating.toFixed(1) : 'N/A'}</span>
+              <span>{driverRating !== null ? driverRating.toFixed(1) : 'N/A'}</span>
             </div>
           </div>
           <div className="text-center">

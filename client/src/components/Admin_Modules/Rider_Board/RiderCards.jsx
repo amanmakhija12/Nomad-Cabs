@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { formatDateSafe } from "../../../utils/DateUtil";
 import { toast, Bounce } from "react-toastify";
 import { riderService, userService } from "../../../services/adminService";
@@ -10,8 +10,6 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
   const [formData, setFormData] = useState({
     status: rider?.status.toLowerCase() || "active",
   });
-
-  console.log("RiderCards render:", rider);
 
   if (!rider) return null;
 
@@ -265,7 +263,7 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
                 </select>
               ) : (
                 <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border ${statusTheme}`}>
-                  {rider.status.toUpperCase()}
+                  {formData.status.toUpperCase()}
                 </span>
               )}
             </div>

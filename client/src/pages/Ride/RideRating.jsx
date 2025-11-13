@@ -29,17 +29,12 @@ export const RideRating = ({ booking }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  const onCompleteRide = async () => {
-    await driverBookingService.completeRide(booking.id);
-  }
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     try {
       await bookingService.rateRide(booking.id, { rating, feedback });
-      await onCompleteRide();
       toast.success("Thank you for your feedback!");
       navigate("/rider");
     } catch (error) {
@@ -49,8 +44,8 @@ export const RideRating = ({ booking }) => {
     }
   };
 
-  const handleSkip = () => {
-    onCompleteRide();
+  const handleSkip = async () => {
+    await bookingService.rateRide(booking.id);
     toast.success("Ride Completed!");
     navigate("/rider");
   };
