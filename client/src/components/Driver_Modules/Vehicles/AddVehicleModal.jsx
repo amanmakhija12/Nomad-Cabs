@@ -6,7 +6,7 @@ const AddVehicleModal = ({ onClose, onSubmit }) => {
   // --- 1. BUG FIX: Changed state to camelCase to match your Java entity ---
   const [formData, setFormData] = useState({
     vehicleType: "",
-    rcNumber: "",
+    registrationNumber: "",
     pucNumber: "",
     insurancePolicyNumber: "",
     pucExpiry: "",
@@ -25,7 +25,7 @@ const AddVehicleModal = ({ onClose, onSubmit }) => {
     e.preventDefault();
     
     // Validate required fields (using camelCase)
-    if (!formData.vehicleType || !formData.rcNumber || !formData.pucExpiry || !formData.insuranceExpiry) {
+    if (!formData.vehicleType || !formData.registrationNumber || !formData.pucExpiry || !formData.insuranceExpiry) {
       alert('Please fill all required fields');
       return;
     }
@@ -102,7 +102,7 @@ const AddVehicleModal = ({ onClose, onSubmit }) => {
 
             {/* Required Fields */}
             {[
-              { label: "RC Number", name: "rcNumber", required: true },
+              { label: "RC Number", name: "registrationNumber", required: true },
               { label: "PUC Number", name: "pucNumber", required: true },
               { label: "Insurance Policy Number", name: "insurancePolicyNumber", required: true },
               { label: "PUC Expiry", name: "pucExpiry", type: "date", required: true },

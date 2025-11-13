@@ -13,7 +13,7 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
   console.log(Driver);
 
   const [formData, setFormData] = useState({
-    status: Driver?.status.toLowerCase() || "active",
+    status: Driver?.userStatus.toLowerCase() || "active",
   });
 
   const handleInputChange = (e) => {

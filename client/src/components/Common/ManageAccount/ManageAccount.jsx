@@ -39,7 +39,7 @@ const ManageAccount = () => {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const response = await api.get("/auth/profile/me");
+        const response = await api.get("/users/me");
         const { data } = response;
         setUserDetails(data);
         
@@ -71,8 +71,8 @@ const ManageAccount = () => {
         state: userDetails.state,
       };
 
-      const response = await api.put("/auth/profile", updatePayload);
-      const {data} = response;
+      const response = await api.put("/users/me", updatePayload);
+      const { data } = response;
       setUserDetails(data);
       setUser(data);
       setIsEditing(false);
@@ -127,10 +127,6 @@ const ManageAccount = () => {
                   {fullName || "Unnamed User"}
                 </h2>
                 <div className="mt-2 flex flex-wrap gap-3 text-xs">
-                  <Badge 
-                    active={userDetails.is_email_verified} 
-                    label="Email" 
-                  />
                   <Badge 
                     active={userDetails.status === "ACTIVE"} 
                     label="Active" 
@@ -263,21 +259,6 @@ const ManageAccount = () => {
                     value={
                       userDetails.createdAt
                         ? new Date(userDetails.createdAt).toLocaleDateString(
-                            "en-US",
-                            { year: "numeric", month: "long", day: "numeric" }
-                          )
-                        : "—"
-                    }
-                    disabled
-                    className={inputClass(false)}
-                  />
-                </Field>
-                <Field label="Last Updated" icon={Calendar}>
-                  <input
-                    type="text"
-                    value={
-                      userDetails.updatedAt
-                        ? new Date(userDetails.updatedAt).toLocaleDateString(
                             "en-US",
                             { year: "numeric", month: "long", day: "numeric" }
                           )

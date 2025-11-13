@@ -46,6 +46,8 @@ const LoginForm = () => {
           lastName: data.lastName,
         };
 
+        console.log(user, loginData);
+
         setAuth(user, loginData.accessToken);
       });
 

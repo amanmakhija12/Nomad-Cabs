@@ -110,10 +110,12 @@ export const driverService = {
    */
   async getBookingHistory(filters = {}) {
     const params = new URLSearchParams();
-    if(filters.filterType) params.append("filterType", filterType);
-    if(filters.searchTerm) params.append("searchTerm", searchTerm);
     params.append("page", filters.page || 0);
     params.append("size", filters.size || 10);
+    if (filters.filterType && filters.searchTerm) {
+      params.append('filterType', filters.filterType);
+      params.append('searchTerm', filters.searchTerm);
+    }
     const response = await api.get(`/driver/bookings/me/history?${params}`);
     return response.data;
   },

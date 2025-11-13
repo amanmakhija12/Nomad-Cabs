@@ -1,8 +1,8 @@
 const filterOptions = [
-  { label: "Pickup Address", value: "pickupAddress" },
-  { label: "Dropoff Address", value: "dropoffAddress" },
-  { label: "Date of Travelling", value: "date" },
-  { label: "Booking Status", value: "status" },
+  { label: "Pickup Address", value: "PICKUP_ADDRESS" },
+  { label: "Dropoff Address", value: "DROPOFF_ADDRESS" },
+  { label: "Date of Travelling", value: "DATE" },
+  { label: "Booking Status", value: "STATUS" },
 ];
 
 const SearchFilter = ({
@@ -43,7 +43,7 @@ const SearchFilter = ({
             Search
           </label>
           <div className="relative">
-            {filterType === "status" ? (
+            {filterType === "STATUS" ? (
               <select
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -52,8 +52,8 @@ const SearchFilter = ({
                 <option value="" className="bg-[#0f0f0f]">
                   All statuses
                 </option>
-                <option value="REQUESTED" className="bg-[#0f0f0f]">
-                  Requested
+                <option value="PENDING" className="bg-[#0f0f0f]">
+                  Pending
                 </option>
                 <option value="ACCEPTED" className="bg-[#0f0f0f]">
                   Accepted
@@ -70,7 +70,7 @@ const SearchFilter = ({
               </select>
             ) : (
               <input
-                type={filterType === "travel_date" ? "date" : "text"}
+                type={filterType === "DATE" ? "date" : "text"}
                 placeholder={`Search by ${
                   filterOptions.find((opt) => opt.value === filterType)
                     ?.label || ""

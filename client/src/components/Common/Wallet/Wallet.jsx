@@ -247,17 +247,17 @@ const Wallet = () => {
 
 const TransactionRow = ({ tx, userId, onClick }) => {
   let isCredit = false;
-  let amount = `₹${tx.totalFare.toFixed(2)}`;
+  let amount = `₹${tx.amount.toFixed(2)}`;
   let color = "text-white/90";
   let label = "Transaction";
   let name = "";
   let Icon = ArrowUpCircle;
 
-  if (tx.transactionType === 'TOP_UP') {
+  if (tx.type === 'DEPOSIT') {
     isCredit = true;
     label = "Wallet Top-up";
     name = "From your bank";
-  } else if (tx.transactionType === 'WITHDRAWAL') {
+  } else if (tx.type === 'WITHDRAWAL') {
     isCredit = false;
     label = "Withdrawal";
     name = "To your bank";
@@ -274,7 +274,7 @@ const TransactionRow = ({ tx, userId, onClick }) => {
     } else {
       label = "Ride Payment to";
       name = tx.driverName;
-      amount = `-₹${tx.totalFare.toFixed(2)}`;
+      amount = `-₹${tx.amount.toFixed(2)}`;
     }
   }
 
@@ -299,7 +299,7 @@ const TransactionRow = ({ tx, userId, onClick }) => {
         </div>
         <div className="text-left">
           <p className="text-sm font-medium text-white/90">{label} {name}</p>
-          <p className="text-xs text-white/50">{formatDateSafe(tx.createdAt, {variant: "datetime"})}</p>
+          <p className="text-xs text-white/50">{formatDateSafe(tx.timestamp, {variant: "datetime"})}</p>
         </div>
       </div>
       <div className={`text-lg font-semibold ${color}`}>

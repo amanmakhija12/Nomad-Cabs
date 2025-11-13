@@ -4,14 +4,15 @@ import BookingCard from "./BookingCard";
 import Pagination from "../Pagination";
 import BookingCards from "./BookingCards";
 import { useAuthStore } from "../../../store/authStore";
-import { bookingService, driverBookingService } from "../../../services/bookingService";
 import { toast } from "react-toastify";
 import { useDebounce } from "../../../hooks/useDebounce";
+import { riderService } from "../../../services/riderService";
+import { driverService } from "../../../services/driverService";
 
 const Bookings = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [filterType, setFilterType] = useState("pickupAddress");
+  const [filterType, setFilterType] = useState("PICKUP_ADDRESS");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [bookingsData, setBookingsData] = useState({
@@ -45,9 +46,9 @@ const Bookings = () => {
 
         let data;
         if (user?.role === "RIDER") {
-          data = await bookingService.getMyBookings(filters);
+          data = await riderService.getBookingHistory(filters);
         } else if (user?.role === "DRIVER") {
-          data = await driverBookingService.getMyBookings(filters);
+          data = await driverService.getBookingHistory(filters);
         }
 
         setBookingsData(data);

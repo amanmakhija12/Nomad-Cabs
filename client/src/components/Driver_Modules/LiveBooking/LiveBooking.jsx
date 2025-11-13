@@ -15,6 +15,7 @@ import {
 import { useActiveRideCheck } from "../../../hooks/useActiveRideCheck";
 import api from "../../../utils/api";
 import { useNavigate } from "react-router-dom";
+import { driverService } from "../../../services/driverService";
 
 const LiveBooking = () => {
   const navigate = useNavigate();
@@ -123,7 +124,7 @@ const LiveBooking = () => {
 
     try {
       console.log("🔄 Fetching available bookings...");
-      const data = await driverBookingService.getAvailableBookings(vehicleType);
+      const data = await driverService.getPendingOffers();
 
       // ✅ Check if response has error message (409 conflict)
       if (data && data.message && data.message.includes("active booking")) {
@@ -268,7 +269,7 @@ const LiveBooking = () => {
       console.log(
         `🚗 Accepting booking ${bookingId} with vehicle ${selectedVehicle.id}`
       );
-      await driverBookingService.acceptBooking(bookingId, selectedVehicle.id);
+      await driverService.acceptOffer(bookingId, selectedVehicle.id);
 
       toast.success("✅ Booking accepted successfully!", {
         theme: "dark",

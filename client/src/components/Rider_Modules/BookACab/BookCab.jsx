@@ -55,15 +55,15 @@ const BookCab = () => {
       const payload = {
         pickupLat: pickupCoords.lat,
         pickupLng: pickupCoords.lng,
-        pickupAddress: bookingData.pickupAddress,
+        pickupLocationName: bookingData.pickupAddress,
         dropoffLat: dropoffCoords.lat,
         dropoffLng: dropoffCoords.lng,
-        dropoffAddress: bookingData.dropoffAddress,
-        vehicleCategory: bookingData.vehicleCategory.toUpperCase(),
+        dropoffLocationName: bookingData.dropoffAddress,
+        vehicleType: bookingData.vehicleCategory.toUpperCase(),
       };
       
       // 3. Call backend API (Axios handles errors in catch block)
-      const result = await bookingService.createBooking(payload);
+      await bookingService.createBooking(payload);
       
       // 'result' is the RideResponseDTO from the backend
       toast.success("Booking created! Finding drivers...", {

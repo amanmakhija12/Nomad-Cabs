@@ -134,8 +134,9 @@ export const StepVehicle = ({ data, onChange, onNext, onBack }) => {
       setLoading(true);
       try {
         // This function must call your new GET /api/v1/booking/vehicle-types endpoint
-        const result = await bookingService.getVehicleTypesWithCounts(); 
-        setVehicleTypes(result);
+        const { body } = await bookingService.getVehicleTypesWithCounts(); 
+        console.log(body);
+        setVehicleTypes(body);
       } catch (error) {
         console.error('Vehicle Types error:', error);
         const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch vehicle types';
@@ -187,15 +188,15 @@ export const StepVehicle = ({ data, onChange, onNext, onBack }) => {
 
           return (
             <div
-              key={v.id}
+              key={v.vehicleType}
               onClick={() => {
                 // 3. Only allow click if NOT disabled
                 if (!isDisabled) {
-                  onChange("vehicleCategory", v.vehicleCategory);
+                  onChange("vehicleCategory", v.vehicleType);
                 }
               }}
               className={`group cursor-pointer rounded-2xl p-5 border border-white/10 bg-[#1a1a1a] shadow-sm transition relative overflow-hidden ${
-                data.vehicleCategory === v.vehicleCategory
+                data.vehicleCategory === v.vehicleType
                   ? "ring-2 ring-white bg-white/10" // Selected
                   : isDisabled
                   ? "opacity-40 cursor-not-allowed" // Disabled
@@ -213,15 +214,15 @@ export const StepVehicle = ({ data, onChange, onNext, onBack }) => {
               {/* --- END OF NEW BADGE --- */}
 
               <div className="text-center space-y-2 relative">
-                <div className="text-4xl drop-shadow-sm">{getVehicleInfo(v.vehicleCategory).icon}</div>
-                <h3 className="font-semibold tracking-wide text-sm">{v.vehicleCategory}</h3>
+                <div className="text-4xl drop-shadow-sm">{getVehicleInfo(v.vehicleType).icon}</div>
+                <h3 className="font-semibold tracking-wide text-sm">{v.vehicleType}</h3>
                 <p className="text-[11px] text-gray-400 leading-snug">
-                  {getVehicleInfo(v.vehicleCategory).description}
+                  {getVehicleInfo(v.vehicleType).description}
                 </p>
-                <p className="text-[10px] text-gray-500">Capacity: {getVehicleInfo(v.vehicleCategory).capacity}</p>
-                <p className="text-xs font-semibold text-white/90">
+                <p className="text-[10px] text-gray-500">Capacity: {getVehicleInfo(v.vehicleType).capacity}</p>
+                {/* <p className="text-xs font-semibold text-white/90">
                   ₹{v.baseFare} base + ₹{v.pricePerKm}/km
-                </p>
+                </p> */}
                 
                 {/* --- 5. SHOW AVAILABLE COUNT --- */}
                 {!isDisabled && (

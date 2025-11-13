@@ -28,12 +28,12 @@ export const bookingService = {
     const response = await api.post("/booking/estimate", bookingData);
     return response.data;
   },
-  async getVehicleTypesWithCounts(city) {
-    const response = await api.get(`/bookings/vehicle-types/${city}`);
+  async getVehicleTypesWithCounts() {
+    const response = await api.get(`/bookings/vehicle-types`);
     return response.data;
   },
   async getActiveRideForRider() {
-    const response = await api.get("/booking/active-ride/rider");
+    const response = await api.get("/bookings/active-ride/rider");
     return response.data;
   },
   async rateRide(bookingId, payload) {
@@ -58,13 +58,11 @@ export const driverBookingService = {
     return response.data;
   },
   async getActiveRideForDriver() {
-    const response = await api.get("/booking/active-ride/driver");
+    const response = await api.get("/bookings/active-ride/driver");
     return response.data;
   },
-  async acceptBooking(bookingId, vehicleId) {
-    const response = await api.post(
-      `/booking/accept/${bookingId}/${vehicleId}`
-    );
+  async acceptBooking(offerId, vehicleId) {
+    const response = await api.post(`/drivers/me/offers/${offerId}/accept`, { vehicleId });
     return response.data;
   },
   async startRide(bookingId) {
@@ -72,14 +70,11 @@ export const driverBookingService = {
     return response.data;
   },
   async completeRide(bookingId) {
-    const response = await api.post(`/booking/complete/${bookingId}`);
+    const response = await api.post(`/driver/bookings/${bookingId}/complete`);
     return response.data;
   },
   async rateRider(bookingId, rating, feedback) {
-    const response = await api.post(`/booking/rate/rider/${bookingId}`, {
-      riderRating: rating,
-      riderFeedback: feedback,
-    });
+    const response = await api.post(`/bookings/${bookingId}/feedback`, { rating });
     return response.data;
   },
 };

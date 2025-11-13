@@ -62,7 +62,7 @@ export const driverService = {
 // ============================================
 export const vehicleService = {
   async getVehiclesByDriver(driverId) {
-    const response = await api.get(`/admin/drivers/me/vehicles/${driverId}`);
+    const response = await api.get(`/admin/drivers/${driverId}/vehicles`);
     return response.data;
   },
   async verifyVehicle(vehicleId) {

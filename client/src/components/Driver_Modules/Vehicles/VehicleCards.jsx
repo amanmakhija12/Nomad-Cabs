@@ -17,6 +17,7 @@ const VehicleCards = () => {
     setLoading(true);
     try {
       const data = await vehicleService.getMyVehicles();
+      console.log(data);
       setVehicles(data);
     } catch (error) {
       console.error('❌ Error fetching vehicles:', error);
@@ -40,7 +41,7 @@ const VehicleCards = () => {
         theme: "dark",
         transition: Bounce,
       });
-      setVehicles(response);
+      setVehicles([...vehicles, response]);
       setShowCreateModal(false);
     } catch (error) {
       console.error("❌ Error adding vehicle:", error);
@@ -88,7 +89,7 @@ const VehicleCards = () => {
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 relative">
-            {vehicles.map((vehicle) => {
+            {vehicles && vehicles.map((vehicle) => {
               const Icon = getVehicleIcon(vehicle.vehicleType);
               return (
                 <div
