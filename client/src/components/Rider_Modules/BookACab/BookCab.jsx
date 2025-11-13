@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   StepsProgress,
   StepRideDetails,
@@ -8,7 +7,6 @@ import {
 } from "./BookingSteps";
 import { bookingService } from "../../../services/bookingService";
 import { toast } from "react-toastify";
-import { useActiveRideCheck } from "../../../hooks/useActiveRideCheck";
 
 // --- MOCK GEOCODING ---
 // In a real app, you would replace this with an async call
@@ -21,9 +19,7 @@ const getCoordinatesFromAddress = async (address, type) => {
   }
 };
 
-const BookCab = () => {
-  const navigate = useNavigate();
-
+const BookCab = ({ onBookingSuccess }) => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   
@@ -34,7 +30,6 @@ const BookCab = () => {
     scheduledDate: "", // Note: Our backend doesn't support this yet
     scheduledTime: "", // Note: Our backend doesn't support this yet
     vehicleCategory: "",
-    paymentMethod: "cash",
   });
 
   const updateField = (field, value) =>
@@ -63,7 +58,8 @@ const BookCab = () => {
       };
       
       // 3. Call backend API (Axios handles errors in catch block)
-      await bookingService.createBooking(payload);
+      const response = await bookingService.createBooking(payload);
+      onBookingSuccess(response);
       
       // 'result' is the RideResponseDTO from the backend
       toast.success("Booking created! Finding drivers...", {
@@ -78,13 +74,9 @@ const BookCab = () => {
         scheduledDate: "",
         scheduledTime: "",
         vehicleCategory: "",
-        paymentMethod: "cash",
       });
       setStep(1);
       
-      // Navigate to bookings page
-      navigate("/ride");
-
     } catch (error) {
       // 4. Handle errors from Axios
       console.error('Booking error:', error);
@@ -97,8 +89,6 @@ const BookCab = () => {
       setLoading(false);
     }
   };
-
-  useActiveRideCheck();
 
   return (
     <div className="min-h-screen bg-[#151212] text-white p-6">

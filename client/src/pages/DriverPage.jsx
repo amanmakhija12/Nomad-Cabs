@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react"; // 1. Added useEffect
 import Sidebar from "../components/Sidebar/Sidebar";
 import Bookings from "../components/Common/Bookings/Bookings";
 import ManageAccount from "../components/Common/ManageAccount/ManageAccount";
@@ -6,18 +6,69 @@ import VehicleCards from "../components/Driver_Modules/Vehicles/VehicleCards";
 import Verification from "../components/Driver_Modules/Verification/Verification";
 import LiveBooking from "../components/Driver_Modules/LiveBooking/LiveBooking";
 import Wallet from "../components/Common/Wallet/Wallet";
-
-const driverNavItems = [
-  { id: "liveBookings", label: "Live Bookings" },
-  { id: "bookings", label: "My Bookings" },
-  { id: "vehicles", label: "Manage Vehicles" },
-  { id: "verification", label: "Verification" },
-  { id: "wallet", label: "Wallet" },
-  { id: "account", label: "Manage Account" },
-];
+import ActiveRide from "../components/Common/Ride/ActiveRide";
+import { useAuthStore } from "../store/authStore"; // 2. Added
+import { driverBookingService } from "../services/bookingService"; // 3. Added
 
 const DriverPage = () => {
   const [activeSection, setActiveSection] = useState("liveBookings");
+
+  // 4. State is now managed here, not in the hook
+  const [booking, setBooking] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const user = useAuthStore((state) => state.user);
+
+  // 5. The hook's logic is moved into this useEffect
+  useEffect(() => {
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+    const checkActiveRide = async () => {
+      try {
+        const response = await driverBookingService.getActiveRideForDriver();
+        if (isMounted && response) {
+          setBooking(response);
+        }
+      } catch (error) {
+        if (isMounted && error.response?.status !== 404) {
+          console.error("Error checking for active ride:", error);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    checkActiveRide();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
+
+  // 6. Add the loading spinner
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-[#151212]">
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-white/10 border-t-white" />
+      </div>
+    );
+  }
+
+  const driverNavItems = [
+    { id: "liveBookings", label: booking ? "Active Ride" : "Live Bookings" },
+    { id: "bookings", label: "My Bookings" },
+    { id: "vehicles", label: "Manage Vehicles" },
+    { id: "verification", label: "Verification" },
+    { id: "wallet", label: "Wallet" },
+    { id: "account", label: "Manage Account" },
+  ];
+
+  const switchActiveRideSection = () => setActiveSection("liveBookings");
 
   return (
     <Sidebar
@@ -25,12 +76,18 @@ const DriverPage = () => {
       setActiveSection={setActiveSection}
       navItems={driverNavItems}
     >
-      {activeSection === "liveBookings" && <LiveBooking />}
-      {activeSection === "bookings" && <Bookings />}
-      {activeSection === "vehicles" && <VehicleCards />}
-      {activeSection === "verification" && <Verification />}
-      {activeSection === "wallet" && <Wallet />}
-      {activeSection === "account" && <ManageAccount />}
+      {activeSection === "liveBookings" &&
+        (booking ? (
+          <ActiveRide onRideEnd={() => setBooking(null)} />
+        ) : (
+          <LiveBooking onBookingAccepted={setBooking} />
+        ))}
+      
+      {activeSection === "bookings" && (<Bookings activeBooking={booking} setActiveSection={switchActiveRideSection} />)}
+      {activeSection === "vehicles" && <VehicleCards activeBooking={booking} setActiveSection={switchActiveRideSection} />}
+      {activeSection === "verification" && <Verification activeBooking={booking} setActiveSection={switchActiveRideSection} />}
+      {activeSection === "wallet" && <Wallet activeBooking={booking} setActiveSection={switchActiveRideSection} />}
+      {activeSection === "account" && <ManageAccount activeBooking={booking} setActiveSection={switchActiveRideSection} />}
     </Sidebar>
   );
 };

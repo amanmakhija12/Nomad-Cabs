@@ -5,8 +5,9 @@ import { useAuthStore } from "../../../store/authStore";
 import { driverService } from "../../../services/driverService"; // <-- Use your new service
 import AddVehicleModal from "../Vehicles/AddVehicleModal"; // <-- Import the Add modal
 import { VehicleEditorCard } from "./VehicleEditorCard"; // <-- Import the new Card
+import ActiveRideBanner from "../../Common/ActiveRideBanner";
 
-const ManageVerification = () => {
+const ManageVerification = ({ activeBooking, setActiveSection }) => {
   const user = useAuthStore((s) => s.user);
   
   const [driverData, setDriverData] = useState(null);
@@ -204,6 +205,10 @@ const ManageVerification = () => {
           onClose={() => setShowAddModal(false)}
           onSubmit={onVehicleAdded}
         />
+      )}
+
+      {activeBooking && (
+        <ActiveRideBanner setActiveSection={setActiveSection} />
       )}
     </>
   );

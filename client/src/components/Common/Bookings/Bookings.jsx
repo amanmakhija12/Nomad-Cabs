@@ -8,8 +8,9 @@ import { toast } from "react-toastify";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { riderService } from "../../../services/riderService";
 import { driverService } from "../../../services/driverService";
+import ActiveRideBanner from "../ActiveRideBanner";
 
-const Bookings = () => {
+const Bookings = ({ activeBooking, setActiveSection }) => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [filterType, setFilterType] = useState("PICKUP_ADDRESS");
@@ -35,8 +36,6 @@ const Bookings = () => {
       try {
         setLoading(true);
         
-        // We just pass the filterType and searchTerm directly.
-        // The backend will handle the "one filter at a time" logic.
         const filters = {
           page: currentPage,
           size: 10,
@@ -102,7 +101,7 @@ const Bookings = () => {
         setSearchTerm={setSearchTerm}
       />
 
-      <ul className="space-y-4 flex-grow pb-24">
+      <ul className={`space-y-4 flex-grow ${activeBooking ? 'pb-44' : 'pb-24'}`}>
         {bookingsData.content.length === 0 ? (
           <div className="bg-[#141414] rounded-2xl p-12 text-center border border-white/10">
             <p className="text-gray-400 text-lg">No bookings found</p>
@@ -133,6 +132,10 @@ const Bookings = () => {
           isRider={isRider}
           onClose={closeBooking}
         />
+      )}
+      
+      {activeBooking && (
+        <ActiveRideBanner setActiveSection={setActiveSection} />
       )}
     </div>
   );

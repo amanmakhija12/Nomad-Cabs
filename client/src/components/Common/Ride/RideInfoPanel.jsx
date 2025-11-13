@@ -1,5 +1,5 @@
 import { User, Phone, Star, Award, Calendar } from "lucide-react";
-import { formatDateSafe } from "../../utils/DateUtil";
+import { formatDateSafe } from "../../../utils/DateUtil";
 
 export const RideInfoPanel = ({ role, 
   driverName, 

@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { driverBookingService } from "../../../services/bookingService";
-import { vehicleService } from "../../../services/vehicleService";
+import { driverBookingService, bookingService } from "../../../services/bookingService";
 import { useAuthStore } from "../../../store/authStore";
 import { toast } from "react-toastify";
 import {
@@ -12,14 +11,10 @@ import {
   RefreshCw,
   AlertCircle,
 } from "lucide-react"; // Removed unused 'Divide' import
-import { useActiveRideCheck } from "../../../hooks/useActiveRideCheck";
 import api from "../../../utils/api";
-import { useNavigate } from "react-router-dom";
 import { driverService } from "../../../services/driverService";
 
 const LiveBooking = () => {
-  const navigate = useNavigate();
-
   const [bookings, setBookings] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -31,13 +26,11 @@ const LiveBooking = () => {
     type: "",
   });
   const [isPollingActive, setIsPollingActive] = useState(true);
-  const [isActive, setIsActive] = useState(false); // This will track if a ride is active
+  
   const [isVerified, setIsVerified] = useState(false);
 
   const user = useAuthStore((s) => s.user);
   const intervalRef = useRef(null);
-
-  useActiveRideCheck();
 
   // Fetch driver's vehicles on mount
   useEffect(() => {
@@ -115,37 +108,10 @@ const LiveBooking = () => {
     loadVehicles();
   }, [user]);
 
-  const fetchAvailableBookings = async (vehicleType) => {
-    if (!vehicleType) {
-      setBookings([]);
-      setPreviousCount(0);
-      return;
-    }
-
+  const fetchAvailableBookings = async () => {
     try {
       console.log("🔄 Fetching available bookings...");
       const data = await driverService.getPendingOffers();
-
-      // ✅ Check if response has error message (409 conflict)
-      if (data && data.message && data.message.includes("active booking")) {
-        console.log("⚠️ Active booking detected");
-        setIsActive(true);
-        setBookings([]);
-        setPreviousCount(0);
-        setIsPollingActive(false); // Stop polling
-
-        toast.warning(
-          "You have an active ride. Complete it before accepting new ones.",
-          {
-            theme: "dark",
-            autoClose: 5000,
-          }
-        );
-        return;
-      }
-
-      // ✅ Normal flow - no active booking
-      setIsActive(false);
 
       console.log(`✅ Found ${data.length} available bookings`);
 
@@ -163,20 +129,11 @@ const LiveBooking = () => {
         playNotificationSound();
       }
 
-      console.log(`✅ Updating bookings state with: `, data);
-
       setBookings(data);
       setPreviousCount(data.length);
       setLastFetchTime(new Date());
     } catch (error) {
       console.error("❌ Error fetching available bookings:", error);
-
-      // Check if error message indicates active booking
-      if (error.message && error.message.includes("active booking")) {
-        setIsActive(true);
-        setBookings([]);
-        setIsPollingActive(false);
-      }
 
       if (bookings.length === 0 && !loading) {
         toast.error(error.message || "Failed to fetch available rides", {
@@ -201,14 +158,11 @@ const LiveBooking = () => {
   useEffect(() => {
     if (!user) return;
 
-    // 1. Always clear any previous interval when dependencies change
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
 
-    // 2. Fetch data immediately on load or when dependencies change
-    // We wrap fetch in a function to use it in setTimeout
     const fetchData = () => {
       setLoading(true);
       fetchAvailableBookings(selectedVehicle.type).finally(() =>
@@ -218,19 +172,14 @@ const LiveBooking = () => {
 
     fetchData();
 
-    // 3. Start a new interval ONLY if polling is active AND no ride is active
-    if (isPollingActive && !isActive) {
+    // 7. Polling logic no longer checks for 'isActive'
+    if (isPollingActive) {
       console.log("✅ Polling started...");
-      intervalRef.current = setInterval(fetchData, 5000); // Use 5000ms from your original code
-    } else if (isActive) {
-      // If a ride is active, stop polling and set UI to 'Paused'
-      console.log("🔴 Active ride detected. Polling stopped.");
-      setIsPollingActive(false); // This updates the UI to "Paused"
+      intervalRef.current = setInterval(fetchData, 5000);
     } else if (!isPollingActive) {
       console.log("⏸️ Polling is manually paused.");
     }
 
-    // 4. Cleanup: This runs on unmount or when dependencies change
     return () => {
       if (intervalRef.current) {
         console.log("🧹 Clearing interval...");
@@ -238,25 +187,22 @@ const LiveBooking = () => {
         intervalRef.current = null;
       }
     };
-  }, [isPollingActive, user, isActive, selectedVehicle.type]); // ✅ ADDED `isActive` to dependencies
+  }, [isPollingActive, user, selectedVehicle.type]); // 8. REMOVED 'isActive' from dependencies
 
-  // Pause polling when tab is hidden
+  // 9. SIMPLIFIED visibility useEffect
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
         setIsPollingActive(false);
       } else {
-        // Only resume if there isn't an active ride
-        if (!isActive) {
-          setIsPollingActive(true);
-        }
+        setIsPollingActive(true); // Always resume
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () =>
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [isActive]); // ✅ ADDED `isActive` dependency here too
+  }, []);
 
   // Accept booking with error handling
   const handleAccept = async (bookingId) => {
@@ -276,16 +222,18 @@ const LiveBooking = () => {
         autoClose: 3000,
       });
 
-      // After accepting, we will have an active ride.
-      // fetchAvailableBookings() will now detect it and set isActive=true
-      fetchAvailableBookings();
-      navigate("/ride"); // Redirect to the common ride page
+      console.log("Fetching the newly active ride...");
+      const activeRide = await driverBookingService.getActiveRideForDriver();
+
+      onBookingAccepted(activeRide.data);
+
     } catch (error) {
       console.error("❌ Error accepting booking:", error);
       toast.error(error.message || "Failed to accept booking", {
         theme: "dark",
         autoClose: 5000,
       });
+      fetchAvailableBookings();
     }
   };
 
@@ -328,89 +276,78 @@ const LiveBooking = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-4xl font-semibold mb-2">Live Bookings</h1>
-          <p className="text-gray-400">
-            {isActive ? "You have an active ride." : "Accept rides near you"}
-          </p>
+          <p className="text-gray-400">Accept rides near you</p>
         </div>
 
-        {/* ✅ CORRECTION 4: Inverted logic to show controls when NOT active */}
-        {!isActive ? (
-          <div className="flex items-center gap-4 flex-wrap">
-            {/* Vehicle Selection with real data */}
-            <select
-              value={selectedVehicle.id}
-              onChange={handleVehicleSelect}
-              disabled={vehiclesLoading || vehicles.length === 0}
-              className="px-4 py-2 rounded-xl bg-[#1a1a1a] border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 text-sm disabled:opacity-50 disabled:cursor-not-allowed min-w-[250px]"
-            >
-              {vehiclesLoading ? (
-                <option>Loading vehicles...</option>
-              ) : vehicles.length === 0 ? (
-                <option>No vehicles available</option>
-              ) : (
-                <>
-                  <option value="">Select Vehicle</option>
-                  {isVerified &&
-                    vehicles
-                      .filter(
-                        (v) =>
-                          v.pucVerified && v.rcVerified && v.insuranceVerified
-                      )
-                      .map((vehicle) => (
-                        <option key={vehicle.id} value={vehicle.id}>
-                          {getVehicleDisplay(vehicle)}
-                        </option>
-                      ))}
-                </>
-              )}
-            </select>
+        <div className="flex items-center gap-4 flex-wrap">
+          {/* Vehicle Selection with real data */}
+          <select
+            value={selectedVehicle.id}
+            onChange={handleVehicleSelect}
+            disabled={vehiclesLoading || vehicles.length === 0}
+            className="px-4 py-2 rounded-xl bg-[#1a1a1a] border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 text-sm disabled:opacity-50 disabled:cursor-not-allowed min-w-[250px]"
+          >
+            {vehiclesLoading ? (
+              <option>Loading vehicles...</option>
+            ) : vehicles.length === 0 ? (
+              <option>No vehicles available</option>
+            ) : (
+              <>
+                <option value="">Select Vehicle</option>
+                {isVerified &&
+                  vehicles
+                    .filter(
+                      (v) =>
+                        v.pucVerified && v.rcVerified && v.insuranceVerified
+                    )
+                    .map((vehicle) => (
+                      <option key={vehicle.id} value={vehicle.id}>
+                        {getVehicleDisplay(vehicle)}
+                      </option>
+                    ))}
+              </>
+            )}
+          </select>
 
-            {/* Live indicator */}
+          {/* Live indicator */}
+          <div
+            className={`flex items-center gap-2 px-4 py-2 rounded-full border ${
+              isPollingActive
+                ? "bg-green-500/10 border-green-500/30"
+                : "bg-gray-500/10 border-gray-500/30"
+            }`}
+          >
             <div
-              className={`flex items-center gap-2 px-4 py-2 rounded-full border ${
-                isPollingActive
-                  ? "bg-green-500/10 border-green-500/30"
-                  : "bg-gray-500/10 border-gray-500/30"
+              className={`w-2 h-2 rounded-full ${
+                isPollingActive ? "bg-green-400 animate-pulse" : "bg-gray-400"
+              }`}
+            />
+            <span
+              className={`text-sm font-medium ${
+                isPollingActive ? "text-green-300" : "text-gray-300"
               }`}
             >
-              <div
-                className={`w-2 h-2 rounded-full ${
-                  isPollingActive ? "bg-green-400 animate-pulse" : "bg-gray-400"
-                }`}
-              />
-              <span
-                className={`text-sm font-medium ${
-                  isPollingActive ? "text-green-300" : "text-gray-300"
-                }`}
-              >
-                {isPollingActive ? "Live Updates" : "Paused"}
-              </span>
-            </div>
+              {isPollingActive ? "Live Updates" : "Paused"}
+            </span>
+          </div>
 
-            {/* Manual refresh */}
-            <button
-              onClick={() => {
-                setLoading(true);
-                fetchAvailableBookings(selectedVehicle.type).finally(() =>
-                  setLoading(false)
-                );
-              }}
-              disabled={loading}
-              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 transition disabled:opacity-50"
-              title="Refresh now"
-            >
-              <RefreshCw
-                className={`w-5 h-5 ${loading ? "animate-spin" : ""}`}
-              />
-            </button>
-          </div>
-        ) : (
-          // This now shows when a ride IS active
-          <div className="bg-red-600/20 text-red-400 px-4 py-2 rounded-xl border border-red-400/30">
-            You have an active booking. Please complete or cancel it before
-            accepting new bookings.
-          </div>
-        )}
+          {/* Manual refresh */}
+          <button
+            onClick={() => {
+              setLoading(true);
+              fetchAvailableBookings(selectedVehicle.type).finally(() =>
+                setLoading(false)
+              );
+            }}
+            disabled={loading}
+            className="p-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 transition disabled:opacity-50"
+            title="Refresh now"
+          >
+            <RefreshCw
+              className={`w-5 h-5 ${loading ? "animate-spin" : ""}`}
+            />
+          </button>
+        </div>
       </div>
 
       {/* Stats Bar */}
@@ -450,9 +387,8 @@ const LiveBooking = () => {
             <div>
               <p className="text-gray-400 text-xs">Status</p>
               <p className="text-sm font-medium">
-                {isActive
-                  ? "Active Ride"
-                  : selectedVehicle.id !== ""
+                {/* 18. SIMPLIFIED status text */}
+                {selectedVehicle.id !== ""
                   ? "Ready to Accept"
                   : "Select Vehicle"}
               </p>
@@ -463,7 +399,7 @@ const LiveBooking = () => {
 
       {/* Bookings Grid */}
       {/* Show "No rides" only if polling is active and no bookings are found */}
-      {bookings.length === 0 && !isActive ? (
+      {bookings.length === 0 ? (
         <div className="bg-[#141414] rounded-2xl p-12 text-center border border-white/10">
           <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
             <Car className="w-8 h-8 text-gray-500" />
@@ -479,22 +415,11 @@ const LiveBooking = () => {
               : "Polling is paused. Switch to this tab to resume."}
           </p>
         </div>
-      ) : // Show the active ride message if active, otherwise show the grid
-      isActive ? (
-        <div className="bg-[#141414] rounded-2xl p-12 text-center border border-white/10">
-          <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Navigation className="w-8 h-8 text-green-500" />
-          </div>
-          <p className="text-gray-400 text-lg mb-2">Active ride in progress</p>
-          <p className="text-gray-500 text-sm">
-            Please go to your 'My Bookings' page to manage your current ride.
-          </p>
-        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {bookings.map((booking) => (
             <div
-              key={booking.id}
+              key={booking.offerId}
               className="bg-[#141414] p-6 rounded-2xl border border-white/10 hover:border-white/20 transition-all hover:-translate-y-1 hover:shadow-2xl group"
             >
               {/* Rider Info */}
@@ -543,12 +468,6 @@ const LiveBooking = () => {
                     {booking.estimatedDistanceKm.toFixed(2)} km
                   </p>
                 </div>
-                {/* <div>
-                  <p className="text-xs text-gray-500 mb-1">Duration</p>
-                  <p className="text-sm font-semibold">
-                    {booking.tripDurationMinutes.toFixed(2)} min
-                  </p>
-                </div> */}
               </div>
 
               {/* Fare */}

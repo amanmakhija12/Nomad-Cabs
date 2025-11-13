@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Star, User } from "lucide-react";
-import { bookingService, driverBookingService } from "../../services/bookingService";
+import { bookingService, driverBookingService } from "../../../services/bookingService";
 
 // A simple star rating component
 const StarRating = ({ rating, setRating }) => {

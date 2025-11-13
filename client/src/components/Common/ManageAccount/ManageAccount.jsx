@@ -14,8 +14,9 @@ import {
 import { useAuthStore } from "../../../store/authStore";
 import { toast } from "react-toastify";
 import api from "../../../utils/api";
+import ActiveRideBanner from "../ActiveRideBanner";
 
-const ManageAccount = () => {
+const ManageAccount = ({ activeBooking, setActiveSection }) => {
   const [userDetails, setUserDetails] = useState({
     id: "",
     email: "",
@@ -298,6 +299,10 @@ const ManageAccount = () => {
           </form>
         </div>
       </div>
+
+      {activeBooking && (
+        <ActiveRideBanner setActiveSection={setActiveSection} />
+      )}
     </div>
   );
 };

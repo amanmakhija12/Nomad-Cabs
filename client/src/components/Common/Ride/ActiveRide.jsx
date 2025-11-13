@@ -6,12 +6,12 @@ import { RideInfoPanel } from "./RideInfoPanel";
 import { RideActionFooter } from "./RideActionFooter";
 import { MapPlaceholder } from "./MapPlaceholder";
 import { Loader } from "lucide-react";
-import { bookingService, driverBookingService } from "../../services/bookingService";
-import { useAuthStore } from "../../store/authStore";
+import { bookingService, driverBookingService } from "../../../services/bookingService";
+import { useAuthStore } from "../../../store/authStore";
 import { RideRating } from "./RideRating";
-import { PaymentScreen } from "../../components/Common/PaymentScreen";
+import { PaymentScreen } from "./PaymentScreen";
 
-const ActiveRide = () => {
+const ActiveRide = ({ onRideEnd }) => {
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -88,7 +88,10 @@ const ActiveRide = () => {
   );
   
   const onCancelRide = () => handleAction(
-    () => bookingService.cancelRide(booking.id, "Cancelled by user"),
+    () => {
+      bookingService.cancelRide(booking.id, "Cancelled by user")
+      onRideEnd();
+    },
     "Ride Cancelled!",
     true
   );
@@ -106,7 +109,10 @@ const ActiveRide = () => {
   );
 
   const handleConfirm = () => handleAction(
-    () => driverBookingService.confirmCashPayment(booking.id),
+    () => {
+      driverBookingService.confirmCashPayment(booking.id)
+      onRideEnd();
+    },
     "Ride completed!",
     true
   );

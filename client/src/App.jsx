@@ -13,7 +13,6 @@ import { useAuthStore } from "./store/authStore";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import BookCab from "./components/Rider_Modules/BookACab/BookCab";
-import ActiveRide from "./pages/Ride/ActiveRide";
 
 const ProtectedRoute = ({ children, roles }) => {
   const user = useAuthStore((s) => s.user);
@@ -72,15 +71,6 @@ const App = () => {
           element={
             <ProtectedRoute roles={["RIDER"]}>
               <BookCab />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/ride"
-          element={
-            <ProtectedRoute roles={["RIDER", "DRIVER"]}>
-              <ActiveRide />
             </ProtectedRoute>
           }
         />

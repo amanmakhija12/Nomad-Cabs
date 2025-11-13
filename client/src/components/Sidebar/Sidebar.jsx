@@ -10,7 +10,8 @@ import {
   IndianRupee,
   CreditCard,
   X,
-  Menu
+  Menu,
+  CarFront
 } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
 import { getInitial } from "../../utils/getInitial";
@@ -32,6 +33,8 @@ const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
         return Users;
       case "Book a Cab":
         return Car;
+      case "Active Ride":
+        return CarFront;
       case "Manage Vehicles":
         return Car;
       case "Manage Account":
@@ -45,6 +48,7 @@ const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
       case "Fare Board":
         return IndianRupee;
       case "Transactions":
+      case "Wallet":
         return CreditCard;
       default:
         return HelpCircle;
