@@ -135,13 +135,14 @@ const VehicleVerificationCard = ({ vehicle, onApprove, loading }) => {
 // Updated to use the new components and simplified logic
 export const VerificationModal = ({ driver, onClose, onRefresh }) => {
   const [saving, setSaving] = useState(null); // Tracks "type-id-action"
-  const [vehicles, setVehicles] = useState(null);
+  const [vehicles, setVehicles] = useState([]);
   const [vehicleLoading, setVehicleLoading] = useState(true);
 
   const fetchVehicles = useCallback(async () => {
     try {
       setVehicleLoading(true);
-      const response = await vehicleService.getVehiclesByDriver(driver.driverId);
+      console.log(driver);
+      const response = await vehicleService.getVehiclesByDriver(driver.userId);
       setVehicles(response || []);
     } catch (error) {
       console.error("Error fetching vehicles:", error);

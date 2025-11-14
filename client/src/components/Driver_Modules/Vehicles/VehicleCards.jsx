@@ -6,9 +6,8 @@ import { getVehicleIcon } from "./Vehicles";
 import { PlusCircle } from 'lucide-react';
 import AddVehicleModal from "./AddVehicleModal";
 import { vehicleService } from "../../../services/vehicleService"; // ✅ Import from your service
-import ActiveRideBanner from "../../Common/ActiveRideBanner";
 
-const VehicleCards = ({ activeBooking, setActiveSection }) => {
+const VehicleCards = () => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
@@ -197,10 +196,6 @@ const VehicleCards = ({ activeBooking, setActiveSection }) => {
           vehicle={selectedVehicle}
           onClose={() => setSelectedVehicle(null)}
         />
-      )}
-
-      {activeBooking && (
-        <ActiveRideBanner setActiveSection={setActiveSection} />
       )}
     </>
   );

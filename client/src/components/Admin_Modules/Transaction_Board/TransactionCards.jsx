@@ -111,13 +111,7 @@ const TransactionCards = ({ transaction, onClose }) => {
               {transaction.bookingId}
             </p>
             <div className="mt-4">
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadge(
-                  transaction.bookingStatus
-                )}`}
-              >
-                {transaction.bookingStatus}
-              </span>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadge("COMPLETED")}`}>COMPLETED</span>
             </div>
           </div>
         </div>
@@ -139,8 +133,7 @@ const TransactionCards = ({ transaction, onClose }) => {
             <InfoPanel title="Trip Details">
               <InfoRow label="Pickup" value={transaction.pickupAddress} />
               <InfoRow label="Dropoff" value={transaction.dropoffAddress} />
-              <InfoRow label="Created At" value={formatDateSafe(transaction.createdAt, { variant: "datetime" })} />
-              <InfoRow label="Updated At" value={formatDateSafe(transaction.updatedAt, { variant: "datetime" })} />
+              <InfoRow label="Created At" value={formatDateSafe(transaction.timestamp, { variant: "datetime" })} />
             </InfoPanel>
           </div>
 
@@ -152,26 +145,19 @@ const TransactionCards = ({ transaction, onClose }) => {
             <div className="space-y-2">
               <FareRow label="Base Fare" value={transaction.baseFare} />
               <FareRow label="Distance Fare" value={transaction.distanceFare} />
-              <FareRow label="Duration Fare" value={transaction.durationFare} />
-              <FareRow label="Surge" value={transaction.surchargeFees} />
-              <FareRow label="Platform Fee" value={transaction.platformFee} />
               <FareRow label="Taxes & Fees (GST)" value={transaction.taxes} />
               {transaction.discount > 0 && (
                 <FareRow label="Discount" value={-transaction.discount} />
               )}
               <FareRow label="Total Fare" value={transaction.totalFare} isTotal />
+              <FareRow label="Commission Fee" value={transaction.commissionFee} />
+              <FareRow label="Driver Payout" value={transaction.totalFare - transaction.commissionFee} isTotal />
             </div>
           </div>
 
           {/* Payment Status */}
           <div className="text-center">
-            <span
-              className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border ${getPaymentBadge(
-                transaction.paymentStatus
-              )}`}
-            >
-              {transaction.paymentStatus}
-            </span>
+            <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border ${getPaymentBadge("SUCCESSFUL")}`}>SUCCESSFUL</span>
           </div>
 
         </div>

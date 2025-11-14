@@ -13,8 +13,8 @@ const ManageTransactions = () => {
 
   // filters
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [fareFilter, setFareFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [fareFilter, setFareFilter] = useState("ALL");
   const [fareValue, setFareValue] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   
@@ -34,8 +34,8 @@ const ManageTransactions = () => {
         page: transactionsData.number - 1,
         size: 10,
         searchTerm: debouncedSearchTerm || null,
-        status: statusFilter === "all" ? null : statusFilter,
-        fareFilter: fareFilter === "all" ? null : fareFilter,
+        paymentMode: statusFilter === "ALL" ? null : statusFilter,
+        fareFilter: fareFilter === "ALL" ? null : fareFilter,
         fareValue: debouncedFareValue || null,
         dateFilter: dateFilter || null,
       };
@@ -69,22 +69,6 @@ const ManageTransactions = () => {
 
   // --- 7. PAGINATION is now driven by backend data ---
   const currentTransactions = transactionsData.content || [];
-  const totalPages = transactionsData.totalPages || 1;
-
-  const statusBadge = (s) => ({
-    completed: "bg-emerald-900/40 text-emerald-300 border-emerald-700",
-    cancelled: "bg-red-900/40 text-red-300 border-red-700",
-    ongoing: "bg-blue-900/40 text-blue-300 border-blue-700",
-    pending: "bg-amber-900/40 text-amber-300 border-amber-700",
-  }[s] || "bg-[#222] text-white/60 border-white/10");
-
-  const paymentBadge = (p) => ({
-    paid: "bg-emerald-900/40 text-emerald-300 border-emerald-700",
-    cancelled: "bg-red-900/40 text-red-300 border-red-700",
-    pending: "bg-amber-900/40 text-amber-300 border-amber-700",
-    failed: "bg-red-900/40 text-red-300 border-red-700",
-  }[p] || "bg-[#222] text-white/60 border-white/10");
-
   const inputBase = "h-11 w-full rounded-lg bg-[#1b1b1b] border border-white/10 text-sm px-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-white/15";
   const selectBase = inputBase;
 
@@ -116,18 +100,15 @@ const ManageTransactions = () => {
             />
           </div>
           <div>
-            <label className="text-[11px] font-medium tracking-wide uppercase text-white/40 block mb-2">Booking Status</label>
+            <label className="text-[11px] font-medium tracking-wide uppercase text-white/40 block mb-2">Payment Mode</label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className={selectBase}
             >
-              <option value="all">All Status</option>
-              <option value="REQUESTED">Requested</option>
-              <option value="ACCEPTED">Accepted</option>
-              <option value="STARTED">Started</option>
-              <option value="COMPLETED">Completed</option>
-              <option value="CANCELLED">Cancelled</option>
+              <option value="ALL">All Mode</option>
+              <option value="WALLET">Wallet</option>
+              <option value="CASH">Cash</option>
             </select>
           </div>
           <div>
@@ -148,10 +129,10 @@ const ManageTransactions = () => {
               onChange={(e) => setFareFilter(e.target.value)}
               className={selectBase}
             >
-              <option value="all">All Fares</option>
-              <option value="equal">Equal (=)</option>
-              <option value="greater">Greater (≥)</option>
-              <option value="less">Less (≤)</option>
+              <option value="ALL">All Fares</option>
+              <option value="EQUAL">Equal (=)</option>
+              <option value="GREATER">Greater (≥)</option>
+              <option value="LESS">Less (≤)</option>
             </select>
           </div>
           <div>
@@ -199,7 +180,7 @@ const ManageTransactions = () => {
                   <th className="px-5 py-4 text-left font-semibold min-w-[150px]">Driver</th>
                   <th className="px-5 py-4 text-left font-semibold min-w-[220px]">Route</th>
                   <th className="px-5 py-4 text-left font-semibold min-w-[100px]">Fare (₹)</th>
-                  <th className="px-5 py-4 text-left font-semibold min-w-[100px]">Payment</th>
+                  <th className="px-5 py-4 text-left font-semibold min-w-[100px]">Payment Mode</th>
                   <th className="px-5 py-4 text-left font-semibold min-w-[120px]">Date</th>
                 </tr>
               </thead>
@@ -210,7 +191,7 @@ const ManageTransactions = () => {
                     onClick={() => openTransaction(t)}
                     className={`h-20 border-t border-white/5 hover:bg-white/5 transition cursor-pointer ${idx === currentTransactions.length - 1 ? 'border-b border-white/5' : ''}`}
                   >
-                    <td className="px-5 py-4 font-medium text-white/90">{t.id}</td>
+                    <td className="px-5 py-4 font-medium text-white/90">{t.id.split("-")[0]}...</td>
                     <td className="px-5 py-4">
                       <div className="text-white/85 font-medium">{t.riderName || "-"}</div>
                       <div className="text-white/40 text-[11px] mt-1">{t.riderPhone}</div>
@@ -225,7 +206,7 @@ const ManageTransactions = () => {
                     </td>
                     <td className="px-5 py-4 font-semibold text-white">₹{t.totalFare.toFixed(2)}</td>
                     <td className="px-5 py-4">
-                      <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold border ${paymentBadge(t.paymentStatus)}`}>{t.paymentMode}</span>
+                      <span className={"inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold border bg-[#222] text-white/60 border-white/10"}>{t.paymentMode}</span>
                     </td>
                     <td className="px-5 py-4 text-white/70">
                       {formatDateSafe(t.timestamp, { locale: 'en-IN', timeZone: 'Asia/Kolkata', variant: 'date', fallback: '—', assumeUTCForMySQL: true })}

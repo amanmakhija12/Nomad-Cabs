@@ -67,10 +67,8 @@ const QuickActions = ({ setActiveSection }) => (
 
 // Main Dashboard Component
 const Dashboard = ({ setActiveSection }) => {
-  const [revenueStats, setRevenueStats] = useState(null);
   const [platformStats, setPlatformStats] = useState(null);
   const [chartData, setChartData] = useState([]);
-  const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dateFilter, setDateFilter] = useState("30d");
 
@@ -78,17 +76,8 @@ const Dashboard = ({ setActiveSection }) => {
     try {
       setLoading(true);
       // Fetch all dashboard data in parallel
-      const [revenueRes, platformRes, chartRes, txRes] = await Promise.all([
-        adminStatsService.getRevenueStats(filter),
-        adminStatsService.getPlatformStats(),
-        adminStatsService.getRevenueChartData(filter),
-        adminStatsService.getRecentTransactions(),
-      ]);
-      
-      setRevenueStats(revenueRes);
-      setPlatformStats(platformRes);
-      setChartData(chartRes);
-      setTransactions(txRes.content || []);
+      const response = await adminStatsService.getPlatformStats();
+      setPlatformStats(response);
       
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -96,9 +85,8 @@ const Dashboard = ({ setActiveSection }) => {
     } finally {
       setLoading(false);
     }
-  }, []); // Empty array, fetchData is stable
+  }, []);
 
-  // This effect runs when the 'dateFilter' state changes
   useEffect(() => {
     fetchData(dateFilter);
   }, [dateFilter, fetchData]);
@@ -112,18 +100,15 @@ const Dashboard = ({ setActiveSection }) => {
       return `${prefix}0`;
     }
     
-    // Check if the prefix is currency, and add .toFixed(2)
     if (prefix === "₹") {
       return `${prefix}${num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
     
-    // Otherwise, just format as a whole number
     return `${prefix}${num.toLocaleString('en-IN')}`;
   };
 
   return (
     <div className="p-6 space-y-10 text-white">
-      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
         <h1 className="text-4xl font-semibold tracking-tight text-white">
           Admin Dashboard
@@ -131,11 +116,10 @@ const Dashboard = ({ setActiveSection }) => {
         <DateFilterButtons activeFilter={dateFilter} setFilter={setDateFilter} />
       </div>
       
-      {/* Stat Card Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <StatCard 
           title="Total Net Revenue" 
-          value={formatValue(revenueStats?.totalGrossRevenue, "₹")} 
+          value={formatValue(platformStats?.companyWalletBalance, "₹")} 
           icon={DollarSign} 
           color="text-emerald-300"
         />
@@ -159,25 +143,23 @@ const Dashboard = ({ setActiveSection }) => {
         />
         <StatCard 
           title="Successful Trips" 
-          value={formatValue(revenueStats?.totalSuccessfulTransactions)} 
+          value={formatValue(platformStats?.successfulTrips)} 
           icon={CreditCard} 
           color="text-white"
         />
         <StatCard 
           title="Avg. Commission / Trip" 
           value={formatValue(
-            // Calculate the average: Total Commission / Total Trips
-            revenueStats?.totalSuccessfulTransactions > 0
-              ? revenueStats?.totalCommissionFees / revenueStats?.totalSuccessfulTransactions
+            platformStats?.successfulTrips > 0
+              ? platformStats?.companyWalletBalance / platformStats?.successfulTrips
               : 0,
-            "₹" // The prefix is Rupees
+            "₹"
           )} 
           icon={Percent} 
           color="text-white"
         />
       </div>
 
-      {/* Revenue Chart */}
       <div className="bg-[#141414] rounded-2xl border border-white/10 p-8 shadow-lg h-[400px]">
         <h2 className="text-2xl font-semibold tracking-tight text-white mb-8">
           Net Revenue ({dateFilter})
@@ -208,10 +190,8 @@ const Dashboard = ({ setActiveSection }) => {
         )}
       </div>
       
-      {/* Quick Actions */}
       <QuickActions setActiveSection={setActiveSection} />
 
-      {/* Recent Transactions List */}
       <div className="bg-[#141414] rounded-2xl border border-white/10 p-8 shadow-lg">
         <h2 className="text-2xl font-semibold tracking-tight text-white mb-8">
           Recent Activity
@@ -225,25 +205,23 @@ const Dashboard = ({ setActiveSection }) => {
                 <th className="text-left font-semibold px-5 py-4">Driver</th>
                 <th className="text-left font-semibold px-5 py-4">Total Fare</th>
                 <th className="text-left font-semibold px-5 py-4">Commission</th>
-                <th className="text-left font-semibold px-5 py-4">Platform Fee</th>
                 <th className="text-left font-semibold px-5 py-4">Date</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {loading ? (
                 <tr><td colSpan="7" className="p-8 text-center text-white/40">Loading...</td></tr>
-              ) : transactions.length === 0 ? (
+              ) : platformStats.latestTransactions.length === 0 ? (
                 <tr><td colSpan="7" className="p-8 text-center text-white/40">No transactions found.</td></tr>
               ) : (
-                transactions.map(tx => (
+                platformStats.latestTransactions.map(tx => (
                   <tr key={tx.id} className="hover:bg-white/5">
-                    <td className="px-5 py-4 font-mono text-xs text-white/70">{tx.bookingId?.split('-')[0]}...</td>
+                    <td className="px-5 py-4 font-mono text-xs text-white/70">{tx.id?.split('-')[0]}...</td>
                     <td className="px-5 py-4 text-white/90">{tx.riderName}</td>
                     <td className="px-5 py-4 text-white/90">{tx.driverName}</td>
                     <td className="px-5 py-4 text-white font-medium">₹{tx.totalFare.toFixed(2)}</td>
                     <td className="px-5 py-4 text-blue-300 font-medium">₹{tx.commissionFee.toFixed(2)}</td>
-                    <td className="px-5 py-4 text-indigo-300 font-medium">₹{tx.platformFee.toFixed(2)}</td>
-                    <td className="px-5 py-4 text-white/60">{formatDateSafe(tx.createdAt, { variant: 'date' })}</td>
+                    <td className="px-5 py-4 text-white/60">{formatDateSafe(tx.timestamp, { variant: 'date' })}</td>
                   </tr>
                 ))
               )}

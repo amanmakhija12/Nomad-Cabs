@@ -9,6 +9,7 @@ import Wallet from "../components/Common/Wallet/Wallet";
 import ActiveRide from "../components/Common/Ride/ActiveRide";
 import { useAuthStore } from "../store/authStore"; // 2. Added
 import { driverBookingService } from "../services/bookingService"; // 3. Added
+import ActiveRideBanner from "../components/Common/ActiveRideBanner";
 
 const DriverPage = () => {
   const [activeSection, setActiveSection] = useState("liveBookings");
@@ -81,13 +82,19 @@ const DriverPage = () => {
           <ActiveRide onRideEnd={() => setBooking(null)} />
         ) : (
           <LiveBooking onBookingAccepted={setBooking} />
-        ))}
+        ))
+      }
       
-      {activeSection === "bookings" && (<Bookings activeBooking={booking} setActiveSection={switchActiveRideSection} />)}
-      {activeSection === "vehicles" && <VehicleCards activeBooking={booking} setActiveSection={switchActiveRideSection} />}
-      {activeSection === "verification" && <Verification activeBooking={booking} setActiveSection={switchActiveRideSection} />}
-      {activeSection === "wallet" && <Wallet activeBooking={booking} setActiveSection={switchActiveRideSection} />}
-      {activeSection === "account" && <ManageAccount activeBooking={booking} setActiveSection={switchActiveRideSection} />}
+      {activeSection === "bookings" && (<Bookings />)}
+      {activeSection === "vehicles" && <VehicleCards />}
+      {activeSection === "verification" && <Verification />}
+      {activeSection === "wallet" && <Wallet />}
+      {activeSection === "account" && <ManageAccount />}
+
+      {booking && activeSection !== "liveBookings" && (
+        <ActiveRideBanner setActiveSection={switchActiveRideSection} />
+      )}
+      
     </Sidebar>
   );
 };

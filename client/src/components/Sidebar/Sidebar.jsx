@@ -11,7 +11,8 @@ import {
   CreditCard,
   X,
   Menu,
-  CarFront
+  CarFront,
+  LayoutDashboard
 } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
 import { getInitial } from "../../utils/getInitial";
@@ -50,6 +51,8 @@ const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
       case "Transactions":
       case "Wallet":
         return CreditCard;
+      case "Dashboard":
+        return LayoutDashboard;
       default:
         return HelpCircle;
     }

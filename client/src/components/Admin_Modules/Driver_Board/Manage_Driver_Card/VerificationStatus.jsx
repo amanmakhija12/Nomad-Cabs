@@ -4,7 +4,6 @@ const VerificationStatus = ({ driver }) => {
 
   const allVerified =
     driver.aadhaarVerified &&
-    driver.panVerified &&
     driver.driverLicenseVerified;
 
   if (allVerified) {

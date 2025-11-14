@@ -52,28 +52,28 @@ const BookingCard = ({ booking, isRider, onBookingClick }) => {
           )}
           <span
             className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold border ${
-              booking.status === "completed"
+              booking.status === "COMPLETED"
                 ? "bg-green-900/40 text-green-300 border-green-700"
-                : booking.status === "cancelled"
+                : booking.status === "CANCELLED"
                 ? "bg-red-900/40 text-red-300 border-red-700"
-                : booking.status === "in_progress"
+                : booking.status === "IN_PROGRESS"
                 ? "bg-blue-900/40 text-blue-300 border-blue-700"
                 : "bg-yellow-900/40 text-yellow-300 border-yellow-700"
             }`}
           >
-            {booking.status === "completed" && (
+            {booking.status === "COMPLETED" && (
               <Check className="w-3 h-3" />
             )}
-            {booking.status === "in_progress" && (
+            {booking.status === "IN_PROGRESS" && (
               <CircleDashed className="w-3 h-3" />
             )}
-            {booking.status === "cancelled" && (
+            {booking.status === "CANCELLED" && (
               <X className="w-3 h-3" />
             )}
-            {booking.status === "requested" && (
+            {booking.status === "PENDING" && (
               <TriangleAlert className="w-3 h-3" />
             )}
-            {booking.status.replace("_", " ").toUpperCase()}
+            {booking.status.replace("_", " ")}
           </span>
         </div>
       </div>

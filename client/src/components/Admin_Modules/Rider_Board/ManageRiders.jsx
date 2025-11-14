@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { Search, Mail, Phone, MapPin, Shield, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import RiderCards from "./RiderCards";
-import { riderService, userService } from "../../../services/adminService";
+import { riderService } from "../../../services/adminService";
 import { toast, Bounce } from "react-toastify";
 import { useDebounce } from "../../../hooks/useDebounce";
 import Pagination from "../../Common/Pagination";
 
 const filterOptions = [
-  { label: "Email", value: "email" },
-  { label: "Phone Number", value: "phoneNumber" },
+  { label: "Email", value: "EMAIL" },
+  { label: "Phone Number", value: "PHONE" },
 ];
 
 const ManageRiders = () => {
@@ -134,7 +134,7 @@ const ManageRiders = () => {
           {loading ? 'Loading...' : `Found ${totalItems} rider${totalItems !== 1 ? "s" : ""}`}
         </div>
         <div className="text-xs text-white/40 tracking-wider uppercase">
-          Page {currentPage} of {totalPages}
+          Page {totalItems === 0 ? 0 : currentPage} of {totalPages}
         </div>
       </div>
 

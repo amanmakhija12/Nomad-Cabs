@@ -8,7 +8,8 @@ export const riderService = {
     const params = new URLSearchParams();
     if (filters.page) params.append("page", filters.page);
     if (filters.size) params.append("size", filters.size);
-    // Note: Our backend controller for this is at /users/admin/riders
+    if(filters.filterType) params.append("filterType", filters.filterType);
+    if(filters.searchTerm) params.append("searchContent", filters.searchTerm);
     const response = await api.get("/users/admin/riders", { params });
     return response.data;
   },
@@ -30,6 +31,8 @@ export const driverService = {
     const params = new URLSearchParams();
     if (filters.page) params.append("page", filters.page);
     if (filters.size) params.append("size", filters.size);
+    if (filters.filterType) params.append("filterType", filters.filterType);
+    if (filters.searchTerm) params.append("searchContent", filters.searchTerm);
     const response = await api.get("/drivers/admin/all", { params });
     return response.data;
   },

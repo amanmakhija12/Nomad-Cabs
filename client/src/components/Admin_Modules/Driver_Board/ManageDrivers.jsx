@@ -9,8 +9,8 @@ import { useAuthStore } from "../../../store/authStore";
 import Pagination from "../../Common/Pagination";
 
 const filterOptions = [
-  { label: "Aadhaar", value: "aadhaarNumber" },
-  { label: "DL Number", value: "dlNumber" },
+  { label: "Aadhaar", value: "AADHAR" },
+  { label: "DL Number", value: "LICENSE" },
 ];
 
 const ManageDrivers = () => {
@@ -39,15 +39,13 @@ const ManageDrivers = () => {
   }, [selectedDriver]);
 
   const fetchData = useCallback(async () => {
-    // 5. Don't run if the user (admin) isn't loaded yet
     if (!user) return; 
 
     setLoading(true);
     try {
       const params = {
-        page: currentPage - 1, // 6. Convert to 0-based for the API
+        page: currentPage - 1,
         size: 10,
-        // 7. Remove 'role: "DRIVER"', the backend endpoint doesn't need it
         filterType: debouncedSearchTerm ? filterType : null,
         searchTerm: debouncedSearchTerm ? debouncedSearchTerm : null,
       };
@@ -143,7 +141,7 @@ const ManageDrivers = () => {
             : "No drivers found"}
         </span>
         <span>
-          Page {currentPage} of {totalPages}
+          Page {totalItems === 0 ? 0 : currentPage} of {totalPages}
         </span>
       </div>
 

@@ -7,6 +7,7 @@ import Wallet from "../components/Common/Wallet/Wallet";
 import ActiveRide from "../components/Common/Ride/ActiveRide";
 import { useAuthStore } from "../store/authStore";
 import { bookingService } from "../services/bookingService";
+import ActiveRideBanner from "../components/Common/ActiveRideBanner";
 
 const RiderPage = () => {
   const [activeSection, setActiveSection] = useState("bookCab");
@@ -88,9 +89,14 @@ const RiderPage = () => {
       )}
       
       {/* 9. The other pages still get the booking object for the banner */}
-      {activeSection === "myBooking" && <Bookings activeBooking={booking} setActiveSection={switchActiveRideSection} />}
-      {activeSection === "wallet" && <Wallet activeBooking={booking} setActiveSection={switchActiveRideSection} />}
-      {activeSection === "account" && <ManageAccount activeBooking={booking} setActiveSection={switchActiveRideSection} />}
+      {activeSection === "myBooking" && <Bookings />}
+      {activeSection === "wallet" && <Wallet />}
+      {activeSection === "account" && <ManageAccount />}
+
+      {booking && activeSection !== "bookCab" && (
+        <ActiveRideBanner setActiveSection={switchActiveRideSection} />
+      )}
+      
     </Sidebar>
   );
 };

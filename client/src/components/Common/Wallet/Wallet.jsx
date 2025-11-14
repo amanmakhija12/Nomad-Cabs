@@ -5,9 +5,8 @@ import { toast } from 'react-toastify';
 import { Wallet as WalletIcon, ArrowUpCircle, ArrowDownCircle, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import TransactionDetailModal from './TransactionDetailModal';
 import { formatDateSafe } from '../../../utils/DateUtil';
-import ActiveRideBanner from '../ActiveRideBanner';
 
-const Wallet = ({ activeBooking, setActiveSection }) => {
+const Wallet = () => {
   const [wallet, setWallet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [amount, setAmount] = useState('');
@@ -241,10 +240,6 @@ const Wallet = ({ activeBooking, setActiveSection }) => {
             onClose={() => setSelectedTx(null)}
             userRole={user.role}
           />
-        )}
-
-        {activeBooking && (
-          <ActiveRideBanner setActiveSection={setActiveSection} />
         )}
     </>
   );

@@ -8,9 +8,8 @@ import { toast } from "react-toastify";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { riderService } from "../../../services/riderService";
 import { driverService } from "../../../services/driverService";
-import ActiveRideBanner from "../ActiveRideBanner";
 
-const Bookings = ({ activeBooking, setActiveSection }) => {
+const Bookings = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [filterType, setFilterType] = useState("PICKUP_ADDRESS");
@@ -101,7 +100,7 @@ const Bookings = ({ activeBooking, setActiveSection }) => {
         setSearchTerm={setSearchTerm}
       />
 
-      <ul className={`space-y-4 flex-grow ${activeBooking ? 'pb-44' : 'pb-24'}`}>
+      <ul className={"space-y-4 flex-grow"}>
         {bookingsData.content.length === 0 ? (
           <div className="bg-[#141414] rounded-2xl p-12 text-center border border-white/10">
             <p className="text-gray-400 text-lg">No bookings found</p>
@@ -134,9 +133,7 @@ const Bookings = ({ activeBooking, setActiveSection }) => {
         />
       )}
       
-      {activeBooking && (
-        <ActiveRideBanner setActiveSection={setActiveSection} />
-      )}
+      
     </div>
   );
 };
