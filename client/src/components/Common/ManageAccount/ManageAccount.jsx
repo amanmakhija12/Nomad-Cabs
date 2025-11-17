@@ -35,7 +35,7 @@ const ManageAccount = () => {
   
   const { setUser } = useAuthStore();
 
-  // Fetch user details on mount
+  
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
@@ -43,7 +43,7 @@ const ManageAccount = () => {
         const { data } = response;
         setUserDetails(data);
         
-        // Update store if needed
+        
         setUser(data);
       } catch (error) {
         console.error("Error fetching user details:", error);
@@ -56,14 +56,14 @@ const ManageAccount = () => {
     fetchUserDetails();
   }, [setUser]);
 
-  // Handle profile update
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     try {
       setSaving(true);
       
-      // Only send editable fields
+      
       const updatePayload = {
         firstName: userDetails.firstName,
         lastName: userDetails.lastName,
@@ -107,7 +107,7 @@ const ManageAccount = () => {
   return (
     <div className="min-h-screen bg-[#151212] text-white p-6">
       <div className="max-w-5xl mx-auto">
-        {/* Header */}
+        {}
         <div className="mb-10">
           <h1 className="text-4xl font-semibold mb-2">Account Settings</h1>
           <p className="text-gray-400">
@@ -116,7 +116,7 @@ const ManageAccount = () => {
         </div>
 
         <div className="bg-[#141414] border border-white/10 rounded-2xl overflow-hidden shadow-xl">
-          {/* Top bar inside card */}
+          {}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 p-8 border-b border-white/10 bg-gradient-to-r from-[#161616] to-[#1a1a1a]">
             <div className="flex items-center gap-5">
               <div className="w-20 h-20 rounded-2xl bg-[#1f1f1f] border border-white/10 flex items-center justify-center">
@@ -152,7 +152,7 @@ const ManageAccount = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="p-8 space-y-10">
-            {/* Personal */}
+            {}
             <Section title="Personal Information" icon={User}>
               <div className="grid md:grid-cols-2 gap-6">
                 <Field label="First Name" icon={User}>
@@ -204,7 +204,7 @@ const ManageAccount = () => {
               </div>
             </Section>
 
-            {/* Location */}
+            {}
             <Section title="Location" icon={MapPin}>
               <div className="grid md:grid-cols-2 gap-6">
                 <Field label="City" icon={MapPin}>
@@ -234,7 +234,7 @@ const ManageAccount = () => {
               </div>
             </Section>
 
-            {/* Metadata */}
+            {}
             <Section title="Account Information" icon={Shield}>
               <div className="grid md:grid-cols-2 gap-6">
                 <Field label="Role" icon={Shield}>
@@ -302,7 +302,7 @@ const ManageAccount = () => {
   );
 };
 
-// Helper Components
+
 const Field = ({ label, icon: Icon, children }) => (
   <div className="space-y-2">
     <label className="flex items-center gap-2 text-[11px] font-medium tracking-wide text-gray-400 uppercase">

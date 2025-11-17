@@ -78,7 +78,7 @@ export const StepRideDetails = ({ data, onChange, onNext }) => {
         </Field>
       </div>
       
-      {/* Optional: Schedule for later */}
+      {}
       <div className="bg-[#1a1a1a] p-4 rounded-xl border border-white/10">
         <div className="flex items-start gap-3 mb-4">
           <AlertCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
@@ -124,16 +124,16 @@ export const StepRideDetails = ({ data, onChange, onNext }) => {
 };
 
 export const StepVehicle = ({ data, onChange, onNext, onBack }) => {
-  // 1. Add state for vehicle types and loading
+  
   const [vehicleTypes, setVehicleTypes] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 2. Fetch vehicle types (with counts) on mount
+  
   useEffect(() => {
     const fetchVehicleTypes = async () => {
       setLoading(true);
       try {
-        // This function must call your new GET /api/v1/booking/vehicle-types endpoint
+        
         const { body } = await bookingService.getVehicleTypesWithCounts(); 
         console.log(body);
         setVehicleTypes(body);
@@ -149,8 +149,8 @@ export const StepVehicle = ({ data, onChange, onNext, onBack }) => {
     fetchVehicleTypes();
   }, []);
 
-  // Helper function to get static data (icons, etc.)
-  // You should have this in your bookingData.js or similar
+  
+  
   const getVehicleInfo = (type) => {
     const types = {
       SEDAN: { icon: "🚗", description: "Comfortable sedans", capacity: 4 },
@@ -169,28 +169,28 @@ export const StepVehicle = ({ data, onChange, onNext, onBack }) => {
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         
-        {/* Handle loading state */}
+        {}
         {loading && (
           <p className="text-gray-400 col-span-full">Loading vehicle types...</p>
         )}
         
-        {/* Handle empty/error state */}
+        {}
         {!loading && !vehicleTypes?.length && (
           <p className="text-red-400 col-span-full">Could not find any vehicle types. Please try again later.</p>
         )}
 
-        {/* Render vehicle types */}
+        {}
         {vehicleTypes && vehicleTypes.map((v) => {
           
-          // --- THIS IS THE NEW LOGIC ---
+          
           const isDisabled = v.availableCount === 0;
-          // --- END OF NEW LOGIC ---
+          
 
           return (
             <div
               key={v.vehicleType}
               onClick={() => {
-                // 3. Only allow click if NOT disabled
+                
                 if (!isDisabled) {
                   onChange("vehicleCategory", v.vehicleType);
                 }
@@ -205,13 +205,13 @@ export const StepVehicle = ({ data, onChange, onNext, onBack }) => {
             >
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition pointer-events-none bg-gradient-to-br from-white/5 to-transparent"></div>
               
-              {/* --- 4. UNAVAILABLE BADGE --- */}
+              {}
               {isDisabled && (
                 <div className="absolute top-2 right-2 bg-red-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full z-10">
                   UNAVAILABLE
                 </div>
               )}
-              {/* --- END OF NEW BADGE --- */}
+              {}
 
               <div className="text-center space-y-2 relative">
                 <div className="text-4xl drop-shadow-sm">{getVehicleInfo(v.vehicleType).icon}</div>
@@ -220,17 +220,15 @@ export const StepVehicle = ({ data, onChange, onNext, onBack }) => {
                   {getVehicleInfo(v.vehicleType).description}
                 </p>
                 <p className="text-[10px] text-gray-500">Capacity: {getVehicleInfo(v.vehicleType).capacity}</p>
-                {/* <p className="text-xs font-semibold text-white/90">
-                  ₹{v.baseFare} base + ₹{v.pricePerKm}/km
-                </p> */}
+                {}
                 
-                {/* --- 5. SHOW AVAILABLE COUNT --- */}
+                {}
                 {!isDisabled && (
                   <p className="text-[10px] text-green-400 font-medium pt-1">
                     {v.availableCount} {v.availableCount === 1 ? 'driver' : 'drivers'} available
                   </p>
                 )}
-                {/* --- END OF NEW COUNT --- */}
+                {}
               </div>
             </div>
           );
@@ -257,15 +255,15 @@ export const StepVehicle = ({ data, onChange, onNext, onBack }) => {
 };
 
 export const StepPayment = ({ data, onChange, onBack, onSubmit, loading }) => {
-  // 1. Create state for the fare and its loading status
+  
   const [estimatedFare, setEstimatedFare] = useState(null);
   const [fareLoading, setFareLoading] = useState(true);
 
-  // 2. Fix the useEffect hook
+  
   useEffect(() => {
-    // 3. Define an async function *inside* the hook
+    
     const fetchFare = async () => {
-      // 4. Check for required data
+      
       if (!data.pickupAddress || !data.dropoffAddress || !data.vehicleCategory) {
         setFareLoading(false);
         return;
@@ -286,7 +284,7 @@ export const StepPayment = ({ data, onChange, onBack, onSubmit, loading }) => {
         
         const result = await bookingService.calculateEstimatedFare(payload);
         
-        // 5. Set the fare from the API
+        
         setEstimatedFare(result);
       } catch (error) {
         console.error('Fare estimation error:', error);
@@ -297,10 +295,10 @@ export const StepPayment = ({ data, onChange, onBack, onSubmit, loading }) => {
       }
     };
 
-    // 6. Call the async function
+    
     fetchFare();
     
-    // 7. Add dependencies: re-run this effect if any of these change
+    
   }, [data.pickupAddress, data.dropoffAddress, data.vehicleCategory]);
   
   return (
@@ -338,7 +336,7 @@ export const StepPayment = ({ data, onChange, onBack, onSubmit, loading }) => {
         )}
       </div>
 
-      {/* Booking Summary */}
+      {}
       <div className="bg-[#141414] p-6 rounded-2xl border border-white/10">
         <h3 className="font-semibold mb-4 text-sm tracking-wide uppercase text-white/80 flex items-center gap-2">
           <CheckCircle className="w-4 h-4" />
@@ -369,7 +367,7 @@ export const StepPayment = ({ data, onChange, onBack, onSubmit, loading }) => {
         </div>
       </div>
 
-      {/* Important Notes */}
+      {}
       <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-xl">
         <div className="flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
@@ -384,7 +382,7 @@ export const StepPayment = ({ data, onChange, onBack, onSubmit, loading }) => {
         </div>
       </div>
 
-      {/* Action Buttons */}
+      {}
       <div className="flex justify-between">
         <button
           onClick={onBack}
@@ -414,7 +412,7 @@ export const StepPayment = ({ data, onChange, onBack, onSubmit, loading }) => {
   );
 };
 
-// --- Small Reusable Pieces ---
+
 const Field = ({ label, icon: Icon, iconClass = "", children }) => (
   <div>
     <label className="block text-[11px] font-medium mb-2 text-gray-400 tracking-wide uppercase">

@@ -8,7 +8,7 @@ const ManageCard = ({ driver, onClick }) => (
     onClick={() => onClick(driver)}
     className="group relative bg-[#141414] p-6 border border-white/10 rounded-2xl shadow-sm cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden min-h-[200px] flex flex-col"
   >
-    {/* subtle overlay */}
+    {}
     <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
 
     <div className="relative z-10">

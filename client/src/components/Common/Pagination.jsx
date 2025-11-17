@@ -2,15 +2,14 @@ const Pagination = ({
   currentPage,
   totalPages,
   onPageChange,
-  position = "fixed", // "fixed" | "relative" | "sticky"
+  position = "fixed",
   maxVisiblePages = 5,
   showLabels = true,
-  size = "md", // "sm" | "md" | "lg"
-  variant = "light", // "light" | "dark"
+  size = "md",
+  variant = "light",
 }) => {
   if (totalPages <= 1) return null;
 
-  // Calculate visible page range
   const getVisiblePages = () => {
     const half = Math.floor(maxVisiblePages / 2);
     let start = Math.max(1, currentPage - half);
@@ -22,14 +21,12 @@ const Pagination = ({
 
   const visiblePages = getVisiblePages();
 
-  // Size classes
   const sizeClasses = {
     sm: "px-2 py-1 text-sm min-w-[2rem]",
     md: "px-4 py-2 min-w-[3rem]",
     lg: "px-6 py-3 text-lg min-w-[4rem]",
   };
 
-  // Position classes
   const positionClasses = {
     fixed:
       variant === "dark"
@@ -66,7 +63,6 @@ const Pagination = ({
         </button>
 
         <div className="flex space-x-2">
-          {/* First page */}
           {visiblePages[0] > 1 && (
             <>
               <button
@@ -89,7 +85,6 @@ const Pagination = ({
             </>
           )}
 
-          {/* Visible pages */}
           {visiblePages.map((pageNum) => (
             <button
               key={pageNum}
@@ -102,7 +97,6 @@ const Pagination = ({
             </button>
           ))}
 
-          {/* Last page */}
           {visiblePages[visiblePages.length - 1] < totalPages && (
             <>
               {visiblePages[visiblePages.length - 1] < totalPages - 1 && (

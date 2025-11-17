@@ -1,6 +1,6 @@
 import { Loader } from "lucide-react";
 
-// This component shows the correct buttons based on user role and ride status
+
 export const RideActionFooter = ({
   role,
   status,
@@ -42,7 +42,7 @@ export const RideActionFooter = ({
       }
     }
     
-    // Default: no actions
+    
     return null;
   };
 
@@ -55,7 +55,7 @@ export const RideActionFooter = ({
   );
 };
 
-// A helper for styling the buttons
+
 const ActionButton = ({ onClick, disabled, variant, children, fullWidth = false }) => {
   const colors = {
     primary: "bg-white text-black hover:bg-gray-200",

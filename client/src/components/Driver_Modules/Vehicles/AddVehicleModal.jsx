@@ -3,7 +3,7 @@ import { useState } from "react";
 import { getVehicleIcon } from "./Vehicles";
 
 const AddVehicleModal = ({ onClose, onSubmit }) => {
-  // --- 1. BUG FIX: Changed state to camelCase to match your Java entity ---
+  
   const [formData, setFormData] = useState({
     vehicleType: "",
     registrationNumber: "",
@@ -24,7 +24,7 @@ const AddVehicleModal = ({ onClose, onSubmit }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Validate required fields (using camelCase)
+    
     if (!formData.vehicleType || !formData.registrationNumber || !formData.pucExpiry || !formData.insuranceExpiry) {
       alert('Please fill all required fields');
       return;
@@ -33,7 +33,7 @@ const AddVehicleModal = ({ onClose, onSubmit }) => {
     onSubmit(formData);
   };
 
-  // --- 2. THEME FIX: Changed getVehicleIcon to use camelCase state ---
+  
   const Icon = getVehicleIcon(formData.vehicleType);
   const inputBase = "w-full p-3 text-base font-medium text-white bg-[#1a1a1a] border-2 border-white/10 rounded-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all duration-200";
 
@@ -43,11 +43,11 @@ const AddVehicleModal = ({ onClose, onSubmit }) => {
       onClick={onClose}
     >
       <div
-        // --- 3. THEME FIX: Changed modal container to dark theme ---
+        
         className="bg-[#141414] rounded-2xl shadow-2xl border border-white/10 w-full max-w-3xl max-h-[90vh] overflow-y-auto no-scrollbar relative"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* --- 4. THEME FIX: Header and close button --- */}
+        {}
         <div className="p-8 bg-gradient-to-r from-[#181818] to-[#151515] relative border-b border-white/10">
           <button
             type="button"
@@ -74,12 +74,12 @@ const AddVehicleModal = ({ onClose, onSubmit }) => {
             </p>
           </div>
         </div>
-        {/* --- END OF THEME FIX --- */}
+        {}
 
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Vehicle Type */}
-            {/* --- 5. THEME FIX: Form group styling --- */}
+            {}
+            {}
             <div className="group bg-[#1b1b1b] p-4 rounded-xl border border-white/10 hover:shadow-md transition-all duration-200 hover:border-white/20">
               <label className="block text-xs font-semibold text-white/50 uppercase tracking-wide mb-2 group-hover:text-white/70">
                 Vehicle Type <span className="text-red-500">*</span>
@@ -87,7 +87,7 @@ const AddVehicleModal = ({ onClose, onSubmit }) => {
               <select
                 className={inputBase}
                 required
-                name="vehicleType" // camelCase
+                name="vehicleType" 
                 value={formData.vehicleType}
                 onChange={handleChange}
               >
@@ -98,9 +98,9 @@ const AddVehicleModal = ({ onClose, onSubmit }) => {
                 <option value="SUV">SUV</option>
               </select>
             </div>
-            {/* --- END OF THEME FIX --- */}
+            {}
 
-            {/* Required Fields */}
+            {}
             {[
               { label: "RC Number", name: "registrationNumber", required: true },
               { label: "PUC Number", name: "pucNumber", required: true },
@@ -120,7 +120,7 @@ const AddVehicleModal = ({ onClose, onSubmit }) => {
                 </label>
                 <input
                   type={type}
-                  name={name} // camelCase
+                  name={name} 
                   value={formData[name]}
                   onChange={handleChange}
                   required={required}
@@ -130,7 +130,7 @@ const AddVehicleModal = ({ onClose, onSubmit }) => {
             ))}
           </div>
 
-          {/* --- 6. THEME FIX: Note box --- */}
+          {}
           <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
             <p className="text-sm text-blue-300">
               <strong>Note:</strong> Document uploads will be added in the next version. 
@@ -138,7 +138,7 @@ const AddVehicleModal = ({ onClose, onSubmit }) => {
             </p>
           </div>
 
-          {/* --- 7. THEME FIX: Buttons --- */}
+          {}
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
@@ -155,7 +155,7 @@ const AddVehicleModal = ({ onClose, onSubmit }) => {
               <span>Add Vehicle</span>
             </button>
           </div>
-          {/* --- END OF THEME FIX --- */}
+          {}
 
         </form>
       </div>

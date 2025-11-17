@@ -30,7 +30,7 @@ const VehicleCard = ({ vehicle, onClick }) => {
   const pucOk = asBool(vehicle?.pucVerified);
   const insOk = asBool(vehicle?.insuranceVerified);
 
-  // DRY helpers
+  
   const verifs = [
     { abbr: "RC", ok: rcOk, dotTitle: "RC" },
     { abbr: "PUC", ok: pucOk, dotTitle: "PUC" },
@@ -50,7 +50,7 @@ const VehicleCard = ({ vehicle, onClick }) => {
       onClick={() => onClick(vehicle)}
       className="group relative bg-[#141414] rounded-2xl p-6 border border-white/10 hover:border-white/20 hover:bg-[#181818] transition-all duration-300 cursor-pointer overflow-hidden"
     >
-      {/* subtle highlight */}
+      {}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl transition-opacity" />
 
       <div className="relative z-10 flex items-start justify-between mb-6 gap-4">

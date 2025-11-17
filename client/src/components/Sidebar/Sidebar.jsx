@@ -60,12 +60,12 @@ const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
 
   return (
     <div className="font-sans flex flex-col md:flex-row h-[100vh] bg-[#0f0f0f]">
-      {/* Sidebar */}
+      {}
       <aside
         className={`flex flex-col h-[100vh] bg-gradient-to-b from-[#0a0a0a] to-[#0c0c0c] shadow-2xl shadow-black/40 fixed md:static inset-y-0 left-0 z-50 transition-all duration-300 ease-in-out rounded-r-3xl 
            ${!openSidebar && "hidden md:flex"}`}
       >
-        {/* Top Section */}
+        {}
         <div className="p-6 flex items-center justify-between">
           <div className="flex items-center space-x-3 overflow-hidden">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white text-black rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
@@ -81,7 +81,7 @@ const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
           </div>
         </div>
 
-        {/* Nav */}
+        {}
         <div className="flex-1 overflow-y-auto px-4 pb-4">
           <nav className="py-4">
             <ul className="space-y-3">
@@ -119,7 +119,7 @@ const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
           </nav>
         </div>
 
-        {/* Logout */}
+        {}
         <div className="p-4 mt-auto">
           <button
             onClick={handleLogout}
@@ -137,7 +137,7 @@ const Sidebar = ({ children, activeSection, setActiveSection, navItems }) => {
         </div>
       </aside>
 
-      {/* Main Content */}
+      {}
       <main className="bg-[#151212] flex-1 p-4 md:p-6 overflow-y-auto">
         <div className="md:hidden flex justify-between items-center mb-4">
           <h1 className="text-xl font-semibold text-white">Nomad Cabs</h1>

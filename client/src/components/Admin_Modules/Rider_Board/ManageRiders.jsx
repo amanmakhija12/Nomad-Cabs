@@ -33,18 +33,18 @@ const ManageRiders = () => {
     const fetchRiders = async () => {
       setLoading(true);
       try {
-        // Build query params
+        
         const params = {
           page: currentPage - 1,
           size: 10,
           role: "RIDER",
           
-          // Add search filters only if searchTerm exists
+          
           filterType: debouncedSearchTerm ? filterType : null,
           searchTerm: debouncedSearchTerm ? debouncedSearchTerm : null,
         };
 
-        // Call your admin service with the filters
+        
         const data = await riderService.getAllRiders(params); 
 
         setRiders(data.content);
@@ -62,7 +62,7 @@ const ManageRiders = () => {
     
     fetchRiders();
     
-    // This hook re-runs whenever the user stops typing, changes filter, or changes page
+    
   }, [currentPage, debouncedSearchTerm, filterType]);
 
   useEffect(() => {
@@ -81,7 +81,7 @@ const ManageRiders = () => {
 
   return (
     <div className="p-6 flex flex-col min-h-[500px] pb-10 bg-[#151212] text-white rounded-3xl">
-      {/* Header */}
+      {}
       <div className="mb-10">
         <h1 className="text-3xl md:text-4xl font-semibold tracking-tight mb-3">
           Rider Management
@@ -91,7 +91,7 @@ const ManageRiders = () => {
         </p>
       </div>
 
-      {/* Filters */}
+      {}
       <div className="bg-[#141414] border border-white/10 rounded-2xl p-6 mb-8 shadow-lg">
         <div className="flex flex-wrap gap-6">
           <div className="flex flex-col min-w-[160px]">
@@ -138,7 +138,7 @@ const ManageRiders = () => {
         </div>
       </div>
 
-      {/* List */}
+      {}
       <ul className="space-y-4 flex-grow">
         {loading && (
           <li className="flex items-center justify-center h-40">
@@ -216,7 +216,7 @@ const ManageRiders = () => {
         ))}
       </ul>
 
-      {/* Pagination */}
+      {}
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages || 1}

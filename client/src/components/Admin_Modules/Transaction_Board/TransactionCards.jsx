@@ -57,7 +57,6 @@ const TransactionCards = ({ transaction, onClose }) => {
   if (!transaction) return null;
   const stop = (e) => e.stopPropagation();
 
-  // Your badge functions are perfect, I'm just adapting the colors
   const getStatusBadge = (status) => {
     const statusClasses = {
       COMPLETED: "bg-emerald-900/40 text-emerald-300 border-emerald-700",
@@ -89,7 +88,6 @@ const TransactionCards = ({ transaction, onClose }) => {
         onClick={stop}
       >
         <div className="p-8 bg-gradient-to-r from-[#181818] via-[#151515] to-[#141414] rounded-t-2xl border-b border-white/10 relative">
-          {/* Close Button */}
           <button
             type="button"
             aria-label="Close"
@@ -99,7 +97,6 @@ const TransactionCards = ({ transaction, onClose }) => {
             <X className="w-5 h-5" />
           </button>
 
-          {/* Header */}
           <div className="text-center mb-8">
             <div className="w-20 h-20 bg-gradient-to-r from-red-600 to-red-700 rounded-full mb-4 mx-auto shadow-sm flex items-center justify-center">
               <span className="text-3xl text-white font-bold">📄</span>
@@ -111,33 +108,46 @@ const TransactionCards = ({ transaction, onClose }) => {
               {transaction.bookingId}
             </p>
             <div className="mt-4">
-              <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadge("COMPLETED")}`}>COMPLETED</span>
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadge(
+                  "COMPLETED"
+                )}`}
+              >
+                COMPLETED
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Body */}
         <div className="p-6 space-y-10">
-
-          {/* Main Info Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Column 1 */}
             <InfoPanel title="User Details">
               <InfoRow label="Rider" value={transaction.riderName} />
-              <InfoRow label="Rider Phone" value={transaction.riderPhone} mono />
+              <InfoRow
+                label="Rider Phone"
+                value={transaction.riderPhone}
+                mono
+              />
               <InfoRow label="Driver" value={transaction.driverName} />
-              <InfoRow label="Driver Phone" value={transaction.driverPhone} mono />
+              <InfoRow
+                label="Driver Phone"
+                value={transaction.driverPhone}
+                mono
+              />
             </InfoPanel>
-            
-            {/* Column 2 */}
+
             <InfoPanel title="Trip Details">
               <InfoRow label="Pickup" value={transaction.pickupAddress} />
               <InfoRow label="Dropoff" value={transaction.dropoffAddress} />
-              <InfoRow label="Created At" value={formatDateSafe(transaction.timestamp, { variant: "datetime" })} />
+              <InfoRow
+                label="Created At"
+                value={formatDateSafe(transaction.timestamp, {
+                  variant: "datetime",
+                })}
+              />
             </InfoPanel>
           </div>
 
-          {/* Fare Breakdown */}
           <div className="bg-[#1f1f1f] rounded-xl border border-white/10 p-6">
             <h3 className="text-lg font-semibold text-white mb-4">
               Fare Breakdown
@@ -149,31 +159,49 @@ const TransactionCards = ({ transaction, onClose }) => {
               {transaction.discount > 0 && (
                 <FareRow label="Discount" value={-transaction.discount} />
               )}
-              <FareRow label="Total Fare" value={transaction.totalFare} isTotal />
-              <FareRow label="Commission Fee" value={transaction.commissionFee} />
-              <FareRow label="Driver Payout" value={transaction.totalFare - transaction.commissionFee} isTotal />
+              <FareRow
+                label="Total Fare"
+                value={transaction.totalFare}
+                isTotal
+              />
+              <FareRow
+                label="Commission Fee"
+                value={transaction.commissionFee}
+              />
+              <FareRow
+                label="Driver Payout"
+                value={transaction.totalFare - transaction.commissionFee}
+                isTotal
+              />
             </div>
           </div>
 
-          {/* Payment Status */}
           <div className="text-center">
-            <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border ${getPaymentBadge("SUCCESSFUL")}`}>SUCCESSFUL</span>
+            <span
+              className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border ${getPaymentBadge(
+                "SUCCESSFUL"
+              )}`}
+            >
+              SUCCESSFUL
+            </span>
           </div>
-
         </div>
       </div>
     </div>
   );
 };
 
-// Re-styled helper component for fare rows
 const FareRow = ({ label, value, isTotal = false }) => (
-  <div className={`flex justify-between items-center py-2 ${
-    isTotal ? 'text-lg font-bold border-t border-white/10 pt-3 mt-2' : 'text-sm'
-  }`}>
-    <span className={isTotal ? 'text-white' : 'text-white/60'}>{label}</span>
-    <span className={isTotal ? 'text-white' : 'text-white/90'}>
-      {value < 0 ? '-' : ''}₹{Math.abs(value || 0).toFixed(2)}
+  <div
+    className={`flex justify-between items-center py-2 ${
+      isTotal
+        ? "text-lg font-bold border-t border-white/10 pt-3 mt-2"
+        : "text-sm"
+    }`}
+  >
+    <span className={isTotal ? "text-white" : "text-white/60"}>{label}</span>
+    <span className={isTotal ? "text-white" : "text-white/90"}>
+      {value < 0 ? "-" : ""}₹{Math.abs(value || 0).toFixed(2)}
     </span>
   </div>
 );

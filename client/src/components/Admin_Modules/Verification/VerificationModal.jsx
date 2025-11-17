@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { X, Check, ShieldCheck, ShieldAlert, CheckCircle2 } from "lucide-react";
-// Make sure this path is correct for your project structure
+
 import { driverService, vehicleService } from "../../../services/adminService";
 
-// Reusable spinner
+
 const Spinner = () => <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />;
 
-// Gets a simple status icon and text
+
 const getStatusDisplay = (isVerified) => {
   if (isVerified) {
     return (
@@ -25,21 +25,21 @@ const getStatusDisplay = (isVerified) => {
   );
 };
 
-// 1. SIMPLIFIED ROW (for Driver docs)
-// This component now only handles a single approval action
+
+
 const VerificationRow = ({ label, value, isVerified, onApprove, loading }) => {
   return (
     <tr className="border-t border-white/5">
-      {/* Document Info */}
+      {}
       <td className="px-5 py-4 align-top">
         <div className="text-white/85 font-medium">{label}</div>
         <div className="text-white/40 text-[11px] mt-1 truncate max-w-xs">{value || "Not Submitted"}</div>
       </td>
       
-      {/* Status */}
+      {}
       <td className="px-5 py-4 align-top">{getStatusDisplay(isVerified)}</td>
       
-      {/* Actions */}
+      {}
       <td className="px-5 py-4 align-top">
         {!isVerified && (
           <div className="flex gap-2">
@@ -64,8 +64,8 @@ const VerificationRow = ({ label, value, isVerified, onApprove, loading }) => {
 };
 
 
-// 2. NEW VEHICLE CARD
-// This component displays vehicle info and has ONE approve button
+
+
 const VehicleVerificationCard = ({ vehicle, onApprove, loading }) => {
   
   const StatusBadge = ({ label, isVerified, value }) => (
@@ -86,19 +86,19 @@ const VehicleVerificationCard = ({ vehicle, onApprove, loading }) => {
 
   return (
     <div className="bg-[#1f1f1f] rounded-xl border border-white/10 overflow-hidden">
-      {/* Header */}
+      {}
       <h4 className="text-md font-semibold text-white p-4 bg-black/20">
         {vehicle.registrationNumber} ({vehicle.vehicleType})
       </h4>
       
-      {/* Document Statuses */}
+      {}
       <div className="p-4 grid grid-cols-3 gap-4 border-b border-white/10">
         <StatusBadge label="RC" isVerified={vehicle.rcVerified} value={vehicle.registrationNumber} />
         <StatusBadge label="PUC" isVerified={vehicle.pucVerified} value={vehicle.pucNumber} />
         <StatusBadge label="Insurance" isVerified={vehicle.insuranceVerified} value={vehicle.insurancePolicyNumber} />
       </div>
 
-      {/* Action Footer */}
+      {}
       <div className="p-4 bg-black/10">
         {vehicle.isVerified ? (
           <div className="flex items-center gap-2 text-green-300">
@@ -131,10 +131,10 @@ const VehicleVerificationCard = ({ vehicle, onApprove, loading }) => {
 };
 
 
-// 3. MAIN MODAL
-// Updated to use the new components and simplified logic
+
+
 export const VerificationModal = ({ driver, onClose, onRefresh }) => {
-  const [saving, setSaving] = useState(null); // Tracks "type-id-action"
+  const [saving, setSaving] = useState(null); 
   const [vehicles, setVehicles] = useState([]);
   const [vehicleLoading, setVehicleLoading] = useState(true);
 
@@ -156,7 +156,7 @@ export const VerificationModal = ({ driver, onClose, onRefresh }) => {
     fetchVehicles();
   }, [fetchVehicles]);
 
-  // Simplified handler
+  
   const handleDriverVerify = async (docType) => {
     if((docType === "AADHAAR" && !driver.aadharNumber) || (docType === "LICENSE" && !driver.licenseNumber)) {
       toast.error(`Cannot approve unsubmitted document`);
@@ -165,7 +165,7 @@ export const VerificationModal = ({ driver, onClose, onRefresh }) => {
     const savingKey = `driver-${docType}-approve`;
     setSaving(savingKey);
     try {
-      await driverService.verifyDriverDoc(driver.driverId, docType, true); // Always true
+      await driverService.verifyDriverDoc(driver.driverId, docType, true); 
       toast.success(`Driver ${docType} approved`);
       onRefresh(); 
     } catch (error) {
@@ -175,15 +175,15 @@ export const VerificationModal = ({ driver, onClose, onRefresh }) => {
     }
   };
 
-  // Simplified handler
+  
   const handleVehicleVerify = async (vehicleId) => {
     const savingKey = `vehicle-${vehicleId}-approve`;
     setSaving(savingKey);
     try {
-      // This is the single API call you mentioned
+      
       await vehicleService.verifyVehicle(vehicleId); 
       toast.success(`Vehicle approved`);
-      fetchVehicles(); // Refetch vehicles for this modal
+      fetchVehicles(); 
     } catch (error) {
       toast.error(error.message || "Failed to update status");
     } finally {
@@ -194,7 +194,7 @@ export const VerificationModal = ({ driver, onClose, onRefresh }) => {
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-[#141414] rounded-2xl border border-white/10 shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
-        {/* Modal Header */}
+        {}
         <div className="flex justify-between items-center p-6 border-b border-white/10">
           <div>
             <h2 className="text-xl font-semibold text-white">Verification Details</h2>
@@ -205,10 +205,10 @@ export const VerificationModal = ({ driver, onClose, onRefresh }) => {
           </button>
         </div>
 
-        {/* Modal Content (Scrollable) */}
+        {}
         <div className="p-8 space-y-8 overflow-y-auto">
           
-          {/* Driver Documents */}
+          {}
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Driver Documents</h3>
             <table className="w-full text-sm">
@@ -238,7 +238,7 @@ export const VerificationModal = ({ driver, onClose, onRefresh }) => {
             </table>
           </div>
 
-          {/* Vehicle Documents */}
+          {}
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Vehicle Documents</h3>
             {vehicleLoading ? (

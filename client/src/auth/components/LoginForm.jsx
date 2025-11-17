@@ -7,7 +7,6 @@ const LoginForm = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const { setUser, setToken } = useAuthStore();
   const [loading, setLoading] = useState(false);
-
   const validate = () => {
     if (!formData.email.trim() || !formData.password.trim()) {
       toast.error("Email and password required", { theme: "dark" });
@@ -20,11 +19,9 @@ const LoginForm = () => {
     }
     return true;
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-
     try {
       setLoading(true);
 
@@ -47,11 +44,9 @@ const LoginForm = () => {
 
         setUser(user);
       });
-
       toast.success("Login successful", { theme: "dark" });
     } catch (err) {
       console.error("Login error:", err);
-      // This will show the "Invalid credentials" message from your Spring backend
       const errorMessage =
         err.response?.data || "Login failed. Please check your credentials.";
       toast.error(errorMessage, { theme: "dark" });
@@ -59,11 +54,9 @@ const LoginForm = () => {
       setLoading(false);
     }
   };
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
   return (
     <form
       className="flex gap-3 flex-col mt-5 min-w-100"

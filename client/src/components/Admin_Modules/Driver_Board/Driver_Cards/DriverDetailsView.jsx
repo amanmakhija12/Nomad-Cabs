@@ -27,24 +27,20 @@ const DriverDetailsView = ({
 
   const staticFieldsRight = [
     { label: "Email", value: Driver?.email || "—", isBadge: false },
-    { label: "Created At", value: formatDateSafe(Driver?.createdAt) || "—", isBadge: false },
-    { label: "Updated At", value: formatDateSafe(Driver?.updatedAt) || "—", isBadge: false },
-  ];
-
-  const docs = [
-    { label: "PAN", value: Driver.panCard },
     { label: "Aadhaar", value: Driver.aadharNumber },
     {
       label: "DL No. (Expiry)",
       value: `${Driver.licenseNumber || "—"} ${
-        Driver.driverLicenseExpiry ? `(${formatDateSafe(Driver.driverLicenseExpiry)})` : ""
+        Driver.driverLicenseExpiry
+          ? `(${formatDateSafe(Driver.driverLicenseExpiry)})`
+          : ""
       }`,
     },
   ];
 
   return (
     <>
-      {/* Header */}
+      {}
       <div className="p-8 bg-gradient-to-b from-[#181818] via-[#151515] to-[#141414] rounded-t-2xl border-b border-white/10 relative">
         <button
           type="button"
@@ -133,10 +129,10 @@ const DriverDetailsView = ({
         </div>
       </div>
 
-      {/* Content */}
+      {}
       <div className="p-8 space-y-10">
         <div className="grid md:grid-cols-3 gap-6">
-          {/* Status panel */}
+          {}
           <div className={panelBase}>
             <p className="text-[11px] uppercase tracking-wider text-white/40">
               Status
@@ -182,7 +178,6 @@ const DriverDetailsView = ({
             ))}
           </div>
 
-      
           <div className="space-y-6">
             {staticFieldsRight.map((f) => (
               <div className={panelBase} key={f.label}>
@@ -201,19 +196,6 @@ const DriverDetailsView = ({
               </div>
             ))}
           </div>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {docs.map((d) => (
-            <div className={panelBase} key={d.label}>
-              <p className="text-[11px] uppercase tracking-wider text-white/40">
-                {d.label}
-              </p>
-              <div className="text-white/90 text-sm font-medium break-words">
-                {d.value || "—"}
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </>

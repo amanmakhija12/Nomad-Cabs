@@ -29,7 +29,7 @@ const Bookings = () => {
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  // Fetch bookings from backend
+  
   useEffect(() => {
     const fetchBookings = async () => {
       try {
@@ -118,9 +118,9 @@ const Bookings = () => {
       </ul>
 
       <Pagination
-        currentPage={currentPage + 1} // Display as 1-based
+        currentPage={currentPage + 1} 
         totalPages={bookingsData.totalPages || 1}
-        onPageChange={(page) => setCurrentPage(page - 1)} // Convert to 0-based
+        onPageChange={(page) => setCurrentPage(page - 1)} 
         position="relative"
         variant="dark"
       />

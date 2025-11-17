@@ -23,7 +23,7 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
     if (!Driver?.userId) return;
     try {
       
-      // Update status if changed
+      
       if (formData.status) {
         await userService.updateUserStatus(Driver.userId, formData.status.toUpperCase());
       }
@@ -91,7 +91,7 @@ const DriverCards = ({ Driver, onClose, onRefresh }) => {
     if (!ok) return;
     
     try {
-      // Delete user (which will cascade delete driver)
+      
       await userService.deleteUser(Driver.userId);
       toast.success("Driver deleted", { theme: "dark", transition: Bounce });
       onRefresh && onRefresh();

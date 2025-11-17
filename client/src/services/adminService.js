@@ -1,8 +1,8 @@
-import api from "../utils/api"; // This is: http://localhost:8080/api/v1
+import api from "../utils/api"; 
 
-// ============================================
-// USER & RIDER MANAGEMENT
-// ============================================
+
+
+
 export const riderService = {
   async getAllRiders(filters = {}) {
     const params = new URLSearchParams();
@@ -23,9 +23,9 @@ export const riderService = {
   },
 };
 
-// ============================================
-// DRIVER MANAGEMENT
-// ============================================
+
+
+
 export const driverService = {
   async getAllDrivers(filters = {}) {
     const params = new URLSearchParams();
@@ -48,21 +48,21 @@ export const driverService = {
     return response.data;
   },
   async verifyDriverDoc(driverId, docType, approved) {
-    // docType must be "AADHAAR", or "LICENSE"
+    
     if (approved) {
       const response = await api.post(
         `/drivers/admin/approve/${driverId}/${docType.toUpperCase()}`
       );
       return response.data;
     }
-    // We would need a /reject endpoint if 'approved' is false
+    
     return null;
   },
 };
 
-// ============================================
-// VEHICLE MANAGEMENT
-// ============================================
+
+
+
 export const vehicleService = {
   async getVehiclesByDriver(driverId) {
     const response = await api.get(`/admin/drivers/${driverId}/vehicles`);
@@ -74,9 +74,9 @@ export const vehicleService = {
   },
 };
 
-// ============================================
-// BOOKING MANAGEMENT
-// ============================================
+
+
+
 export const bookingService = {
   async getAllBookings(page = 0, size = 10) {
     const response = await api.get(
@@ -90,9 +90,9 @@ export const bookingService = {
   },
 };
 
-// ============================================
-// USER MANAGEMENT (Generic)
-// ============================================
+
+
+
 export const userService = {
   async getUserById(userId) {
     const response = await api.get(`/users/admin/${userId}`);
@@ -114,9 +114,9 @@ export const userService = {
   },
 };
 
-// ============================================
-// FARE
-// ============================================
+
+
+
 export const fareConfigService = {
   async getAllFares() {
     const response = await api.get("/admin/fares");
@@ -136,9 +136,9 @@ export const fareConfigService = {
   },
 };
 
-// ============================================
-// TRANSACTION MANAGEMENT
-// ============================================
+
+
+
 export const transactionService = {
   async fetchTransactions(filters = {}) {
     const params = new URLSearchParams(filters);
@@ -147,13 +147,13 @@ export const transactionService = {
   },
 };
 
-// ============================================
-// DASHBOARD
-// ============================================
+
+
+
 export const adminStatsService = {
   async getPlatformStats() {
     const response = await api.get("/admin/dashboard");
     return response.data;
   },
-  // ... (other stats calls are now part of the main dashboard call) ...
+  
 };

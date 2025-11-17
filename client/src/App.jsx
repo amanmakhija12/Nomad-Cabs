@@ -21,7 +21,7 @@ const ProtectedRoute = ({ children, roles }) => {
     return <Navigate to="/auth" replace />;
   }
   
-  // Case-insensitive role check
+  
   const userRole = user.role?.toUpperCase();
   const allowedRoles = roles?.map(r => r.toUpperCase());
   

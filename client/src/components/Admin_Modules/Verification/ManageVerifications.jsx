@@ -17,7 +17,7 @@ const ManageVerifications = () => {
       setLoading(true);
       const params = { page, size: 10 };
       
-      // Use the correct service call
+      
       const response = await driverService.getVerificationQueue(params);
       
       setDrivers(response.content || []);
@@ -26,7 +26,7 @@ const ManageVerifications = () => {
         totalPages: response.totalPages,
         totalElements: response.totalElements,
       });
-      return response.content || []; // Return the new list
+      return response.content || []; 
     } catch (error) {
       console.error("Error fetching verification queue:", error);
       toast.error(error.message || "Failed to fetch data");
@@ -60,7 +60,7 @@ const ManageVerifications = () => {
 
   return (
     <div className="p-6 space-y-10 pb-24 text-white rounded-2xl min-h-full">
-      {/* Header */}
+      {}
       <div className="bg-gradient-to-r from-[#181818] via-[#151515] to-[#121212] rounded-2xl p-8 border border-white/10 shadow-lg">
         <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-white">
           Verification Center
@@ -70,7 +70,7 @@ const ManageVerifications = () => {
         </p>
       </div>
 
-      {/* Driver List */}
+      {}
       <div className="bg-[#141414] rounded-2xl border border-white/10 p-8 shadow-lg">
         <h2 className="text-2xl font-semibold tracking-tight text-white mb-8">
           Pending Verification Queue ( {drivers.length} )
@@ -98,7 +98,7 @@ const ManageVerifications = () => {
         variant="dark"
       />
 
-      {/* The Modal */}
+      {}
       {selectedDriver && (
         <VerificationModal
           driver={selectedDriver}
@@ -110,9 +110,9 @@ const ManageVerifications = () => {
   );
 };
 
-// --- Child Component: DriverRow ---
+
 const DriverRow = ({ driver, onClick }) => {
-  // Check for any unverified doc
+  
   const hasPendingDocs = !driver.isAadhaarVerified || 
                          !driver.isDriverLicenseVerified;
   return (

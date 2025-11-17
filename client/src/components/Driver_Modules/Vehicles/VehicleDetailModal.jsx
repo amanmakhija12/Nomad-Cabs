@@ -8,7 +8,7 @@ const VehicleDetailModal = ({ vehicle, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-[#141414] rounded-2xl shadow-2xl border border-white/10 w-full max-w-3xl max-h-[90vh] overflow-y-auto no-scrollbar relative">
-        {/* Header */}
+        {}
         <div className="relative bg-gradient-to-r from-[#181818] via-[#151515] to-[#121212] p-6 rounded-t-2xl border-b border-white/10">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
@@ -35,9 +35,9 @@ const VehicleDetailModal = ({ vehicle, onClose }) => {
           </div>
         </div>
 
-        {/* Body */}
+        {}
         <div className="p-6 space-y-10">
-          {/* Verification */}
+          {}
           <div>
             <h3 className="text-sm font-semibold tracking-wide text-white/70 uppercase mb-5 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
@@ -59,7 +59,7 @@ const VehicleDetailModal = ({ vehicle, onClose }) => {
             </div>
           </div>
 
-          {/* Info Grid */}
+          {}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <InfoPanel title="Vehicle Information">
               <InfoRow label="Vehicle Type" value={vehicle.vehicleType} cap />

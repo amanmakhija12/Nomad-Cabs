@@ -5,7 +5,7 @@ import VehicleDetailModal from "./VehicleDetailModal";
 import { getVehicleIcon } from "./Vehicles";
 import { PlusCircle } from 'lucide-react';
 import AddVehicleModal from "./AddVehicleModal";
-import { vehicleService } from "../../../services/vehicleService"; // ✅ Import from your service
+import { vehicleService } from "../../../services/vehicleService"; 
 
 const VehicleCards = () => {
   const [vehicles, setVehicles] = useState([]);
@@ -32,10 +32,10 @@ const VehicleCards = () => {
     }
   }, []);
 
-  // ✅ Add vehicle using your service
+  
   const addVehicle = async (vehicleData) => {
     try {
-      // ✅ Use your existing service
+      
       const response = await vehicleService.addVehicle(vehicleData);
       toast.success("Vehicle added successfully!", {
         theme: "dark",
@@ -166,7 +166,7 @@ const VehicleCards = () => {
               );
             })}
           </div>
-          {/* Add Vehicle Button */}
+          {}
           <div className="absolute bottom-8 right-8">
             <button
               className="group bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold text-base
@@ -201,7 +201,7 @@ const VehicleCards = () => {
   );
 };
 
-// Helper components (keep as is)
+
 const Row = ({ label, value }) => (
   <div className="flex items-center justify-between">
     <span className="text-gray-500 text-[11px] uppercase tracking-wide">

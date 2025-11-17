@@ -4,7 +4,7 @@ import { bookingService, driverBookingService } from '../services/bookingService
 
 export const useActiveRideCheck = () => {
   const user = useAuthStore((state) => state.user);
-  // This state now holds the booking object or null
+  
   const [booking, setBooking] = useState(null); 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -25,9 +25,9 @@ export const useActiveRideCheck = () => {
         }
 
         if (isMounted && response && response.data) {
-          setBooking(response.data); // <-- Set the booking object
+          setBooking(response.data); 
         } else if (isMounted) {
-          setBooking(null); // <-- Explicitly set to null
+          setBooking(null); 
         }
         
       } catch (error) {
@@ -35,7 +35,7 @@ export const useActiveRideCheck = () => {
           if (error.response?.status !== 404) {
             console.error("Error checking for active ride:", error);
           }
-          setBooking(null); // <-- Set to null on 404 or other errors
+          setBooking(null); 
         }
       } finally {
         if (isMounted) {
@@ -51,6 +51,6 @@ export const useActiveRideCheck = () => {
     };
   }, [user]);
 
-  // Return the booking and a loading state
+  
   return { booking, isLoading }; 
 };

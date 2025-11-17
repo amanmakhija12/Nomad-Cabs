@@ -2,14 +2,14 @@ import { ArrowRight, Car } from "lucide-react";
 
 const ActiveRideBanner = ({ setActiveSection }) => {
   const handleClick = () => {
-    // Navigate to the 'bookCab' section, which handles the active ride view
+    
     setActiveSection();
   };
 
   return (
     <button
       onClick={handleClick}
-      // Fixed at the bottom, z-40 so it's below the z-50 BookingCards modal
+      
       className="fixed bottom-0 left-0 right-0 z-40 w-full bg-[#1f1f1f] border-t border-white/10 shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.3)] p-4 cursor-pointer hover:bg-[#2a2a2a] transition-colors"
     >
       <div className="max-w-screen-md mx-auto flex items-center justify-between">

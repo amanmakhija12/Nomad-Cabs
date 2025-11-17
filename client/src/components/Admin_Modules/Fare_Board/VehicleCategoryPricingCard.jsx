@@ -2,14 +2,14 @@ import { useState } from "react";
 import { toast, Bounce } from "react-toastify";
 import { Save, X, Edit, Plus, Trash2 } from "lucide-react";
 
-// Vehicle categories constraint
+
 const VEHICLE_CATEGORIES = ["BIKE", "AUTO", "SEDAN", "SUV"];
 
-// Default state for a new fare config
+
 const DEFAULT_NEW_FARE = {
   city: "",
   state: "",
-  vehicleType: VEHICLE_CATEGORIES[0], // Default to first category
+  vehicleType: VEHICLE_CATEGORIES[0], 
   baseFare: 0,
   ratePerKm: 0,
 };
@@ -26,11 +26,11 @@ const VehicleCategoryPricingCard = ({
   const inputBase =
     "h-11 w-full rounded-lg bg-[#1b1b1b] border border-white/10 text-sm px-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-white/15";
 
-  // --- Edit Handlers ---
+  
 
   const handleFareConfigEdit = (fare) => {
     setEditingFareConfig({ ...fare });
-    setIsAdding(false); // Close "add" row if open
+    setIsAdding(false); 
   };
 
   const handleFareConfigSave = async () => {
@@ -62,12 +62,12 @@ const VehicleCategoryPricingCard = ({
     setEditingFareConfig(null);
   };
 
-  // --- Add New Handlers ---
+  
 
   const handleAddNewToggle = () => {
     setIsAdding(true);
     setNewFareConfig(DEFAULT_NEW_FARE);
-    setEditingFareConfig(null); // Close "edit" row if open
+    setEditingFareConfig(null); 
   };
 
   const handleAddNewCancel = () => {
@@ -92,7 +92,7 @@ const VehicleCategoryPricingCard = ({
     }
   };
 
-  // --- Delete Handler ---
+  
 
   const handleDeleteFare = async (fareId) => {
     if (!window.confirm("Are you sure you want to delete this fare?")) {
@@ -114,7 +114,7 @@ const VehicleCategoryPricingCard = ({
     }
   };
 
-  // --- Input Change Handlers ---
+  
 
   const handleEditChange = (e) => {
     const { name, value } = e.target;
@@ -174,7 +174,7 @@ const VehicleCategoryPricingCard = ({
           <tbody>
             {fareConfigs.map((fareConfig) =>
               editingFareConfig?.id === fareConfig.id ? (
-                // --- Editing Row ---
+                
                 <tr
                   key={fareConfig.id}
                   className="border-t border-white/5 bg-white/5"
@@ -249,7 +249,7 @@ const VehicleCategoryPricingCard = ({
                   </td>
                 </tr>
               ) : (
-                // --- Display Row ---
+                
                 <tr
                   key={fareConfig.id}
                   className="border-t border-white/5 hover:bg-white/5 transition"
@@ -299,7 +299,7 @@ const VehicleCategoryPricingCard = ({
               )
             )}
           </tbody>
-          {/* --- Add New Row --- */}
+          {}
           {isAdding && (
             <tfoot className="border-t-2 border-white/10">
               <tr className="bg-white/5">

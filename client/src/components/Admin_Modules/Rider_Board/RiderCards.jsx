@@ -2,7 +2,18 @@ import { useState } from "react";
 import { formatDateSafe } from "../../../utils/DateUtil";
 import { toast, Bounce } from "react-toastify";
 import { riderService, userService } from "../../../services/adminService";
-import { X, Mail, Phone, MapPin, Shield, Pencil, Save, Trash2, CalendarClock, UserCheck } from "lucide-react";
+import {
+  X,
+  Mail,
+  Phone,
+  MapPin,
+  Shield,
+  Pencil,
+  Save,
+  Trash2,
+  CalendarClock,
+  UserCheck,
+} from "lucide-react";
 
 const RiderCards = ({ rider, onClose, onRefresh }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -17,17 +28,25 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
 
   const handleUpdate = async () => {
     try {
-      // Update status separately if changed
       if (formData.status) {
-        await userService.updateUserStatus(rider.id, formData.status.toUpperCase());
+        await userService.updateUserStatus(
+          rider.id,
+          formData.status.toUpperCase()
+        );
       }
 
-      toast.success("Rider updated successfully", { transition: Bounce, theme: "dark" });
+      toast.success("Rider updated successfully", {
+        transition: Bounce,
+        theme: "dark",
+      });
       setIsEditing(false);
       onRefresh && onRefresh();
     } catch (e) {
       console.error(e);
-      toast.error("Error updating rider", { transition: Bounce, theme: "dark" });
+      toast.error("Error updating rider", {
+        transition: Bounce,
+        theme: "dark",
+      });
     }
   };
 
@@ -84,12 +103,18 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
     }
     try {
       await riderService.deleteRider(rider.id);
-      toast.success("Rider deleted successfully", { transition: Bounce, theme: "dark" });
+      toast.success("Rider deleted successfully", {
+        transition: Bounce,
+        theme: "dark",
+      });
       onRefresh && onRefresh();
       onClose();
     } catch (e) {
       console.error(e);
-      toast.error("Error deleting rider", { transition: Bounce, theme: "dark" });
+      toast.error("Error deleting rider", {
+        transition: Bounce,
+        theme: "dark",
+      });
     } finally {
       setIsDeleting(false);
     }
@@ -149,16 +174,6 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
       }),
       icon: <CalendarClock className="w-4 h-4 text-white/40" />,
     },
-    {
-      label: "Updated At",
-      value: formatDateSafe(rider.updatedAt, {
-        locale: "en-IN",
-        timeZone: "Asia/Kolkata",
-        variant: "datetime",
-        fallback: "—",
-      }),
-      icon: <CalendarClock className="w-4 h-4 text-white/40" />,
-    },
   ];
 
   return (
@@ -170,7 +185,7 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
         className="bg-[#141414] rounded-2xl shadow-2xl border border-white/10 w-full max-w-4xl max-h-[90vh] overflow-y-auto no-scrollbar relative"
         onClick={stop}
       >
-        {/* Header */}
+        {}
         <div className="relative bg-gradient-to-r from-[#181818] via-[#151515] to-[#121212] p-8 rounded-t-2xl border-b border-white/10">
           <button
             aria-label="Close"
@@ -236,16 +251,17 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
                   disabled={isDeleting}
                   className="h-11 px-6 rounded-xl bg-red-600 text-white text-sm font-medium flex items-center gap-2 shadow hover:bg-red-700 transition disabled:opacity-40"
                 >
-                  <Trash2 className="w-4 h-4" /> {isDeleting ? "Deleting…" : "Delete"}
+                  <Trash2 className="w-4 h-4" />{" "}
+                  {isDeleting ? "Deleting…" : "Delete"}
                 </button>
               )}
             </div>
           </div>
         </div>
 
-        {/* Content */}
+        {}
         <div className="p-8 space-y-10">
-          {/* Status panel */}
+          {}
           <div className="grid md:grid-cols-3 gap-6">
             <div className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5 flex flex-col gap-2">
               <p className="text-[11px] uppercase tracking-wider text-white/40 flex items-center gap-2">
@@ -254,7 +270,9 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
               {isEditing ? (
                 <select
                   value={formData.status}
-                  onChange={(e) => setFormData((p) => ({ ...p, status: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((p) => ({ ...p, status: e.target.value }))
+                  }
                   className="h-11 w-full rounded-lg bg-[#242424] text-white text-sm px-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/15"
                 >
                   <option value="active">Active</option>
@@ -262,7 +280,9 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
                   <option value="deleted">Deleted</option>
                 </select>
               ) : (
-                <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border ${statusTheme}`}>
+                <span
+                  className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border ${statusTheme}`}
+                >
                   {formData.status.toUpperCase()}
                 </span>
               )}
@@ -278,11 +298,14 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
             </div>
           </div>
 
-          {/* Editable / Static sections */}
+          {}
           <div className="grid md:grid-cols-2 gap-8">
             <div className="space-y-6">
               {staticFieldsLeft.map((f) => (
-                <div key={f.name} className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5">
+                <div
+                  key={f.name}
+                  className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5"
+                >
                   <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2 flex items-center gap-2">
                     {f.icon}
                     {f.label}
@@ -296,7 +319,10 @@ const RiderCards = ({ rider, onClose, onRefresh }) => {
 
             <div className="space-y-6">
               {staticFieldsRight.map((f, idx) => (
-                <div key={idx} className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5">
+                <div
+                  key={idx}
+                  className="bg-[#1b1b1b] border border-white/10 rounded-xl p-5"
+                >
                   <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2 flex items-center gap-2">
                     {f.icon}
                     {f.label}

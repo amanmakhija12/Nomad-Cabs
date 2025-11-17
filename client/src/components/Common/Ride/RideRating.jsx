@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import { Star, User } from "lucide-react";
 import { bookingService } from "../../../services/bookingService";
 
-// A simple star rating component
+
 const StarRating = ({ rating, setRating }) => {
   return (
     <div className="flex justify-center gap-4">
@@ -15,7 +15,7 @@ const StarRating = ({ rating, setRating }) => {
             star <= rating ? "text-yellow-400" : "text-gray-600"
           }`}
           onClick={() => setRating(star)}
-          onMouseEnter={() => setRating(star)} // Interactive hover
+          onMouseEnter={() => setRating(star)} 
         />
       ))}
     </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"; // 1. Added useEffect
+import { useState, useEffect } from "react"; 
 import Sidebar from "../components/Sidebar/Sidebar";
 import Bookings from "../components/Common/Bookings/Bookings";
 import ManageAccount from "../components/Common/ManageAccount/ManageAccount";
@@ -7,19 +7,19 @@ import Verification from "../components/Driver_Modules/Verification/Verification
 import LiveBooking from "../components/Driver_Modules/LiveBooking/LiveBooking";
 import Wallet from "../components/Common/Wallet/Wallet";
 import ActiveRide from "../components/Common/Ride/ActiveRide";
-import { useAuthStore } from "../store/authStore"; // 2. Added
-import { driverBookingService } from "../services/bookingService"; // 3. Added
+import { useAuthStore } from "../store/authStore"; 
+import { driverBookingService } from "../services/bookingService"; 
 import ActiveRideBanner from "../components/Common/ActiveRideBanner";
 
 const DriverPage = () => {
   const [activeSection, setActiveSection] = useState("liveBookings");
 
-  // 4. State is now managed here, not in the hook
+  
   const [booking, setBooking] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const user = useAuthStore((state) => state.user);
 
-  // 5. The hook's logic is moved into this useEffect
+  
   useEffect(() => {
     if (!user) {
       setIsLoading(false);
@@ -51,7 +51,7 @@ const DriverPage = () => {
     };
   }, [user]);
 
-  // 6. Add the loading spinner
+  
   if (isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-[#151212]">

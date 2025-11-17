@@ -8,9 +8,9 @@ import {
 import { bookingService } from "../../../services/bookingService";
 import { toast } from "react-toastify";
 
-// --- MOCK GEOCODING ---
-// In a real app, you would replace this with an async call
-// to a service like Google Maps Geocoding API.
+
+
+
 const getCoordinatesFromAddress = async (address, type) => {
   if (type === 'pickup') {
     return { lat: 13.0827, lng: 80.2707 };
@@ -23,12 +23,12 @@ const BookCab = ({ onBookingSuccess }) => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   
-  // Use camelCase here to match the backend DTO from the start
+  
   const [bookingData, setBookingData] = useState({
     pickupAddress: "",
     dropoffAddress: "",
-    scheduledDate: "", // Note: Our backend doesn't support this yet
-    scheduledTime: "", // Note: Our backend doesn't support this yet
+    scheduledDate: "", 
+    scheduledTime: "", 
     vehicleCategory: "",
   });
 
@@ -42,11 +42,11 @@ const BookCab = ({ onBookingSuccess }) => {
     setLoading(true);
     
     try {
-      // 1. Get coordinates from addresses
+      
       const pickupCoords = await getCoordinatesFromAddress(bookingData.pickupAddress, "pickup");
       const dropoffCoords = await getCoordinatesFromAddress(bookingData.dropoffAddress, "dropoff");
       
-      // 2. Prepare payload for backend (MUST match RideRequestDTO.java)
+      
       const payload = {
         pickupLat: pickupCoords.lat,
         pickupLng: pickupCoords.lng,
@@ -57,17 +57,17 @@ const BookCab = ({ onBookingSuccess }) => {
         vehicleType: bookingData.vehicleCategory.toUpperCase(),
       };
       
-      // 3. Call backend API (Axios handles errors in catch block)
+      
       const response = await bookingService.createBooking(payload);
       onBookingSuccess(response);
       
-      // 'result' is the RideResponseDTO from the backend
+      
       toast.success("Booking created! Finding drivers...", {
         theme: "dark",
         autoClose: 3000,
       });
       
-      // Reset form
+      
       setBookingData({
         pickupAddress: "",
         dropoffAddress: "",
@@ -78,7 +78,7 @@ const BookCab = ({ onBookingSuccess }) => {
       setStep(1);
       
     } catch (error) {
-      // 4. Handle errors from Axios
+      
       console.error('Booking error:', error);
       const errorMessage = error.response?.data || error.message || 'Failed to create booking';
       toast.error(`${errorMessage}`, {

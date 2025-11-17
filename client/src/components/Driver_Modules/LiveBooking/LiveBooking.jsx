@@ -10,7 +10,7 @@ import {
   Car,
   RefreshCw,
   AlertCircle,
-} from "lucide-react"; // Removed unused 'Divide' import
+} from "lucide-react"; 
 import api from "../../../utils/api";
 import { driverService } from "../../../services/driverService";
 
@@ -32,7 +32,7 @@ const LiveBooking = ({ onBookingAccepted }) => {
   const user = useAuthStore((s) => s.user);
   const intervalRef = useRef(null);
 
-  // Fetch driver's vehicles on mount
+  
   useEffect(() => {
     if (!user) return;
 
@@ -143,7 +143,7 @@ const LiveBooking = ({ onBookingAccepted }) => {
     }
   };
 
-  // Play notification sound
+  
   const playNotificationSound = () => {
     try {
       const audio = new Audio("/notification.mp3");
@@ -154,7 +154,7 @@ const LiveBooking = ({ onBookingAccepted }) => {
     }
   };
 
-  // ✅ CORRECTION 3: Corrected Start/Stop polling logic
+  
   useEffect(() => {
     if (!user) return;
 
@@ -172,7 +172,7 @@ const LiveBooking = ({ onBookingAccepted }) => {
 
     fetchData();
 
-    // 7. Polling logic no longer checks for 'isActive'
+    
     if (isPollingActive) {
       console.log("✅ Polling started...");
       intervalRef.current = setInterval(fetchData, 5000);
@@ -187,15 +187,15 @@ const LiveBooking = ({ onBookingAccepted }) => {
         intervalRef.current = null;
       }
     };
-  }, [isPollingActive, user, selectedVehicle.type]); // 8. REMOVED 'isActive' from dependencies
+  }, [isPollingActive, user, selectedVehicle.type]); 
 
-  // 9. SIMPLIFIED visibility useEffect
+  
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
         setIsPollingActive(false);
       } else {
-        setIsPollingActive(true); // Always resume
+        setIsPollingActive(true); 
       }
     };
 
@@ -204,7 +204,7 @@ const LiveBooking = ({ onBookingAccepted }) => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
-  // Accept booking with error handling
+  
   const handleAccept = async (bookingId, vehicleCategory) => {
     if (selectedVehicle.id === "") {
       toast.error("Please select a vehicle first", { theme: "dark" });
@@ -242,7 +242,7 @@ const LiveBooking = ({ onBookingAccepted }) => {
     }
   };
 
-  // Format time ago
+  
   const getTimeAgo = (date) => {
     if (!date) return "";
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
@@ -252,7 +252,7 @@ const LiveBooking = ({ onBookingAccepted }) => {
     return `${Math.floor(seconds / 3600)}h ago`;
   };
 
-  // Get vehicle display name
+  
   const getVehicleDisplay = (vehicle) => {
     const parts = [];
     if (vehicle.manufacturer) parts.push(vehicle.manufacturer);
@@ -277,7 +277,7 @@ const LiveBooking = ({ onBookingAccepted }) => {
 
   return (
     <div className="min-h-screen bg-[#151212] text-white p-6">
-      {/* Header */}
+      {}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-4xl font-semibold mb-2">Live Bookings</h1>
@@ -285,7 +285,7 @@ const LiveBooking = ({ onBookingAccepted }) => {
         </div>
 
         <div className="flex items-center gap-4 flex-wrap">
-          {/* Vehicle Selection with real data */}
+          {}
           <select
             value={selectedVehicle.id}
             onChange={handleVehicleSelect}
@@ -314,7 +314,7 @@ const LiveBooking = ({ onBookingAccepted }) => {
             )}
           </select>
 
-          {/* Live indicator */}
+          {}
           <div
             className={`flex items-center gap-2 px-4 py-2 rounded-full border ${
               isPollingActive
@@ -336,7 +336,7 @@ const LiveBooking = ({ onBookingAccepted }) => {
             </span>
           </div>
 
-          {/* Manual refresh */}
+          {}
           <button
             onClick={() => {
               setLoading(true);
@@ -355,8 +355,8 @@ const LiveBooking = ({ onBookingAccepted }) => {
         </div>
       </div>
 
-      {/* Stats Bar */}
-      {/* This will still show stats, which is fine */}
+      {}
+      {}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <div className="bg-[#141414] p-4 rounded-xl border border-white/10">
           <div className="flex items-center gap-3">
@@ -392,7 +392,7 @@ const LiveBooking = ({ onBookingAccepted }) => {
             <div>
               <p className="text-gray-400 text-xs">Status</p>
               <p className="text-sm font-medium">
-                {/* 18. SIMPLIFIED status text */}
+                {}
                 {selectedVehicle.id !== ""
                   ? "Ready to Accept"
                   : "Select Vehicle"}
@@ -402,8 +402,8 @@ const LiveBooking = ({ onBookingAccepted }) => {
         </div>
       </div>
 
-      {/* Bookings Grid */}
-      {/* Show "No rides" only if polling is active and no bookings are found */}
+      {}
+      {}
       {bookings.length === 0 ? (
         <div className="bg-[#141414] rounded-2xl p-12 text-center border border-white/10">
           <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -427,7 +427,7 @@ const LiveBooking = ({ onBookingAccepted }) => {
               key={booking.offerId}
               className="bg-[#141414] p-6 rounded-2xl border border-white/10 hover:border-white/20 transition-all hover:-translate-y-1 hover:shadow-2xl group"
             >
-              {/* Rider Info */}
+              {}
               <div className="flex items-center gap-3 mb-4 pb-4 border-b border-white/10">
                 <div className="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center font-bold">
                   {booking.riderName?.[0]?.toUpperCase() || "R"}
@@ -442,7 +442,7 @@ const LiveBooking = ({ onBookingAccepted }) => {
                 </div>
               </div>
 
-              {/* Locations */}
+              {}
               <div className="space-y-3 mb-4">
                 <div className="flex items-start gap-2">
                   <MapPin className="w-4 h-4 text-green-400 flex-shrink-0 mt-1" />
@@ -465,7 +465,7 @@ const LiveBooking = ({ onBookingAccepted }) => {
                 </div>
               </div>
 
-              {/* Trip Details */}
+              {}
               <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-white/5 rounded-xl">
                 <div>
                   <p className="text-xs text-gray-500 mb-1">Distance</p>
@@ -475,7 +475,7 @@ const LiveBooking = ({ onBookingAccepted }) => {
                 </div>
               </div>
 
-              {/* Fare */}
+              {}
               <div className="flex justify-between items-center mb-4">
                 <span className="text-gray-400 text-sm">Estimated Fare</span>
                 <span className="text-green-400 font-bold text-2xl flex items-center gap-1">
@@ -484,7 +484,7 @@ const LiveBooking = ({ onBookingAccepted }) => {
                 </span>
               </div>
 
-              {/* Vehicle Type */}
+              {}
               <div className="mb-4">
                 <span className="inline-block px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-xs font-medium">
                   {booking.vehicleCategory}
@@ -494,7 +494,7 @@ const LiveBooking = ({ onBookingAccepted }) => {
                 </span>
               </div>
 
-              {/* Accept Button */}
+              {}
               <button
                 onClick={() => handleAccept(booking.offerId, booking.vehicleCategory)}
                 disabled={selectedVehicle.id === ""}

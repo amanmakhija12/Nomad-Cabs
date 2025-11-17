@@ -62,9 +62,7 @@ export const calculateFare = (distanceKm, vehicleType) => {
   };
 };
 
-/**
- * Create booking via backend API
- */
+
 export const createBooking = async (bookingData, token) => {
   try {
     const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:8080/api/v1';
@@ -92,7 +90,7 @@ export const createBooking = async (bookingData, token) => {
 };
 
 
- //TODO: Get coordinates from address using geocoding API
+ 
 
 export const getCoordinatesFromAddress = async (address) => {
  

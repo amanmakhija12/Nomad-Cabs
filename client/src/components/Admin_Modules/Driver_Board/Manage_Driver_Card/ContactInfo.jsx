@@ -1,4 +1,3 @@
-// Contact Information Component
 const ContactInfo = ({ driver }) => {
   if (!driver.email && !driver.phoneNumber) return null;
 

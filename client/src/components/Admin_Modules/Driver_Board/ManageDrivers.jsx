@@ -68,17 +68,17 @@ const ManageDrivers = () => {
     } finally {
       setLoading(false);
     }
-    // 8. Add all dependencies for this function
+    
   }, [user, currentPage, debouncedSearchTerm, filterType]);
 
-  // 9. This useEffect now triggers the 'fetchData' function
+  
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
   return (
     <div className="p-6 flex flex-col min-h-[500px] pb-10 bg-[#151212] text-white rounded-3xl">
-      {/* Header */}
+      {}
       <div className="mb-10">
         <h1 className="text-3xl md:text-4xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
           Driver Management
@@ -88,7 +88,7 @@ const ManageDrivers = () => {
         </p>
       </div>
 
-      {/* Filters */}
+      {}
       <div className="bg-gradient-to-r from-[#181818] via-[#151515] to-[#121212] rounded-2xl p-8 border border-white/10 shadow-lg">
         <div className="grid gap-6 md:grid-cols-3">
           <div className="flex flex-col gap-2">
@@ -145,7 +145,7 @@ const ManageDrivers = () => {
         </span>
       </div>
 
-      {/* Grid */}
+      {}
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <div className="animate-spin h-12 w-12 rounded-full border-2 border-white/10 border-t-white" />
@@ -162,7 +162,7 @@ const ManageDrivers = () => {
         </div>
       )}
 
-      {/* Pagination */}
+      {}
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages || 1}

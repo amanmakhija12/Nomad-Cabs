@@ -76,7 +76,7 @@ const HeroSection = () => {
           <img
             src={MainCar}
             wrapperProps={{
-              // If you need to, you can tweak the effect transition using the wrapper style.
+              
               style: { transitionDelay: '1s' },
             }}
             className="relative right-10"

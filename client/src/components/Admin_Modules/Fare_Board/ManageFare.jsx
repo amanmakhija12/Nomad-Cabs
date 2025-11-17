@@ -11,13 +11,8 @@ const ManageFare = () => {
   const fetchFareData = useCallback(async (silent = false) => {
     try {
       setLoading(true);
-      
-      // Use Promise.all to fetch both in parallel
       const fareResponse = await fareConfigService.getAllFares();
-      
-      // Axios response is in .data
-      setFareConfigs(fareResponse || []); 
-      
+      setFareConfigs(fareResponse || []);
     } catch (error) {
       console.error("Error fetching fare data:", error);
       if (!silent && !hasShownErrorRef.current) {
@@ -49,7 +44,6 @@ const ManageFare = () => {
 
   return (
     <div className="p-6 space-y-10 pb-24 text-white rounded-2xl min-h-full">
-      {/* Header */}
       <div className="bg-gradient-to-r from-[#181818] via-[#151515] to-[#121212] rounded-2xl p-8 border border-white/10 shadow-lg">
         <h1 className="text-3xl md:text-4xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
           Fare Board
@@ -64,7 +58,6 @@ const ManageFare = () => {
           </span>
         </div>
       </div>
-
       <VehicleCategoryPricingCard
         fareConfigs={fareConfigs}
         setFareConfigs={setFareConfigs}

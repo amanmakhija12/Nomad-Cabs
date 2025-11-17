@@ -12,15 +12,15 @@ import ActiveRideBanner from "../components/Common/ActiveRideBanner";
 const RiderPage = () => {
   const [activeSection, setActiveSection] = useState("bookCab");
   
-  // 4. The booking state now LIVES in RiderPage.
+  
   const [booking, setBooking] = useState(null); 
   
-  // 5. We still have the loading state.
+  
   const [isLoading, setIsLoading] = useState(true);
   
   const user = useAuthStore((state) => state.user);
 
-  // 6. We move the hook's logic into the page's useEffect
+  
   useEffect(() => {
     if (!user) {
       setIsLoading(false);
@@ -30,7 +30,7 @@ const RiderPage = () => {
     let isMounted = true;
     const checkActiveRide = async () => {
       try {
-        // Only checking for RIDER here
+        
         const response = await bookingService.getActiveRideForRider();
         if (isMounted && response) {
           setBooking(response);
@@ -39,7 +39,7 @@ const RiderPage = () => {
         if (isMounted && error.response?.status !== 404) {
           console.error("Error checking for active ride:", error);
         }
-        // On 404 or any error, booking remains null (which is correct)
+        
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -80,15 +80,15 @@ const RiderPage = () => {
     >
       {activeSection === "bookCab" && (
         booking ? (
-          // 7. Pass setBooking to ActiveRide
+          
           <ActiveRide onRideEnd={() => setBooking(null)} />
         ) : (
-          // 8. Pass setBooking to BookCab
+          
           <BookCab onBookingSuccess={setBooking} />
         )
       )}
       
-      {/* 9. The other pages still get the booking object for the banner */}
+      {}
       {activeSection === "myBooking" && <Bookings />}
       {activeSection === "wallet" && <Wallet />}
       {activeSection === "account" && <ManageAccount />}
