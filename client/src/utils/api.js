@@ -4,7 +4,7 @@ import axios from "axios";
 const api = axios.create({
   // This is the *only* place you need to define your main URL
   // It points to our API Gateway
-  baseURL: "http://localhost:3030/api/v1",
+  baseURL: "http://localhost:8090/api/v1",
   headers: {
     "Content-Type": "application/json",
   },
@@ -15,7 +15,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Get the token from wherever you store it (e.g., localStorage)
-    const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem("nomad_auth_token");
 
     if (token) {
       // If the token exists, add it to the 'Authorization' header

@@ -7,7 +7,7 @@ import { useDebounce } from "../../../hooks/useDebounce";
 import Pagination from "../../Common/Pagination";
 
 const ManageTransactions = () => {
-  const [transactionsData, setTransactionsData] = useState({ content: [], totalPages: 0, totalElements: 0, number: 0 });
+  const [transactionsData, setTransactionsData] = useState({ content: [], totalPages: 0, totalElements: 0, number: 1 });
   const [loading, setLoading] = useState(true);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
 
@@ -112,7 +112,7 @@ const ManageTransactions = () => {
             </select>
           </div>
           <div>
-            <label className="text-[11px] font-medium tracking-wide uppercase text-white/40 block mb-2">Updated Date</label>
+            <label className="text-[11px] font-medium tracking-wide uppercase text-white/40 block mb-2">Date</label>
             <input
               type="date"
               value={dateFilter}

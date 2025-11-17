@@ -5,7 +5,7 @@ import api from "../../utils/api";
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const setAuth = useAuthStore((s) => s.setAuth);
+  const { setUser, setToken } = useAuthStore();
   const [loading, setLoading] = useState(false);
 
   const validate = () => {
@@ -28,14 +28,13 @@ const LoginForm = () => {
     try {
       setLoading(true);
 
-      const response = await api.post("/auth/login", formData);
-
-      const loginData = response.data;
+      const { data: loginData } = await api.post("/auth/login", formData);
 
       if (!loginData.accessToken) {
         throw new Error("Login failed: No token received from server.");
       }
-      localStorage.setItem("accessToken", loginData.accessToken);
+
+      setToken(loginData.accessToken);
 
       api.get("/users/me").then(({ data }) => {
         const user = {
@@ -46,9 +45,7 @@ const LoginForm = () => {
           lastName: data.lastName,
         };
 
-        console.log(user, loginData);
-
-        setAuth(user, loginData.accessToken);
+        setUser(user);
       });
 
       toast.success("Login successful", { theme: "dark" });
