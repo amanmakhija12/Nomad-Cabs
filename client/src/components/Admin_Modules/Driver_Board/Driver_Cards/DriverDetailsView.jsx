@@ -25,6 +25,7 @@ const DriverDetailsView = ({
     { label: "State", name: "state" },
   ];
 
+
   const staticFieldsRight = [
     { label: "Email", value: Driver?.email || "—", isBadge: false },
     { label: "Aadhaar", value: Driver.aadharNumber },

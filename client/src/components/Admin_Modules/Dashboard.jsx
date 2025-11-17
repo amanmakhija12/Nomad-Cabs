@@ -11,15 +11,6 @@ import {
 } from "lucide-react";
 import { adminStatsService } from "../../services/adminService";
 import { formatDateSafe } from "../../utils/DateUtil";
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-} from "recharts";
 
 const StatCard = ({ title, value, icon: Icon, color }) => (
   <div
@@ -34,32 +25,6 @@ const StatCard = ({ title, value, icon: Icon, color }) => (
     </div>
   </div>
 );
-
-const DateFilterButtons = ({ activeFilter, setFilter }) => {
-  const filters = [
-    { label: "7 Days", value: "7d" },
-    { label: "15 Days", value: "15d" },
-    { label: "30 Days", value: "30d" },
-    { label: "Lifetime", value: "lifetime" },
-  ];
-  return (
-    <div className="flex items-center gap-2 rounded-full bg-[#141414] border border-white/10 p-2">
-      {filters.map((f) => (
-        <button
-          key={f.value}
-          onClick={() => setFilter(f.value)}
-          className={`h-9 px-6 rounded-full text-sm font-medium transition ${
-            activeFilter === f.value
-              ? "bg-white text-black shadow"
-              : "text-white/60 hover:text-white hover:bg-white/10"
-          }`}
-        >
-          {f.label}
-        </button>
-      ))}
-    </div>
-  );
-};
 
 const QuickActions = ({ setActiveSection }) => (
   <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -144,10 +109,6 @@ const Dashboard = ({ setActiveSection }) => {
         <h1 className="text-4xl font-semibold tracking-tight text-white">
           Admin Dashboard
         </h1>
-        <DateFilterButtons
-          activeFilter={dateFilter}
-          setFilter={setDateFilter}
-        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -193,67 +154,6 @@ const Dashboard = ({ setActiveSection }) => {
           icon={Percent}
           color="text-white"
         />
-      </div>
-
-      <div className="bg-[#141414] rounded-2xl border border-white/10 p-8 shadow-lg h-[400px]">
-        <h2 className="text-2xl font-semibold tracking-tight text-white mb-8">
-          Net Revenue ({dateFilter})
-        </h2>
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            Loading chart...
-          </div>
-        ) : (
-          <ResponsiveContainer width="100%" height="85%">
-            <AreaChart
-              data={chartData}
-              margin={{ top: 5, right: 20, bottom: 5, left: -20 }}
-            >
-              <defs>
-                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis
-                dataKey="date"
-                stroke="#9ca3af"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis
-                stroke="#9ca3af"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(val) => `₹${val / 1000}k`}
-              />
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#1f1f1f",
-                  border: "1px solid #ffffff20",
-                  borderRadius: "12px",
-                }}
-                labelStyle={{ color: "#ffffff" }}
-                itemStyle={{ color: "#10b981" }}
-                formatter={(value) => [
-                  `₹${value.toLocaleString("en-IN")}`,
-                  "Revenue",
-                ]}
-              />
-              <Area
-                type="monotone"
-                dataKey="revenue"
-                stroke="#10b981"
-                strokeWidth={2}
-                fillOpacity={1}
-                fill="url(#colorRevenue)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        )}
       </div>
 
       <QuickActions setActiveSection={setActiveSection} />

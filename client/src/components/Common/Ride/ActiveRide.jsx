@@ -141,6 +141,7 @@ const ActiveRide = ({ onRideEnd }) => {
         booking={booking}
         onPayWithWallet={handlePay}
         onConfirmCash={handleConfirm}
+        isUpdating={isUpdating}
       />
     );
   }
